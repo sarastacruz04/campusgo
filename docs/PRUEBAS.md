@@ -21,7 +21,7 @@ Se ejecutan con `npm test` (jest-expo y Testing Library).
 | __tests__/hooks/hooks.test.tsx | useAnnounce (sin doble anuncio en Android), useReduceMotion (sistema, preferencia y cleanup del listener) y useHaptics (Android, iOS y apagado). | E1 | Aprobado |
 | `npm run a11y:contrast` | 22 pares de color por tema en claro, oscuro y alto contraste. | E1 | Aprobado: 66 de 66 pares cumplen WCAG AA |
 
-Última ejecución: 2026-11-06, `npm test` con 11 archivos y 70 de 70 pruebas aprobadas, ejecutado por Claude Code en WSL (Node 22.20.0).
+Última ejecución: 2026-11-06, `npm test` con 11 archivos y 72 de 72 pruebas aprobadas, ejecutado por Claude Code en WSL (Node 22.20.0).
 
 Pendientes por etapa: validators, reducers, selectores, thunks con servicios simulados, flujos de pantalla y pruebas SQL de RLS (sección 10).
 
