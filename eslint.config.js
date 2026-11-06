@@ -24,6 +24,7 @@ module.exports = defineConfig([
     },
   },
   {
-    ignores: ['dist/*', '.expo/*', 'node_modules/*', 'coverage/*'],
+    // expo-env.d.ts lo genera Expo y está en .gitignore.
+    ignores: ['dist/*', '.expo/*', 'node_modules/*', 'coverage/*', 'expo-env.d.ts'],
   },
 ]);
