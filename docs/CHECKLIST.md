@@ -66,7 +66,7 @@ Aplicación
 - [ ] Los flujos de accesibilidad de la Fase 2 operan en la app → §7, E1
 
 Repositorio
-- [ ] Estructura de carpetas limpia → §4, §9, E0
+- [x] Estructura de carpetas limpia → §4, §9, E0 (evidencia: carpetas de la sección 4 en la raíz, sin src ni código de ejemplo; `npx expo-doctor` 20/20 el 2026-11-06)
 - [ ] Código tipado (TypeScript estricto) y modularizado → §3, §4, §14
 - [ ] Cero credenciales o secretos en el historial → §9, §13, §14, E8
 - [ ] Commits de ambos integrantes, continuos y equitativos a lo largo del corte → §0.2, §9, §13
@@ -145,7 +145,7 @@ Cada ID queda con archivo exacto, prueba y resultado en docs/MATRIZ_ACCESIBILIDA
 
 ## G. Pila tecnológica y requisitos de las fases previas
 
-- [ ] React Native con Expo SDK 58, que abre en Expo Go → §3, E0
+- [ ] React Native con Expo SDK 58, que abre en Expo Go → §3, E0 (proyecto en SDK 58 y bundle de Android compilado con `expo export`; falta que Sara confirme que abre en Expo Go en su teléfono)
 - [ ] Navegación con Expo Router → §3, §4
 - [ ] Estado global con Redux Toolkit → §3, E3
 - [ ] Backend y persistencia en Supabase (Auth, Postgres, Realtime, Storage, RLS) → §3, §5, E2
