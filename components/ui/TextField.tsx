@@ -41,10 +41,9 @@ export function TextField({
   const [focused, setFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Cuando aparece un error nuevo se anuncia sin mover el foco (S-07). En Android lo
-  // lee la región viva del mensaje (siempre montada, ver abajo); en iOS, useAnnounce.
+  // Cuando aparece un error nuevo se anuncia sin mover el foco (S-07, D-27).
   useEffect(() => {
-    if (error) announce(`${label}: ${error}`, { liveRegionVisible: true });
+    if (error) announce(`${label}: ${error}`);
   }, [error, label, announce]);
 
   const hasError = Boolean(error);
@@ -92,25 +91,14 @@ export function TextField({
           />
         ) : null}
       </View>
-      {/* La región viva existe siempre, aunque no haya error: Android solo anuncia
-          cambios dentro de una región que ya estaba en pantalla. Si se creara junto con
-          el mensaje, TalkBack no lo leería (hallazgo C-06 de la auditoría). Mientras está
-          vacía no es un foco (accessible solo con error). */}
-      <View
-        testID={`${label}-error`}
-        accessibilityLiveRegion="polite"
-        accessible={hasError}
-        style={styles.errorRow}
-      >
-        {hasError ? (
-          <>
-            <Icon name="alert-circle" size={18} color={colors.error} />
-            <AppText variant="secondary" color="error" style={styles.errorText}>
-              {error}
-            </AppText>
-          </>
-        ) : null}
-      </View>
+      {hasError ? (
+        <View style={styles.errorRow} accessible>
+          <Icon name="alert-circle" size={18} color={colors.error} />
+          <AppText variant="secondary" color="error" style={styles.errorText}>
+            {error}
+          </AppText>
+        </View>
+      ) : null}
     </View>
   );
 }

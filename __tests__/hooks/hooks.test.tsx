@@ -38,14 +38,19 @@ describe('useAnnounce (S-07)', () => {
     expect(announce).toHaveBeenCalledWith('Reserva cancelada');
   });
 
-  it('en Android no repite lo que ya lee una región viva visible', async () => {
+  it('también anuncia en Android, donde la región viva no se oyó (C-06, D-27)', async () => {
     jest.replaceProperty(Platform, 'OS', 'android');
     const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility');
     const { result } = await renderHook(() => useAnnounce());
-    result.current('Error de red', { liveRegionVisible: true });
+    result.current('Error de red');
+    expect(announce).toHaveBeenCalledWith('Error de red');
+  });
+
+  it('no anuncia mensajes vacíos', async () => {
+    const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility');
+    const { result } = await renderHook(() => useAnnounce());
+    result.current('');
     expect(announce).not.toHaveBeenCalled();
-    result.current('Mensaje nuevo');
-    expect(announce).toHaveBeenCalledWith('Mensaje nuevo');
   });
 });
 

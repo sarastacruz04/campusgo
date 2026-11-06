@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
+import { useAnnounce } from '@/hooks/useAnnounce';
 import { spacing } from '@/theme/layout';
 import { useTheme } from '@/theme/ThemeProvider';
 
@@ -11,17 +13,22 @@ type LoadingStateProps = {
 };
 
 /**
- * Estado de carga: indicador + texto visible, un solo foco con estado busy y región
- * viva para que el lector anuncie la carga sin mover el foco (S-07, T-05).
+ * Estado de carga: indicador + texto visible, un solo foco con estado busy. El
+ * mensaje se anuncia al aparecer, sin mover el foco (S-07, T-05, D-27).
  */
 export function LoadingState({ message }: LoadingStateProps) {
   const { colors } = useTheme();
+  const announce = useAnnounce();
+
+  useEffect(() => {
+    announce(message);
+  }, [message, announce]);
+
   return (
     <View
       accessible
       accessibilityLabel={message}
       accessibilityState={{ busy: true }}
-      accessibilityLiveRegion="polite"
       style={styles.container}
     >
       <ActivityIndicator size="large" color={colors.text} />

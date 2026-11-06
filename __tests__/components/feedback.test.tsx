@@ -81,20 +81,20 @@ describe('StatusBanner', () => {
     announce.mockRestore();
   });
 
-  it('el error usa una región viva assertive en Android', async () => {
+  it('el mensaje es un solo foco con ícono y texto', async () => {
     await renderWithProviders(<StatusBanner tone="error" message="Error de red." />);
-    expect(screen.getByLabelText('Error de red.')).toHaveProp(
-      'accessibilityLiveRegion',
-      'assertive',
-    );
+    expect(screen.getByLabelText('Error de red.')).toHaveProp('accessible', true);
   });
 });
 
 describe('LoadingState', () => {
-  it('muestra texto y anuncia estado busy (T-05)', async () => {
+  it('muestra texto, anuncia la carga y tiene estado busy (S-07, T-05)', async () => {
+    const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility');
     await renderWithProviders(<LoadingState message="Cargando viajes…" />);
     expect(screen.getByText('Cargando viajes…')).toBeOnTheScreen();
     expect(screen.getByLabelText('Cargando viajes…')).toBeBusy();
+    expect(announce).toHaveBeenCalledWith('Cargando viajes…');
+    announce.mockRestore();
   });
 });
 

@@ -1,5 +1,5 @@
 import { fireEvent, screen } from '@testing-library/react-native';
-import { AccessibilityInfo } from 'react-native';
+import { AccessibilityInfo, Platform } from 'react-native';
 
 import { TextField } from '@/components/ui/TextField';
 import { TOUCH_MIN } from '@/theme/layout';
@@ -50,13 +50,25 @@ describe('TextField', () => {
     announce.mockRestore();
   });
 
-  it('la región viva del error existe antes de que haya error (C-06)', async () => {
-    // Android solo anuncia cambios dentro de una región que ya estaba montada.
-    await renderWithProviders(<TextField label="Teléfono" value="" onChangeText={jest.fn()} />);
-    const region = screen.getByTestId('Teléfono-error');
-    expect(region).toHaveProp('accessibilityLiveRegion', 'polite');
-    // Vacía no es un foco: TalkBack no se detiene en ella.
-    expect(region).toHaveProp('accessible', false);
+  it('en Android anuncia el error cuando aparece (C-06, D-27)', async () => {
+    jest.replaceProperty(Platform, 'OS', 'android');
+    const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility');
+    const { rerender } = await renderWithProviders(
+      <TextField label="Teléfono" value="" onChangeText={jest.fn()} />,
+    );
+    expect(announce).not.toHaveBeenCalled();
+
+    await rerender(
+      <TextField
+        label="Teléfono"
+        value="3"
+        error="Debe tener 10 dígitos."
+        onChangeText={jest.fn()}
+      />,
+    );
+    expect(announce).toHaveBeenCalledWith('Teléfono: Debe tener 10 dígitos.');
+    announce.mockRestore();
+    jest.restoreAllMocks();
   });
 
   it('el botón "Mostrar contraseña" alterna la visibilidad (T-08)', async () => {

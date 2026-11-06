@@ -31,8 +31,7 @@ const TONES: Record<BannerTone, { icon: IconName; color: keyof ColorTokens }> = 
 
 /**
  * Mensaje de estado con ícono + texto + borde (V-05: no depende solo del color).
- * Se anuncia sin mover el foco (S-07): región viva en Android y useAnnounce en iOS.
- * Los errores usan región "assertive" para interrumpir; el resto, "polite".
+ * Se anuncia sin mover el foco con useAnnounce, en Android y en iOS (S-07, D-27).
  * Ejemplos: "Sin conexión: mostrando datos guardados", "No se pudo cargar. Reintentar".
  */
 export function StatusBanner({ tone, message, onRetry, haptic = true }: StatusBannerProps) {
@@ -42,7 +41,7 @@ export function StatusBanner({ tone, message, onRetry, haptic = true }: StatusBa
   const { icon, color } = TONES[tone];
 
   useEffect(() => {
-    announce(message, { liveRegionVisible: true });
+    announce(message);
     if (!haptic) return;
     if (tone === 'error') haptics.error();
     if (tone === 'success') haptics.success();
@@ -55,12 +54,7 @@ export function StatusBanner({ tone, message, onRetry, haptic = true }: StatusBa
         { backgroundColor: colors.surface, borderColor: colors[color], borderWidth: borders.focus },
       ]}
     >
-      <View
-        accessible
-        accessibilityLabel={message}
-        accessibilityLiveRegion={tone === 'error' ? 'assertive' : 'polite'}
-        style={styles.messageRow}
-      >
+      <View accessible accessibilityLabel={message} style={styles.messageRow}>
         <Icon name={icon} size={24} color={colors[color]} />
         <AppText color={color} style={styles.message}>
           {message}
