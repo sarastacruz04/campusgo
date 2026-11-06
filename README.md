@@ -36,7 +36,7 @@ Escanea el código QR con Expo Go (el teléfono y el computador deben estar en l
 | `npm run lint` | ESLint con reglas de Expo, Prettier y accesibilidad. |
 | `npm run format` | Formatea el código con Prettier. |
 | `npm test` | Pruebas con jest-expo y Testing Library. |
-| `npm run a11y:contrast` | Verifica el contraste de los tokens de color (disponible desde la Etapa 1). |
+| `npm run a11y:contrast` | Verifica que todos los pares de color cumplan WCAG AA en los temas claro, oscuro y alto contraste. |
 
 ## Documentación
 

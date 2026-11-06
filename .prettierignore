@@ -5,5 +5,6 @@ coverage/
 package-lock.json
 design/
 assets/
+expo-env.d.ts
 docs/
 *.md
