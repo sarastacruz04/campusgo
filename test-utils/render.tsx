@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react-native';
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { StyleSheet, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -11,15 +11,20 @@ const initialMetrics = {
   insets: { top: 0, left: 0, right: 0, bottom: 0 },
 };
 
-/** Renderiza un componente con los mismos providers que la app (tema y área segura). */
+/**
+ * Renderiza un componente con los mismos providers que la app (tema y área segura).
+ * Usa la opción wrapper para que rerender() conserve los providers.
+ */
 export function renderWithProviders(ui: ReactElement, preferences: Partial<Preferences> = {}) {
-  return render(
-    <SafeAreaProvider initialMetrics={initialMetrics}>
-      <ThemeProvider initialPreferences={{ ...DEFAULT_PREFERENCES, ...preferences }}>
-        {ui}
-      </ThemeProvider>
-    </SafeAreaProvider>,
-  );
+  const initialPreferences = { ...DEFAULT_PREFERENCES, ...preferences };
+  function Providers({ children }: { children: ReactNode }) {
+    return (
+      <SafeAreaProvider initialMetrics={initialMetrics}>
+        <ThemeProvider initialPreferences={initialPreferences}>{children}</ThemeProvider>
+      </SafeAreaProvider>
+    );
+  }
+  return render(ui, { wrapper: Providers });
 }
 
 /** Aplana un estilo (arreglo u objeto) para poder leer minHeight, lineHeight, etc. */
