@@ -16,7 +16,7 @@ Preparación:
 2. Activar TalkBack: Ajustes del teléfono > Accesibilidad > TalkBack > activar (o mantener las dos teclas de volumen 3 segundos si el atajo está configurado). Gestos: deslizar a la derecha o a la izquierda para pasar de elemento; doble toque para activar; deslizar hacia abajo y luego a la izquierda para "Atrás".
 3. Instalar Accessibility Scanner desde Google Play, activarlo y tocar el botón flotante sobre el catálogo.
 
-Primera ronda: ejecutada por Sara Santacruz el 2026-11-06 en un teléfono Android con TalkBack en español. Modelo y versión de Android: por completar.
+Primera ronda: ejecutada por Sara Santacruz el 2026-11-06 en un teléfono Android con TalkBack en español. Teléfono: Samsung Galaxy A35 5G con Android 16.
 
 Nota sobre la redacción de TalkBack: según la versión, TalkBack dice "botón de selección" para un radio, "se marcó el elemento…" o "marcado" para el estado checked, "seleccionado" para selected, y agrega al final la pista estándar "tocar dos veces para activar" o "para alternar". Eso es lo esperado. Por eso C-03, C-04 y C-09 se reclasificaron de Fallido a Aprobado: el resultado real anotado por Sara no cambia, cambia la lectura del criterio, que estaba redactado con frases demasiado literales.
 
