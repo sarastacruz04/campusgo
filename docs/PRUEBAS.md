@@ -8,9 +8,22 @@ Se ejecutan con `npm test` (jest-expo y Testing Library).
 
 | Archivo | Qué comprueba | Etapa | Último resultado |
 | --- | --- | --- | --- |
-| __tests__/smoke.test.tsx | La pantalla inicial renderiza con un encabezado accesible; jest-expo, Testing Library y el alias `@/` funcionan. | E0 | Aprobado (2026-11-06, `npm test`: 1 de 1) |
+| __tests__/smoke.test.tsx | La pantalla inicial renderiza con el logo accesible, un título header y el acceso a Ajustes. | E0, E1 | Aprobado |
+| __tests__/theme/contrast.test.ts | Fórmula de contraste de WCAG (contra los valores medidos en el Corte 2), mismos tokens en los tres temas y todos los pares en AA. | E1 | Aprobado |
+| __tests__/theme/typography-layout.test.ts | lineHeight ≥ 1,4 y letterSpacing ≥ 0 en todas las variantes y tamaños; tamaños mínimos; TOUCH_MIN; hitSlopFor; bordes de 2 px en alto contraste. | E1 | Aprobado |
+| __tests__/theme/ThemeProvider.test.tsx | Carga y guarda preferencias, tolera datos corruptos, error fuera del provider y la pantalla de Ajustes (tema, tamaño, reducir movimiento, vibración). | E1 | Aprobado |
+| __tests__/components/Button.test.tsx | Rol, nombre, TOUCH_MIN, lineHeight, carga (busy y deshabilitado) y label obligatorio en TypeScript. | E1 | Aprobado |
+| __tests__/components/IconButton.test.tsx | Nombre accesible, TOUCH_MIN, hitSlop en modo compacto, ícono oculto y label obligatorio en TypeScript. | E1 | Aprobado |
+| __tests__/components/TextField.test.tsx | Etiqueta visible, pista, TOUCH_MIN sin altura fija, error en texto y anunciado, "Mostrar contraseña" y label obligatorio. | E1 | Aprobado |
+| __tests__/components/selection.test.tsx | SegmentedToggle (radiogroup, checked, TOUCH_MIN), RadioGroup, SwitchRow (un solo foco) y BottomTabBar (tab, selected, subrayado). | E1 | Aprobado |
+| __tests__/components/feedback.test.tsx | ConfirmDialog (orden seguro, modal, escape, foco al título), StatusBanner (anuncio, región viva, Reintentar), LoadingState y StepIndicator. | E1 | Aprobado |
+| __tests__/components/identity.test.tsx | Logo (con nombre o decorativo), AppText (escalado, tamaño de Ajustes, alto contraste), ScreenTitle (foco), PhotoPicker ("foto cargada") y orden de foco de ScreenLayout. | E1 | Aprobado |
+| __tests__/hooks/hooks.test.tsx | useAnnounce (sin doble anuncio en Android), useReduceMotion (sistema, preferencia y cleanup del listener) y useHaptics (Android, iOS y apagado). | E1 | Aprobado |
+| `npm run a11y:contrast` | 22 pares de color por tema en claro, oscuro y alto contraste. | E1 | Aprobado: 66 de 66 pares cumplen WCAG AA |
 
-Pendientes por etapa: validators, reducers, selectores, thunks con servicios simulados, componentes ui, flujos de pantalla, `npm run a11y:contrast` y pruebas SQL de RLS (sección 10).
+Última ejecución: 2026-11-06, `npm test` con 11 archivos y 70 de 70 pruebas aprobadas, ejecutado por Claude Code en WSL (Node 22.20.0).
+
+Pendientes por etapa: validators, reducers, selectores, thunks con servicios simulados, flujos de pantalla y pruebas SQL de RLS (sección 10).
 
 ## 2. Casos funcionales
 

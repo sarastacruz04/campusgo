@@ -140,12 +140,12 @@ Cada ID queda con archivo exacto, prueba y resultado en docs/MATRIZ_ACCESIBILIDA
 - [ ] T-06
 - [ ] T-07
 - [ ] T-08
-- [ ] Pantalla de ajustes de accesibilidad (tema, alto contraste, escala de texto, reducir animaciones) → §6, §7, E1
+- [x] Pantalla de ajustes de accesibilidad (tema, alto contraste, escala de texto, reducir animaciones) → §6, §7, E1 (evidencia: app/settings/accessibility.tsx y __tests__/theme/ThemeProvider.test.tsx; la revisión con TalkBack está en docs/AUDITORIA_ACCESIBILIDAD.md, C-10, Pendiente)
 - [ ] Plan de validación del Corte 2 ejecutado: pruebas con lector de pantalla, escalado, contraste y táctil (VoiceOver e Inspector declarados como no ejecutados) → §7.1, §10, E8
 
 ## G. Pila tecnológica y requisitos de las fases previas
 
-- [ ] React Native con Expo SDK 58, que abre en Expo Go → §3, E0 (proyecto en SDK 58 y bundle de Android compilado con `expo export`; falta que Sara confirme que abre en Expo Go en su teléfono)
+- [x] React Native con Expo SDK 58, que abre en Expo Go → §3, E0 (evidencia: proyecto en SDK 58, bundle de Android compilado con `expo export` y Sara confirmó el 2026-11-06 que la app abre en Expo Go en su teléfono)
 - [ ] Navegación con Expo Router → §3, §4
 - [ ] Estado global con Redux Toolkit → §3, E3
 - [ ] Backend y persistencia en Supabase (Auth, Postgres, Realtime, Storage, RLS) → §3, §5, E2

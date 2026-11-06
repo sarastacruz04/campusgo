@@ -1,32 +1,42 @@
 # Matriz de accesibilidad — CampusGo
 
-Trazabilidad de los 26 compromisos de la propuesta aprobada del Corte 2 (docs/PROPUESTA_ACCESIBILIDAD_CORTE2.md). Cada fila se actualiza en la etapa en que el compromiso se implementa: archivo y líneas exactas, prueba automática o manual y resultado real. Estados: Pendiente, Implementado (falta prueba en dispositivo), Aprobado o Fallido.
+Trazabilidad de los 26 compromisos de la propuesta aprobada del Corte 2 (docs/PROPUESTA_ACCESIBILIDAD_CORTE2.md). Cada fila se actualiza en la etapa en que el compromiso se implementa: archivo y líneas exactas, prueba automática o manual y resultado real.
+
+Estados:
+- **Pendiente**: aún no implementado.
+- **Parcial**: implementado en los componentes base; falta la parte que llega con una pantalla de otra etapa.
+- **Implementado**: código y prueba automática listos; falta la prueba en dispositivo (TalkBack, Accessibility Scanner o escalado de fuente), que ejecutan Sara y Samuel.
+- **Aprobado** o **Fallido**: después de la prueba en dispositivo, o de la prueba automática cuando esa es la validación prevista en la propuesta (V-01 con CC; V-07 con UT).
+
+Códigos de prueba (sección 7 de la propuesta): UT = prueba unitaria, CC = `npm run a11y:contrast`, TB = TalkBack, AS = Accessibility Scanner, FS = escalado de fuente, MN = revisión manual.
+Resultados de esta versión (2026-11-06, cierre de la Etapa 1): `npm test` 70 de 70 aprobadas; `npm run a11y:contrast` 66 de 66 pares cumplen. Las pruebas en dispositivo están en docs/AUDITORIA_ACCESIBILIDAD.md, sección "Revisión del catálogo (Etapa 1)", en estado Pendiente.
+Las líneas citadas son las del commit de cierre de la Etapa 1 (rutas desde la raíz; `ui/` = components/ui/).
 
 | ID | Mejora prometida (Corte 2) | Archivo y líneas | Prueba | Resultado | Estado |
 | --- | --- | --- | --- | --- | --- |
-| S-01 | accessibilityRole correcto en cada elemento interactivo y en los títulos (button, link, header, radio, tab, tablist, search). | — | — | — | Pendiente |
-| S-02 | accessibilityLabel en español en todo ícono sin texto, sin repetir el rol; hint solo si el resultado no es obvio; íconos decorativos ocultos. | — | — | — | Pendiente |
-| S-03 | Selector Pasajero/Conductor como radiogroup con dos radio y accessibilityState checked, con texto visible. | — | — | — | Pendiente |
-| S-04 | TripCard como un solo foco con etiqueta compuesta; el "+" visual no es otro foco. | — | — | — | Pendiente |
-| S-05 | Formularios: etiqueta, pista con el formato, autoComplete, textContentType, inputMode y error en texto bajo el campo. | — | — | — | Pendiente |
-| S-06 | accessibilityState selected, disabled, busy y checked. | — | — | — | Pendiente |
-| S-07 | Mensajes dinámicos sin mover el foco (accessibilityLiveRegion y announceForAccessibility con useAnnounce). | — | — | — | Pendiente |
-| S-08 | Diálogos modales con accessibilityViewIsModal, foco inicial en el título, onAccessibilityEscape y retorno del foco. | — | — | — | Pendiente |
-| S-09 | Alternativas textuales: mapa con alternativa escrita, zonas de foto con estado, logo como una sola imagen con etiqueta. | — | — | — | Pendiente |
-| V-01 | Tokens con contraste verificado por script (4,5:1 texto, 3:1 interfaz) en los tres temas. | — | — | — | Pendiente |
-| V-02 | Placeholder #5F6B7A y etiqueta visible persistente sobre cada campo. | — | — | — | Pendiente |
-| V-03 | Controles sobre azul con texto #E3E8F0; selector de modo con segmento activo blanco y texto visible. | — | — | — | Pendiente |
-| V-04 | Íconos de estado y de subida con al menos 3:1. | — | — | — | Pendiente |
-| V-05 | No depender solo del color: error con ícono, texto y borde de 2 px; éxito con ícono y texto; selección con subrayado o relleno y negrita. | — | — | — | Pendiente |
-| V-06 | Escalado de fuente: allowFontScaling, maxFontSizeMultiplier 2, sin alturas fijas, tamaños mínimos; revisado a 200 %. | — | — | — | Pendiente |
-| V-07 | lineHeight de al menos 1,4 veces el fontSize y letterSpacing de 0 o más. | — | — | — | Pendiente |
-| V-08 | Temas claro, oscuro y alto contraste, tamaño de texto, reducir movimiento y vibración en Ajustes, con persistencia. | — | — | — | Pendiente |
-| V-09 | Respeto a reducir movimiento (isReduceMotionEnabled con listener). | — | — | — | Pendiente |
-| T-01 | TOUCH_MIN (44 iOS, 48 Android) como minHeight y minWidth de todos los controles. | — | — | — | Pendiente |
-| T-02 | hitSlop en íconos pequeños y al menos 8 dp entre objetivos vecinos. | — | — | — | Pendiente |
-| T-03 | Orden de foco igual al visual, returnKeyType "next", foco al título al cambiar de pantalla, KeyboardAvoidingView y borde de foco de 2 px. | — | — | — | Pendiente |
-| T-04 | Retroalimentación multimodal: háptica, mensaje con ícono y texto, anuncio del lector e interruptor de vibración. | — | — | — | Pendiente |
-| T-05 | Carga y errores de red: indicador con texto, busy, botón deshabilitado y "Reintentar". | — | — | — | Pendiente |
-| T-06 | Confirmaciones destructivas explícitas con el foco inicial en la opción segura. | — | — | — | Pendiente |
-| T-07 | Sin gestos complejos; punto de recogida tocando el mapa o escribiendo; acciones principales en la mitad inferior. | — | — | — | Pendiente |
-| T-08 | Registro con "Paso x de y", "Anterior" conserva lo escrito, autocompletado, contraseña y código pegables, "Mostrar contraseña", sin CAPTCHA. | — | — | — | Pendiente |
+| S-01 | accessibilityRole correcto en cada elemento interactivo y en los títulos. | ui/Button.tsx:91; ui/IconButton.tsx:65; ui/ScreenTitle.tsx:34; ui/ConfirmDialog.tsx:109; ui/SegmentedToggle.tsx:44, 61; ui/RadioGroup.tsx:38, 48; ui/BottomTabBar.tsx:40, 57; ui/SwitchRow.tsx:26; ui/Logo.tsx:38-41 | UT: Button.test, IconButton.test, identity.test, selection.test. TB: pendiente | UT aprobadas | Implementado |
+| S-02 | accessibilityLabel en español en todo ícono sin texto; hint solo si no es obvio; íconos decorativos ocultos. | ui/IconButton.tsx:26 (label obligatorio en el tipo); ui/Icon.tsx:27-29; ui/AppHeader.tsx:39, 48; ui/TextField.tsx:90; eslint.config.js (regla de pistas, D-08) | UT: IconButton.test ("exige accessibilityLabel" y "el ícono queda oculto"). TB, AS: pendiente | UT aprobadas | Implementado |
+| S-03 | Selector Pasajero/Conductor como radiogroup con dos radio y checked; texto visible. | ui/SegmentedToggle.tsx:44, 61, 63, 74; ui/ScreenLayout.tsx:21, 86 | UT: selection.test (SegmentedToggle). TB: pendiente | UT aprobadas | Implementado |
+| S-04 | TripCard como un solo foco con etiqueta compuesta. | — (components/trips/TripCard.tsx, Etapa 5) | — | — | Pendiente |
+| S-05 | Formularios: etiqueta, pista de formato, autoComplete, textContentType, inputMode y error bajo el campo. | ui/TextField.tsx:15 (label obligatorio), 55 (pista con error), 59 (etiqueta visible), 70 (nombre accesible), 96 (error) | UT: TextField.test. Validadores y formularios reales: Etapa 4 | UT aprobadas | Parcial |
+| S-06 | accessibilityState selected, disabled, busy y checked. | ui/Button.tsx:94; ui/IconButton.tsx:67; ui/SegmentedToggle.tsx:63; ui/RadioGroup.tsx:50; ui/BottomTabBar.tsx:59; ui/SwitchRow.tsx:29; ui/LoadingState.tsx:23 | UT: Button.test, selection.test, feedback.test | UT aprobadas | Implementado |
+| S-07 | Mensajes dinámicos sin mover el foco (región viva en Android y announceForAccessibility). | hooks/useAnnounce.ts:18-22; ui/StatusBanner.tsx:45, 61; ui/TextField.tsx:47, 96; ui/LoadingState.tsx:24 | UT: hooks.test (useAnnounce), feedback.test (StatusBanner), TextField.test. TB: pendiente | UT aprobadas | Implementado |
+| S-08 | Diálogos modales: accessibilityViewIsModal, foco inicial en el título, onAccessibilityEscape y retorno del foco. | ui/ConfirmDialog.tsx:65 (foco al título), 70 (retorno del foco), 90 (atrás de Android), 96-97 (modal y escape), 109 (título header) | UT: feedback.test (ConfirmDialog). TB: pendiente. VoiceOver: no ejecutado (sin iPhone) | UT aprobadas | Implementado |
+| S-09 | Alternativas textuales: mapa, zonas de foto con estado, logo con etiqueta y oculto en pantallas internas. | ui/Logo.tsx:21, 38-42; ui/AppHeader.tsx:41; ui/PhotoPicker.tsx:42-43. Mapa: Etapa 5 | UT: identity.test (Logo, PhotoPicker), smoke.test | UT aprobadas | Parcial |
+| V-01 | Tokens con contraste verificado por script en los tres temas. | theme/colors.ts:62-145 (tres temas), 157-210 (pares verificados); lib/contrast.ts; scripts/check-contrast.ts | CC: `npm run a11y:contrast`. UT: contrast.test | 66 de 66 pares cumplen WCAG AA | Aprobado |
+| V-02 | Placeholder #5F6B7A y etiqueta visible persistente. | theme/colors.ts:69; ui/TextField.tsx:59, 72 | CC (placeholder/surface 5,43:1). UT: TextField.test. AS: pendiente | CC y UT aprobadas | Implementado |
+| V-03 | Controles sobre azul con #E3E8F0; selector de modo con segmento activo blanco y texto visible. | theme/colors.ts:75; ui/SegmentedToggle.tsx:69, 74. Filtros del inicio: Etapa 5 | CC (onBrandMuted/brandSurface, brandSurface/onBrand). UT: selection.test | CC y UT aprobadas | Parcial |
+| V-04 | Íconos de estado y de subida con al menos 3:1. | theme/colors.ts:82-83; ui/ConfirmDialog.tsx:81; ui/PhotoPicker.tsx:67 | CC (onAlertBadge/alertBadge 7,44:1; primary/surface) | CC aprobada | Implementado |
+| V-05 | No depender solo del color. | ui/TextField.tsx:52 (borde de 2 px), 96 (ícono + texto); ui/StatusBanner.tsx:55, 64; ui/BottomTabBar.tsx:66, 93 (subrayado y negrita); ui/SegmentedToggle.tsx:74 (negrita) | UT: TextField.test, selection.test (subrayado). MN: pendiente | UT aprobadas | Implementado |
+| V-06 | Escalado de fuente: allowFontScaling, maxFontSizeMultiplier 2, sin alturas fijas, tamaños mínimos; revisado a 200 %. | ui/AppText.tsx:26, 34; theme/typography.ts:35-44, 54; ui/TextField.tsx:75, 114, 120 | UT: typography-layout.test, identity.test (AppText), TextField.test. FS: pendiente | UT aprobadas | Implementado |
+| V-07 | lineHeight ≥ 1,4 × fontSize y letterSpacing ≥ 0. | theme/typography.ts:35-48, 69; ui/Logo.tsx:51, 68 | UT: typography-layout.test (todas las variantes en los tres tamaños de texto), Button.test, TextField.test | UT aprobadas | Aprobado |
+| V-08 | Temas claro, oscuro y alto contraste, tamaño de texto, reducir movimiento y vibración, con persistencia. | theme/ThemeProvider.tsx:22, 38, 71, 102; app/settings/accessibility.tsx:38, 60, 66; theme/layout.ts:36 (bordes de 2 px en alto contraste) | UT: ThemeProvider.test (persistencia y pantalla de Ajustes), identity.test (alto contraste). MN: pendiente | UT aprobadas | Implementado |
+| V-09 | Respeto a reducir movimiento con listener. | hooks/useReduceMotion.ts:11, 31; app/_layout.tsx:45; ui/ConfirmDialog.tsx:89 | UT: hooks.test (useReduceMotion, incluido el cleanup). MN: pendiente | UT aprobadas | Implementado |
+| T-01 | TOUCH_MIN (44 iOS, 48 Android) como minHeight y minWidth. | theme/layout.ts:9; ui/Button.tsx:142-143; ui/IconButton.tsx:76; ui/TextField.tsx:114, 120; ui/SegmentedToggle.tsx:96; ui/RadioGroup.tsx:86; ui/SwitchRow.tsx:59; ui/BottomTabBar.tsx:87 | UT: Button.test, IconButton.test, TextField.test, selection.test, typography-layout.test. AS: pendiente | UT aprobadas | Implementado |
+| T-02 | hitSlop en íconos pequeños y 8 dp entre objetivos. | theme/layout.ts:12, 45; ui/IconButton.tsx:69; ui/RadioGroup.tsx:76; ui/ConfirmDialog.tsx:175 | UT: IconButton.test (compact), typography-layout.test (hitSlopFor) | UT aprobadas | Implementado |
+| T-03 | Orden de foco visual, returnKeyType "next" con refs, foco al título, KeyboardAvoidingView y borde de foco de 2 px. | hooks/useScreenFocus.ts:16, 24; ui/ScreenTitle.tsx:30; ui/TextField.tsx:23 (ref); ui/ScreenLayout.tsx:98; ui/Button.tsx:97, 111; ui/IconButton.tsx:82 | UT: identity.test (ScreenTitle y orden de foco en ScreenLayout). TB y teclado externo: pendiente | UT aprobadas | Implementado |
+| T-04 | Háptica + mensaje con ícono y texto + anuncio; interruptor de vibración. | hooks/useHaptics.ts:11, 28, 34; ui/StatusBanner.tsx:45-47; app/settings/accessibility.tsx:66 | UT: hooks.test (useHaptics en Android, iOS y con la vibración apagada). MN: pendiente | UT aprobadas | Implementado |
+| T-05 | Carga y errores de red: indicador con texto, busy, botón deshabilitado y "Reintentar". | ui/Button.tsx:85, 94, 125; ui/LoadingState.tsx:23-27; ui/StatusBanner.tsx:69 | UT: Button.test (carga), feedback.test (LoadingState y Reintentar) | UT aprobadas | Implementado |
+| T-06 | Confirmaciones destructivas explícitas con el foco en la opción segura. | ui/ConfirmDialog.tsx:20, 22, 123 (la opción segura va primero) | UT: feedback.test (orden y etiquetas). Uso en pantallas reales: Etapas 4 y 5 | UT aprobadas | Parcial |
+| T-07 | Sin gestos complejos; punto de recogida tocando o escribiendo; acciones abajo. | ui/BottomTabBar.tsx (barra inferior). Mapa: Etapa 5 | — | — | Parcial |
+| T-08 | "Paso x de y", "Anterior" conserva lo escrito, autocompletado, pegado, "Mostrar contraseña", sin CAPTCHA. | ui/StepIndicator.tsx:19; ui/TextField.tsx:73, 90. Registro: Etapa 4 | UT: feedback.test (StepIndicator), TextField.test (Mostrar contraseña) | UT aprobadas | Parcial |
