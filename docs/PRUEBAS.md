@@ -16,12 +16,12 @@ Se ejecutan con `npm test` (jest-expo y Testing Library).
 | __tests__/components/IconButton.test.tsx | Nombre accesible, TOUCH_MIN, hitSlop en modo compacto, ícono oculto y label obligatorio en TypeScript. | E1 | Aprobado |
 | __tests__/components/TextField.test.tsx | Etiqueta visible, pista, TOUCH_MIN sin altura fija, error en texto y anunciado, "Mostrar contraseña" y label obligatorio. | E1 | Aprobado |
 | __tests__/components/selection.test.tsx | SegmentedToggle (radiogroup, checked, TOUCH_MIN), RadioGroup, SwitchRow (un solo foco) y BottomTabBar (tab, selected, subrayado). | E1 | Aprobado |
-| __tests__/components/feedback.test.tsx | ConfirmDialog (orden seguro, modal, escape, foco al título), StatusBanner (anuncio, región viva, Reintentar), LoadingState y StepIndicator. | E1 | Aprobado |
+| __tests__/components/feedback.test.tsx | ConfirmDialog (orden seguro, modal, escape, foco al título), StatusBanner (anuncio, un solo foco, Reintentar), LoadingState y StepIndicator. | E1 | Aprobado |
 | __tests__/components/identity.test.tsx | Logo (con nombre o decorativo), AppText (escalado, tamaño de Ajustes, alto contraste), ScreenTitle (foco), PhotoPicker ("foto cargada") y orden de foco de ScreenLayout. | E1 | Aprobado |
-| __tests__/hooks/hooks.test.tsx | useAnnounce (sin doble anuncio en Android), useReduceMotion (sistema, preferencia y cleanup del listener) y useHaptics (Android, iOS y apagado). | E1 | Aprobado |
+| __tests__/hooks/hooks.test.tsx | useAnnounce (anuncia en Android y en iOS), useReduceMotion (sistema, preferencia y cleanup del listener) y useHaptics (Android, iOS y apagado). | E1 | Aprobado |
 | `npm run a11y:contrast` | 22 pares de color por tema en claro, oscuro y alto contraste. | E1 | Aprobado: 66 de 66 pares cumplen WCAG AA |
 
-Última ejecución: 2026-11-06, `npm test` con 11 archivos y 72 de 72 pruebas aprobadas, ejecutado por Claude Code en WSL (Node 22.20.0).
+Última ejecución: 2026-11-06, `npm test` con 11 archivos y 73 de 73 pruebas aprobadas, ejecutado por Claude Code en WSL (Node 22.20.0).
 
 Pendientes por etapa: validators, reducers, selectores, thunks con servicios simulados, flujos de pantalla y pruebas SQL de RLS (sección 10).
 

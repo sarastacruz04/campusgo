@@ -23,11 +23,11 @@ Nota sobre la redacción de TalkBack: según la versión, TalkBack dice "botón 
 | # | Qué hacer | Qué debe pasar | Tema | Resultado real | Estado |
 | --- | --- | --- | --- | --- | --- |
 | C-01 | Entrar al catálogo con TalkBack activo | El foco cae solo en el título y se oye "Catálogo de componentes, encabezado" (S-01, T-03) | Claro | Se oyó "Catálogo de componentes, encabezado" | Aprobado |
-| C-02 | Recorrer el encabezado | "Volver, botón"; "Perfil, botón"; el logo pequeño no recibe foco (S-02, S-09) | Claro | Entre el perfil y el logo, solo vibra pero no se mueve ni dice nada. Al deslizar hacia atrás desde "Perfil" nunca se oye "Volver" | Fallido. Corrección en ui/Logo.tsx (sin `no-hide-descendants`); reprobar en C-02b |
+| C-02 | Recorrer el encabezado | "Volver, botón"; "Perfil, botón"; el logo pequeño no recibe foco (S-02, S-09) | Claro | Entre el perfil y el logo, solo vibra pero no se mueve ni dice nada. Al deslizar hacia atrás desde "Perfil" nunca se oye "Volver" | Fallido. Corregido en ui/Logo.tsx; aprobado en C-02b |
 | C-03 | Recorrer el selector de modo y cambiarlo | Se oye el nombre ("Modo pasajero"), el rol de radio ("botón de selección" o "botón de opción") y el estado marcado solo en la opción activa; doble toque cambia (S-03) | Claro | En pasajero dice "se marcó el elemento Modo pasajero, botón de selección, tocar dos veces para alternar" y en conductor "Modo conductor, botón de selección, tocar dos veces para alternar" | Aprobado (reclasificado) |
 | C-04 | Recorrer los íconos de la sección Botones | Cada uno se oye con su nombre (Reservar viaje, Buscar viajes, Cancelar reserva, Editar perfil, Cerrar sesión) y el rol botón, sin "botón sin etiqueta" (S-02) | Claro | En todos dice el nombre del ícono y al final "botón, tocar dos veces para activar" | Aprobado (reclasificado) |
 | C-05 | Tocar "Iniciar Sesión" | Se oye "Enviando", el botón queda deshabilitado con indicador y luego vibra y se oye "Envío terminado" (T-04, T-05) | Claro | Sí sucede | Aprobado |
-| C-06 | Escribir 3 dígitos en "ID de la Universidad" | Aparece y se anuncia el error sin mover el foco; borde de 2 px e ícono (S-05, S-07, V-05) | Claro | Al escribir 354 TalkBack dice "354 reemplazó 354, 354" y no lee el error. El mensaje, el ícono y el borde rojo grueso sí se ven en pantalla | Fallido (solo el anuncio). Corrección en ui/TextField.tsx (región viva siempre montada); reprobar en C-06b |
+| C-06 | Escribir 3 dígitos en "ID de la Universidad" | Aparece y se anuncia el error sin mover el foco; borde de 2 px e ícono (S-05, S-07, V-05) | Claro | Al escribir 354 TalkBack dice "354 reemplazó 354, 354" y no lee el error. El mensaje, el ícono y el borde rojo grueso sí se ven en pantalla | Fallido (solo el anuncio). Ver C-06b y C-06c |
 | C-07 | En la contraseña, usar "Mostrar contraseña" | Cambia a "Ocultar contraseña" y el texto se ve (T-08) | Claro | Sí sucede | Aprobado |
 | C-08 | Abrir "Diálogo de confirmación" | Foco en el título; siguiente elemento "No, volver"; gesto Atrás lo cierra y el foco vuelve al botón que lo abrió (S-08, T-06) | Claro | Sí sucede | Aprobado |
 | C-09 | Recorrer la barra inferior | La pestaña activa se anuncia como seleccionada ("seleccionado" o "seleccionada"); las otras no (S-06) | Claro | Recorriendo Inicio dice "seleccionado, Inicio, pestaña, tocar dos veces para activar" | Aprobado (reclasificado) |
@@ -40,8 +40,20 @@ Nota sobre la redacción de TalkBack: según la versión, TalkBack dice "botón 
 
 | # | Qué hacer | Qué debe pasar | Tema | Resultado real | Estado |
 | --- | --- | --- | --- | --- | --- |
-| C-02b | Con TalkBack, ir a "Perfil" y deslizar a la izquierda. Después, tocar directamente la flecha de la izquierda | Se oye "Volver, botón" en los dos casos; el logo no recibe foco | Claro | — | Pendiente |
-| C-06b | Con TalkBack, borrar el ID y escribir un solo dígito en "ID de la Universidad" | Después del eco del dígito escrito, TalkBack lee "Debe tener exactamente 10 dígitos." sin que el foco salga del campo | Claro | — | Pendiente |
+Ejecutada por Sara Santacruz el 2026-11-06, mismo teléfono. (Sara escribió estos resultados sobre las filas C-02 y C-06; se movieron aquí para conservar el historial de la primera ronda.)
+
+| # | Qué hacer | Qué debe pasar | Tema | Resultado real | Estado |
+| --- | --- | --- | --- | --- | --- |
+| C-02b | Con TalkBack, ir a "Perfil" y deslizar a la izquierda. Después, tocar directamente la flecha de la izquierda | Se oye "Volver, botón" en los dos casos; el logo no recibe foco | Claro | Sí sucede | Aprobado |
+| C-06b | Con TalkBack, borrar el ID y escribir un solo dígito en "ID de la Universidad" (región viva siempre montada, D-25) | Después del eco del dígito escrito, TalkBack lee "Debe tener exactamente 10 dígitos." sin que el foco salga del campo | Claro | Al escribir 2 TalkBack dice "2 reemplazó 2" y no lee el error. El mensaje, el ícono y el borde rojo grueso sí se ven en pantalla | Fallido. La región viva no se anuncia en este teléfono; se cambia a announceForAccessibility (D-27) |
+
+### Tercera ronda
+
+| # | Qué hacer | Qué debe pasar | Tema | Resultado real | Estado |
+| --- | --- | --- | --- | --- | --- |
+| C-06c | Con TalkBack, borrar el ID y escribir un solo dígito en "ID de la Universidad" (anuncio con announceForAccessibility, D-27) | Después del eco del dígito, TalkBack lee "ID de la Universidad: Debe tener exactamente 10 dígitos." sin que el foco salga del campo | Claro | — | Pendiente |
+
+Los anuncios de StatusBanner y LoadingState usan el mismo mecanismo (useAnnounce) y se verifican en pantallas reales en las Etapas 3 y 5: en el catálogo se montan cuatro mensajes a la vez y sus anuncios se pisarían.
 
 ## Estructura (se completa en la Etapa 8)
 
