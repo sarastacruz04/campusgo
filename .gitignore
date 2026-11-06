@@ -1,0 +1,52 @@
+# Más información: https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# Dependencias
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Carpetas nativas generadas (la app corre en Expo Go, no se versionan)
+/ios
+/android
+.kotlin/
+
+# Llaves, certificados y keystores (nunca se suben)
+*.jks
+*.keystore
+*.p8
+*.p12
+*.key
+*.pem
+*.mobileprovision
+*.orig.*
+
+# Variables de entorno: solo se versiona .env.example (sin valores reales)
+.env
+.env.*
+!.env.example
+
+# Supabase CLI local
+supabase/.temp/
+supabase/.branches/
+
+# Metro
+.metro-health-check*
+
+# Depuración
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Pruebas
+coverage/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
