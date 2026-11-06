@@ -1,37 +1,54 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-// Pantalla provisional de la Etapa 0: solo comprueba que la app abre en Expo Go.
-// En la Etapa 1 se reemplaza por la bienvenida con el sistema de diseño.
+import { AppText } from '@/components/ui/AppText';
+import { Button } from '@/components/ui/Button';
+import { Logo } from '@/components/ui/Logo';
+import { ScreenTitle } from '@/components/ui/ScreenTitle';
+import { spacing } from '@/theme/layout';
+import { useTheme } from '@/theme/ThemeProvider';
+
+// Pantalla provisional hasta la Etapa 4, donde se convierte en la bienvenida con
+// redirección según la sesión. Por ahora da acceso a Ajustes y, en desarrollo, al
+// catálogo de componentes.
 export default function Index() {
+  const { colors } = useTheme();
   return (
-    <View style={styles.container}>
-      <Text accessibilityRole="header" style={styles.title}>
-        CampusGo
-      </Text>
-      <Text style={styles.subtitle}>Conectando estudiantes, compartiendo trayectos</Text>
-    </View>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.surface }]}>
+      <Logo size="large" />
+      <View style={styles.texts}>
+        <ScreenTitle>Te damos la bienvenida</ScreenTitle>
+        <AppText style={styles.centered}>Conectando estudiantes, compartiendo trayectos</AppText>
+      </View>
+      <View style={styles.actions}>
+        <Button
+          label="Ajustes de accesibilidad"
+          variant="secondary"
+          onPress={() => router.push('/settings/accessibility')}
+        />
+        {__DEV__ ? (
+          <Button label="Catálogo de componentes" onPress={() => router.push('/dev/catalogo')} />
+        ) : null}
+      </View>
+    </SafeAreaView>
   );
 }
 
-// lineHeight de al menos 1,4 veces el tamaño para no recortar tildes ni la Ñ (V-07).
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
-    backgroundColor: '#FFFFFF',
+    padding: spacing.xl,
+    gap: spacing.xxl,
   },
-  title: {
-    fontSize: 28,
-    lineHeight: 40,
-    fontWeight: '700',
-    color: '#334259',
+  texts: {
+    gap: spacing.sm,
   },
-  subtitle: {
-    fontSize: 16,
-    lineHeight: 24,
-    color: '#334259',
+  centered: {
     textAlign: 'center',
+  },
+  actions: {
+    gap: spacing.md,
   },
 });
