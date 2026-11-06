@@ -1,0 +1,330 @@
+# Guía del código de CampusGo
+
+Guía para entender qué hay en el código, cómo funciona y dónde tocar si en la defensa piden un cambio. Se actualiza al terminar cada etapa (la tuya o la de Samuel).
+
+- **Incluye hasta:** Etapa 0 (preparación) y Etapa 1 (sistema de diseño y accesibilidad base).
+- **Todavía no existe:** base de datos, inicio de sesión, Redux, viajes, reservas ni mapas (Etapas 2 a 7).
+- Las preguntas de defensa con respuesta modelo están en [GUIA_DEFENSA.md](GUIA_DEFENSA.md). Esta guía explica el código; aquella, cómo responder.
+
+---
+
+## 1. La idea en una frase
+
+Hasta ahora CampusGo es **una caja de piezas accesibles**: colores, letras, botones, campos, diálogos y el esqueleto de las pantallas. Todavía no hay viajes ni usuarios. Las etapas siguientes arman las pantallas reales con estas piezas, así que si una pieza cumple la accesibilidad, todas las pantallas que la usen también.
+
+---
+
+## 2. Mapa de carpetas (lo que tiene contenido)
+
+```
+campusgo/
+├── app/                  Pantallas. Cada archivo es una ruta (Expo Router).
+│   ├── _layout.tsx       Envuelve toda la app: fuentes, tema y navegación.
+│   ├── index.tsx         Pantalla inicial provisional (ruta "/").
+│   ├── settings/accessibility.tsx   Ajustes de accesibilidad.
+│   └── dev/catalogo.tsx  Catálogo de componentes (solo en desarrollo).
+├── components/ui/        Las piezas reutilizables (botones, campos, diálogos…).
+├── hooks/                Funciones de accesibilidad (anunciar, vibrar, foco…).
+├── theme/                Colores, letras, medidas y el "proveedor" del tema.
+├── lib/contrast.ts       La fórmula matemática del contraste.
+├── scripts/check-contrast.ts   El script que revisa los colores.
+├── __tests__/            Pruebas automáticas.
+├── test-utils/render.tsx Ayuda para las pruebas.
+└── docs/                 Documentación (esta guía, decisiones, matriz, etc.).
+```
+
+Las carpetas `features/`, `services/`, `store/`, `db/`, `types/`, `supabase/` y `components/trips` y `maps` existen pero están vacías (tienen un `.gitkeep`). Se llenan desde la Etapa 2.
+
+---
+
+## 3. Cómo arranca la app (el recorrido completo)
+
+1. **package.json** dice `"main": "expo-router/entry"`. Expo Router es quien arranca.
+2. Expo Router mira la carpeta **app/** y convierte cada archivo en una pantalla: `app/index.tsx` es `/`, `app/settings/accessibility.tsx` es `/settings/accessibility`.
+3. Antes de cualquier pantalla se ejecuta **app/_layout.tsx**, que hace esto en orden:
+   - Deja visible la pantalla de carga nativa (splash) con `SplashScreen.preventAutoHideAsync()`.
+   - Envuelve todo con `SafeAreaProvider` (para no dibujar debajo de la cámara o la barra de estado) y con `ThemeProvider` (el tema y las preferencias).
+   - Carga la fuente Noto Sans en tres pesos: normal, semi negrita y negrita (`useFonts`).
+   - Espera dos cosas: que carguen las fuentes y que el ThemeProvider haya leído las preferencias guardadas (`ready`). Mientras tanto devuelve `null` y se sigue viendo el splash.
+   - Cuando ambas están listas, oculta el splash y muestra la navegación (`Stack`) sin encabezado nativo. Si el usuario activó "reducir movimiento", el cambio de pantalla es un fundido de 150 ms en lugar de deslizar.
+   - Si la fuente fallara, la app sigue con la del sistema en vez de quedarse trabada.
+4. Se muestra **app/index.tsx**.
+
+**Por qué esperar el splash:** sin eso se vería un instante la letra del sistema o el tema claro antes del oscuro (un parpadeo feo).
+
+---
+
+## 4. El sistema de diseño (carpeta theme/)
+
+### 4.1 Colores: theme/colors.ts
+
+Un **token** es un nombre para un color según su uso, por ejemplo `primary` en lugar de `#334259`. Ninguna pantalla escribe un hexadecimal: siempre pide el token al tema activo con `useTheme().colors.primary`. Así, cambiar el tema cambia todos los colores a la vez.
+
+Hay **tres temas** con exactamente los mismos nombres de token: `light` (claro), `dark` (oscuro) y `highContrast` (alto contraste).
+
+Tokens principales del tema claro:
+
+| Token | Color | Dónde se ve |
+| --- | --- | --- |
+| `background` | #B2BBC9 | Fondo gris azulado de la zona de contenido |
+| `surface` | #FFFFFF | Encabezado, tarjetas, campos y barra inferior |
+| `titleBand` | #C1C9D7 | Banda donde va el título de cada pantalla |
+| `cardHeader` | #A9ACB0 | Encabezado gris de las tarjetas de viaje (solo texto grande en negrita) |
+| `text` | #334259 | Texto principal |
+| `textMuted` | #5F6B7A | Texto secundario (14) |
+| `placeholder` | #5F6B7A | Texto de ejemplo dentro de los campos |
+| `primary` | #334259 | Botón principal y bordes |
+| `primaryPressed` | #24303F | Botón principal mientras se presiona |
+| `onPrimary` | #FFFFFF | Texto sobre el botón principal |
+| `brandSurface` | #334259 | Tarjetas y diálogos azules |
+| `onBrand` | #FFFFFF | Texto sobre tarjetas azules |
+| `onBrandMuted` | #E3E8F0 | Texto secundario sobre azul |
+| `border` | #334259 | Borde de campos (1 px; 2 px al enfocar) |
+| `focus` y `link` | #1A4FD6 | Borde de foco con teclado y enlaces |
+| `error` | #B3261E | Mensajes de error |
+| `success` | #1E7B34 | Mensajes de éxito |
+| `successOnBrand` | #3EE700 | Check verde dentro de un diálogo azul |
+| `alertBadge` + `onAlertBadge` | #AF0000 + #FFFFFF | Círculo rojo con "?" blanco de los diálogos |
+| `avatarBackground` + `avatarIcon` | #E3E8F0 + #334259 | Avatar vacío del botón de perfil |
+
+Al final del archivo está **`CONTRAST_PAIRS`**: la lista de combinaciones (qué texto va sobre qué fondo) que de verdad usa la interfaz. El script de contraste revisa cada una en los tres temas.
+
+### 4.2 La revisión de contraste: lib/contrast.ts y scripts/check-contrast.ts
+
+- **lib/contrast.ts** tiene la fórmula de WCAG. `relativeLuminance` calcula qué tan clara es un color de 0 (negro) a 1 (blanco). `contrastRatio` compara dos colores y da un número de 1 a 21.
+- Los mínimos son 4,5 para texto normal, 3 para texto grande y 3 para bordes e íconos (`MIN_RATIO`).
+- **`npm run a11y:contrast`** recorre los 22 pares en los 3 temas (66 en total), imprime cada razón con OK o FALLA y **termina con error si alguno falla**. Hoy pasan los 66.
+
+### 4.3 Letras: theme/typography.ts
+
+La fuente es Noto Sans, con una familia por peso (`fontFamilies.regular`, `semibold`, `bold`). No se usa `fontWeight` porque en Android, con fuentes propias, haría que el sistema cambie la fuente.
+
+| Variante | Tamaño | Alto de línea | Para qué |
+| --- | --- | --- | --- |
+| `title` | 26 | 38 | Títulos de pantalla |
+| `subtitle` | 19 | 28 | Subtítulos y título de diálogos |
+| `cardTitle` | 22 | 32 | Título de tarjetas ("Colina") |
+| `body` | 16 | 24 | Texto normal y campos |
+| `bodyStrong` | 16 | 24 | Texto normal en negrita |
+| `label` | 16 | 24 | Etiquetas de campos |
+| `button` | 16 | 24 | Texto de botones |
+| `secondary` | 14 | 20 | Texto secundario y errores |
+| `tab` | 12 | 18 | Etiquetas de la barra inferior |
+
+Reglas de este archivo:
+- **Alto de línea de al menos 1,4 veces el tamaño** (`MIN_LINE_HEIGHT_RATIO`), para que no se corten las tildes, la Ñ, la ¿ ni la ¡.
+- **Espaciado entre letras 0.** El Figma usaba negativo y pegaba las palabras.
+- **`MAX_FONT_SIZE_MULTIPLIER = 2`**: el texto crece con el ajuste del teléfono hasta 200 %.
+- **`TEXT_SIZE_FACTORS`**: el tamaño elegido en Ajustes (Sistema 1, Grande 1,15, Extra grande 1,3).
+- **`scaleTypography(factor)`** multiplica toda la tabla por ese factor y redondea el alto de línea hacia arriba, para no bajar nunca del 1,4.
+
+### 4.4 Medidas: theme/layout.ts
+
+| Nombre | Valor | Para qué |
+| --- | --- | --- |
+| `TOUCH_MIN` | 44 en iOS, 48 en Android | Alto y ancho mínimo de todo lo que se toca |
+| `TOUCH_GAP` | 8 | Separación mínima entre dos cosas que se tocan |
+| `spacing` | xs 4, sm 8, md 12, lg 16, xl 24, xxl 32 | Márgenes y espacios (base de 4) |
+| `radius` | control 6, card 10, dialog 12, pill 999 | Esquinas redondeadas |
+| `borderWidths(tema)` | 1 px (2 px en alto contraste) | Grosor de bordes; el foco y el error siempre 2 px |
+| `hitSlopFor(tamaño)` | Calcula el margen invisible | Para que un ícono pequeño alcance TOUCH_MIN |
+
+Ejemplo de `hitSlopFor`: un ícono de 32 en Android necesita 8 de margen invisible por lado (32 + 8 + 8 = 48).
+
+### 4.5 El proveedor del tema: theme/ThemeProvider.tsx
+
+Aquí está **la lógica más importante de la Etapa 1**.
+
+Un **Context** de React es una forma de compartir datos con todos los componentes sin pasarlos uno por uno. El ThemeProvider es ese Context para el tema.
+
+**Qué guarda:** las preferencias del usuario (`Preferences`):
+- `theme`: `'system' | 'light' | 'dark' | 'highContrast'`
+- `textSize`: `'system' | 'large' | 'extraLarge'`
+- `reduceMotion`: sí o no
+- `haptics` (vibración): sí o no
+
+Los valores por defecto (`DEFAULT_PREFERENCES`) son Sistema, Sistema, no y sí.
+
+**Cómo funciona, paso a paso:**
+1. Al arrancar, lee las preferencias guardadas en el teléfono con AsyncStorage, bajo la clave `campusgo:preferencias`.
+2. Si no hay nada o el dato está dañado, usa los valores por defecto (`parsePreferences`).
+3. Mientras lee, `ready` es `false`. Por eso `_layout` espera antes de mostrar la app.
+4. Calcula el **tema efectivo**: si la preferencia es "Sistema", pregunta al teléfono si está en modo oscuro (`useColorScheme`); si no, usa la elegida.
+5. Entrega a toda la app un objeto con `themeName`, `colors` (del tema efectivo), `typography` (escalada por el tamaño de texto), `borders`, `preferences`, `setPreference` y `ready`.
+6. `setPreference('theme', 'dark')` cambia una preferencia, actualiza la pantalla al instante y la guarda en el teléfono.
+
+**Detalles que pueden preguntar:**
+- **`useMemo`**: el objeto que se entrega solo se vuelve a crear si algo cambió. Sin él, todos los componentes se redibujarían en cada render.
+- **La bandera `active`**: si el componente se desmonta antes de que AsyncStorage responda, no se intenta actualizar un estado que ya no existe.
+- **¿Por qué AsyncStorage y no SecureStore?** Las preferencias no son secretas. SecureStore se reserva para la sesión (Etapa 3).
+- **`useTheme()`**: es como cualquier componente pide el tema. Si se usa fuera del proveedor, lanza un error claro.
+
+---
+
+## 5. Los hooks de accesibilidad (carpeta hooks/)
+
+Un **hook** es una función de React que empieza con `use` y guarda lógica reutilizable.
+
+| Hook | Qué hace | Lógica clave |
+| --- | --- | --- |
+| `useAnnounce` | Hace que TalkBack diga un mensaje **sin mover el foco** | Llama a `AccessibilityInfo.announceForAccessibility(mensaje)` en Android y en iOS. Ignora mensajes vacíos. |
+| `useHaptics` | Vibra en éxito, advertencia o error | En Android usa `performAndroidHapticsAsync` (Confirm, Long_Press, Reject); en iOS, `notificationAsync`. No vibra si el usuario apagó "Vibración". Si el teléfono no puede vibrar, lo ignora. |
+| `useReduceMotion` | Dice si hay que evitar animaciones | Devuelve `true` si el teléfono tiene "Quitar animaciones" **o** el usuario lo activó en Ajustes. Se suscribe a cambios del sistema y **se desuscribe al desmontar** (`subscription.remove()`). |
+| `useScreenFocus` | Lleva el foco de TalkBack a un elemento (el título) | Espera 500 ms para que termine la transición y envía `sendAccessibilityEvent(ref, 'focus')`. Si cambia `focusKey` (por ejemplo, el paso del registro), lo repite. Cancela el temporizador al desmontar. |
+
+**Una decisión importante (D-27):** la propuesta pedía `accessibilityLiveRegion` en Android para anunciar errores. En tu Samsung no funcionó (pruebas C-06 y C-06b), mientras que `announceForAccessibility` sí (C-05 y C-06c). Por eso toda la app usa solo `useAnnounce`. Es un buen ejemplo para la defensa: una decisión tomada con una prueba real.
+
+---
+
+## 6. Las piezas (carpeta components/ui/)
+
+Regla de todas: **no conocen Redux ni Supabase**. Reciben datos por props y avisan con funciones como `onPress` u `onChange`.
+
+### 6.1 Texto e íconos
+
+- **AppText**: el texto de toda la app. Aplica la variante de letra, el color del tema (`color="error"`, por ejemplo), el escalado del sistema y el límite de 200 %. Si un texto no usa AppText, pierde estas garantías.
+- **Icon**: dibuja un ícono de Material Design Icons y **siempre lo oculta de TalkBack**. El significado lo da el botón que lo contiene o el texto de al lado. Los nombres de íconos se buscan en https://pictogrammers.com/library/mdi/.
+- **Logo**: "Campus G" + un pin dibujado con SVG + "By Sara y Samuel".
+  - `size`: `large` (bienvenida) o `small` (encabezado).
+  - `decorative`: en el encabezado el logo no recibe foco. En bienvenida es una imagen llamada "CampusGo, by Sara y Samuel".
+  - No crece con la fuente: es un logotipo y al 200 % rompería el encabezado (D-21).
+
+### 6.2 Botones
+
+- **Button**: botón con texto.
+  - `label` es obligatorio (TypeScript no compila sin él).
+  - `variant`: `primary` (azul relleno), `secondary` (borde azul sobre blanco), `onBrand` (blanco sobre tarjeta azul), `onBrandOutline` (borde blanco sobre tarjeta azul).
+  - `loading`: muestra el indicador, cambia el texto a `loadingLabel`, anuncia "ocupado" y **se deshabilita** para evitar el doble toque.
+  - Mide como mínimo TOUCH_MIN; cambia de color al presionar; con teclado externo muestra un borde de 2 px.
+- **IconButton**: botón de solo ícono (lupa, papelera, lápiz, perfil, +).
+  - `accessibilityLabel` es obligatorio: un ícono sin texto no tiene nombre para TalkBack.
+  - `variant`: `plain` (ícono suelto), `filled` (círculo azul, como el "+"), `onBrand` (ícono blanco), `avatar` (círculo gris del perfil).
+  - `compact`: mantiene el tamaño visual pequeño del Figma y completa el área con `hitSlop`.
+
+### 6.3 Formularios y selección
+
+- **TextField**: campo de texto.
+  - `label` obligatorio, visible encima del campo (no se depende del placeholder).
+  - `hint`: el formato ("10 dígitos"), visible y leído por TalkBack.
+  - `error`: el texto rojo con ícono debajo, el borde de 2 px rojo y el anuncio por TalkBack ("ID de la Universidad: Debe tener…"). El error también se suma a la pista para oírlo al volver al campo.
+  - `password`: agrega el botón "Mostrar contraseña" / "Ocultar contraseña".
+  - `ref`: permite saltar al siguiente campo con la tecla "siguiente".
+- **SegmentedToggle**: la píldora Pasajero / Conductor. Para TalkBack es un grupo de opciones (radiogroup) y cada lado es una opción con estado marcado. La activa es blanca con texto en negrita; la otra, azul. Solo avisa el cambio si tocas la opción que no estaba elegida.
+- **RadioGroup**: lista de opciones excluyentes (tema en Ajustes; "¿Quieres registrar un carro?" en el registro). La fila completa es lo que se toca.
+- **SwitchRow**: fila con interruptor (Vibración, Reducir movimiento). Toda la fila es **un solo foco** con rol de interruptor; el Switch de dentro está oculto para no anunciarse dos veces.
+
+### 6.4 Mensajes y estados
+
+- **ConfirmDialog**: el diálogo azul del Figma.
+  - `tone`: `question` ("?" blanco en círculo rojo), `error` (X) o `success` (check verde).
+  - Botones: `cancelLabel` (opción segura, va **primero**, botón blanco) y `confirmLabel` (acción, con borde). Si no hay `cancelLabel`, tiene un solo botón.
+  - Accesibilidad: TalkBack no puede salir del diálogo; el foco empieza en el título; el botón Atrás de Android o el gesto de escape cancelan; al cerrarse, el foco vuelve al botón que lo abrió (`returnFocusRef`). Con "reducir movimiento" aparece sin animación.
+- **StatusBanner**: mensaje con ícono + texto + borde. `tone` puede ser `error`, `success`, `info` u `offline` ("Sin conexión…"). Se anuncia al aparecer y vibra en error o éxito (`haptic`). Con `onRetry` muestra el botón "Reintentar".
+- **LoadingState**: indicador girando + texto ("Cargando viajes…"), anunciado y con estado "ocupado".
+- **StepIndicator**: "Paso 2 de 6" en texto, más una barra de progreso que TalkBack no lee para no repetirlo.
+- **PhotoPicker**: zona para elegir foto. `variant="avatar"` es el círculo con "+"; `upload` es el recuadro con flecha de subir. Si ya hay foto, TalkBack dice "…, foto cargada". Todavía no abre la galería: eso llega en la Etapa 4.
+- **ScreenTitle**: el título de cada pantalla, con rol de encabezado, que **recibe el foco al entrar** (usa `useScreenFocus`).
+
+### 6.5 El esqueleto de las pantallas internas
+
+- **AppHeader**: franja blanca con flecha "Volver" (opcional), logo pequeño decorativo y botón "Perfil".
+- **BottomTabBar**: barra inferior con pestañas. Cada una tiene ícono y texto; la activa va subrayada y en negrita y TalkBack dice "seleccionado". Por ahora es una pieza suelta; en la Etapa 4 se conecta a la navegación real.
+- **ScreenLayout**: arma una pantalla interna completa en el orden del Figma: encabezado → selector de modo (si se pasa `mode`) → banda con el título → contenido con scroll → barra inferior (si se pasa `bottomBar`). Ese orden es también el orden en que TalkBack lo recorre. Incluye `KeyboardAvoidingView` para que el teclado no tape el campo.
+
+---
+
+## 7. Las pantallas que existen
+
+| Ruta | Archivo | Qué hace |
+| --- | --- | --- |
+| `/` | app/index.tsx | **Provisional.** Logo grande, título "Te damos la bienvenida", el lema y dos botones: "Ajustes de accesibilidad" y, solo en desarrollo, "Catálogo de componentes". En la Etapa 4 será la bienvenida real con "Iniciar Sesión" y "Registrarse". |
+| `/settings/accessibility` | app/settings/accessibility.tsx | Tema (Sistema, Claro, Oscuro, Alto contraste), Tamaño del texto (Sistema, Grande, Extra grande) con una frase de ejemplo, y los interruptores Reducir movimiento y Vibración. Todo se aplica al instante y queda guardado. |
+| `/dev/catalogo` | app/dev/catalogo.tsx | Todas las piezas juntas para revisarlas con TalkBack. Arriba tiene un selector de tema. Si la app no está en desarrollo (`__DEV__` falso), redirige a `/`. |
+
+---
+
+## 8. Pruebas y comandos
+
+| Comando | Qué hace | Estado actual |
+| --- | --- | --- |
+| `npm start` | Abre el servidor; se escanea el QR con Expo Go | — |
+| `npm run typecheck` | Revisa los tipos de TypeScript | Pasa |
+| `npm run lint` | Revisa estilo, formato y errores de accesibilidad en el código | Pasa |
+| `npm test` | Corre las pruebas automáticas | 73 de 73 |
+| `npm run a11y:contrast` | Revisa los colores | 66 de 66 |
+| `npm run format` | Ordena el formato del código con Prettier | — |
+
+Qué revisa cada archivo de `__tests__/`:
+- **theme/contrast.test.ts**: la fórmula da los mismos valores que la propuesta del Corte 2 (por ejemplo, 10,17 para #334259 sobre blanco) y los tres temas cumplen.
+- **theme/typography-layout.test.ts**: alto de línea, tamaños mínimos, TOUCH_MIN y hitSlop.
+- **theme/ThemeProvider.test.tsx**: guarda y lee preferencias, tolera datos dañados y la pantalla de Ajustes funciona.
+- **components/**: cada pieza tiene su rol, nombre, estado y tamaño mínimo correctos; las que exigen etiqueta no compilan sin ella.
+- **hooks/hooks.test.tsx**: anuncia, vibra según la plataforma y el ajuste, y limpia el listener de "reducir movimiento".
+- **smoke.test.tsx**: la pantalla inicial abre con el logo y el título.
+
+Archivos de apoyo: **jest.setup.ts** simula AsyncStorage solo en las pruebas, y **test-utils/render.tsx** (`renderWithProviders`) renderiza con el tema como en la app real.
+
+Además, `eslint.config.js` incluye el plugin de accesibilidad: si alguien escribe un rol inválido, `npm run lint` falla. La única regla apagada es la que obligaba a poner pista en todo (D-08).
+
+---
+
+## 9. "Si me piden…": recetas de cambios rápidos
+
+| Si me piden… | Dónde | Qué hago | Cómo verifico |
+| --- | --- | --- | --- |
+| Cambiar un color (por ejemplo, el azul principal) | theme/colors.ts, tema `light`, token `primary` (y `brandSurface`, `border` y `text` si es el mismo azul) | Cambio el hexadecimal | `npm run a11y:contrast`: si sale FALLA, ese color no cumple |
+| Probar que el script detecta un mal color | theme/colors.ts, `placeholder` del tema claro | Lo pongo en `#9FA6B0` | El script falla con 2,45:1; luego lo devuelvo a `#5F6B7A` |
+| Cambiar un texto visible | Busco el texto con Ctrl+Shift+F en VS Code (por ejemplo, "Te damos la bienvenida" está en app/index.tsx) | Lo cambio entre las etiquetas | Lo veo en Expo Go; si una prueba buscaba ese texto, la actualizo |
+| Cambiar el tamaño de letra del cuerpo | theme/typography.ts, `body` | Cambio `fontSize` **y** `lineHeight` (mínimo 1,4 veces) | `npm test` (typography-layout.test falla si el alto de línea queda corto) |
+| Hacer los botones más altos | theme/layout.ts, `TOUCH_MIN` | Cambio 48 (o 44) | Se ve en el catálogo; las pruebas comparan contra la constante |
+| Cambiar el nombre que lee TalkBack de un ícono | Donde se usa el `IconButton`, prop `accessibilityLabel` (por ejemplo, "Perfil" en components/ui/AppHeader.tsx) | Cambio el texto (sin la palabra "botón") | TalkBack o `npm test` |
+| Agregar una pista a un botón | En el `Button` o `IconButton`, prop `accessibilityHint` | Ejemplo: `accessibilityHint="Abre la galería"` | TalkBack la lee después del nombre |
+| Cambiar un ícono | Prop `icon` del componente | Uso un nombre de https://pictogrammers.com/library/mdi/ | TypeScript avisa si el nombre no existe |
+| Agregar una opción de tamaño de texto | theme/typography.ts (`TextSizePreference` y `TEXT_SIZE_FACTORS`) y app/settings/accessibility.tsx (`TEXT_SIZE_OPTIONS`) | Agrego el valor y su factor | `npm run typecheck` muestra cada lugar que falta |
+| Cambiar el mensaje de un diálogo | Donde se usa `ConfirmDialog`: props `title`, `message`, `confirmLabel` y `cancelLabel` | Cambio el texto | Lo veo en el catálogo, sección Diálogos |
+| Cambiar el tiempo antes de mover el foco al título | hooks/useScreenFocus.ts, `SCREEN_FOCUS_DELAY_MS` | Cambio 500 | TalkBack al entrar a una pantalla |
+| Que el diálogo no tenga animación nunca | components/ui/ConfirmDialog.tsx, `animationType` | Pongo `'none'` | Abro un diálogo |
+| Cambiar los colores del tema oscuro | theme/colors.ts, objeto `dark` | Cambio el valor | `npm run a11y:contrast` y Ajustes > Oscuro |
+
+**Antes de cualquier commit:** `npm run typecheck`, `npm run lint` y `npm test` deben pasar.
+
+---
+
+## 10. Lo que encontramos en el teléfono (Samsung Galaxy A35 5G, Android 16)
+
+| Prueba | Qué pasó | Qué se hizo |
+| --- | --- | --- |
+| C-02 | TalkBack no llegaba al botón "Volver" | El logo vecino se ocultaba con `no-hide-descendants`; ahora se oculta pieza por pieza (D-26). C-02b aprobada |
+| C-06 y C-06b | El error del campo se veía pero TalkBack no lo leía | La "región viva" de Android no funcionó; se cambió a `announceForAccessibility` (D-27). C-06c aprobada |
+| C-03, C-04 y C-09 | Parecían fallos | Eran correctos: "botón de selección" y "tocar dos veces para activar" son frases normales de TalkBack |
+
+Resultado: 18 de los 26 compromisos de accesibilidad están aprobados. El detalle está en [MATRIZ_ACCESIBILIDAD.md](MATRIZ_ACCESIBILIDAD.md).
+
+---
+
+## 11. Glosario rápido
+
+- **Expo Go**: la app del teléfono que corre el proyecto sin compilarlo.
+- **Expo Router**: navegación donde cada archivo de `app/` es una pantalla.
+- **Componente**: una función que devuelve lo que se dibuja (por ejemplo, `Button`).
+- **Props**: los datos que se le pasan a un componente (`label`, `onPress`…).
+- **Estado (`useState`)**: un dato que, al cambiar, redibuja el componente.
+- **`useEffect`**: código que se ejecuta después de dibujar; su `return` es la limpieza.
+- **Context / Provider**: forma de compartir datos (el tema) con toda la app.
+- **Token**: nombre de un color según su uso.
+- **TalkBack**: el lector de pantalla de Android.
+- **accessibilityRole**: qué es un elemento para TalkBack (botón, encabezado, pestaña…).
+- **accessibilityLabel**: el nombre que lee TalkBack.
+- **accessibilityHint**: la explicación extra, solo si el resultado no es obvio.
+- **accessibilityState**: el estado (marcado, seleccionado, deshabilitado, ocupado).
+- **hitSlop**: área táctil invisible alrededor de un elemento.
+- **lineHeight**: alto de cada línea de texto.
+- **WCAG AA**: el estándar de accesibilidad que seguimos (contraste de 4,5:1 para texto).
+
+---
+
+## 12. Registro de actualizaciones de esta guía
+
+| Fecha | Etapa | Quién la hizo | Qué se agregó a la guía |
+| --- | --- | --- | --- |
+| 2026-11-06 | E0 y E1 | Sara | Primera versión: arranque de la app, sistema de diseño, hooks, componentes, pantallas, pruebas, recetas y hallazgos en el teléfono |

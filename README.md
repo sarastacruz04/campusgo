@@ -40,4 +40,4 @@ Escanea el código QR con Expo Go (el teléfono y el computador deben estar en l
 
 ## Documentación
 
-La especificación está en docs/spec. Decisiones en docs/DECISIONES.md y guía de defensa en docs/GUIA_DEFENSA.md.
+La especificación está en docs/spec. Decisiones en docs/DECISIONES.md, guía del código en docs/GUIA_DEL_CODIGO.md y guía de defensa en docs/GUIA_DEFENSA.md.
