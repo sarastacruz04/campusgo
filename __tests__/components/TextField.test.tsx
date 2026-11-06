@@ -50,6 +50,15 @@ describe('TextField', () => {
     announce.mockRestore();
   });
 
+  it('la región viva del error existe antes de que haya error (C-06)', async () => {
+    // Android solo anuncia cambios dentro de una región que ya estaba montada.
+    await renderWithProviders(<TextField label="Teléfono" value="" onChangeText={jest.fn()} />);
+    const region = screen.getByTestId('Teléfono-error');
+    expect(region).toHaveProp('accessibilityLiveRegion', 'polite');
+    // Vacía no es un foco: TalkBack no se detiene en ella.
+    expect(region).toHaveProp('accessible', false);
+  });
+
   it('el botón "Mostrar contraseña" alterna la visibilidad (T-08)', async () => {
     await renderWithProviders(
       <TextField label="Contraseña" password value="secreta" onChangeText={jest.fn()} />,
