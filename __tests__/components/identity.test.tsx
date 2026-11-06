@@ -107,4 +107,21 @@ describe('ScreenLayout', () => {
       .map((node) => node.props.accessibilityLabel ?? node.props.children);
     expect(focusOrder).toEqual(['Perfil', 'Modo pasajero', 'Modo conductor', '¡Buen viaje Sara!']);
   });
+
+  it('con botón de volver, "Volver" va antes que "Perfil" y el logo no es foco (C-02)', async () => {
+    await renderWithProviders(
+      <ScreenLayout title="Ajustes" onBack={jest.fn()} onPressProfile={jest.fn()}>
+        <Text>Contenido</Text>
+      </ScreenLayout>,
+    );
+    const focusOrder = screen
+      .getAllByRole(/^(button|header|image)$/)
+      .map((node) => node.props.accessibilityLabel ?? node.props.children);
+    expect(focusOrder).toEqual(['Volver', 'Perfil', 'Ajustes']);
+    // El logo decorativo no usa no-hide-descendants (afectaba al botón vecino en Android).
+    expect(screen.getByTestId('logo', { includeHiddenElements: true })).toHaveProp(
+      'importantForAccessibility',
+      'no',
+    );
+  });
 });

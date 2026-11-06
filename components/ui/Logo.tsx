@@ -33,18 +33,25 @@ export function Logo({ size = 'large', decorative = false }: LogoProps) {
   const pinHeight = word * 0.9;
   const pinWidth = pinHeight * 0.75;
 
+  // Decorativo: cada pieza se oculta por separado con importantForAccessibility="no"
+  // (Android) y el contenedor con accessibilityElementsHidden (iOS). No se usa
+  // "no-hide-descendants": en la auditoría (C-02) TalkBack dejó de alcanzar el botón
+  // "Volver", vecino del logo en el encabezado.
+  const hiddenPart = decorative ? 'no' : 'auto';
+
   return (
     <View
       accessible={!decorative}
       accessibilityRole={decorative ? undefined : 'image'}
       accessibilityLabel={decorative ? undefined : LOGO_LABEL}
-      importantForAccessibility={decorative ? 'no-hide-descendants' : 'yes'}
+      importantForAccessibility={decorative ? 'no' : 'yes'}
       accessibilityElementsHidden={decorative}
       testID="logo"
       style={styles.container}
     >
-      <View style={styles.row}>
+      <View style={styles.row} importantForAccessibility={hiddenPart}>
         <Text
+          importantForAccessibility={hiddenPart}
           allowFontScaling={false}
           style={[
             styles.word,
@@ -53,7 +60,13 @@ export function Logo({ size = 'large', decorative = false }: LogoProps) {
         >
           Campus G
         </Text>
-        <Svg width={pinWidth} height={pinHeight} viewBox="0 0 24 32">
+        <Svg
+          width={pinWidth}
+          height={pinHeight}
+          viewBox="0 0 24 32"
+          importantForAccessibility="no"
+          accessibilityElementsHidden
+        >
           <Path
             d="M12 0C5.4 0 0 5.4 0 12c0 9 12 20 12 20s12-11 12-20C24 5.4 18.6 0 12 0z"
             fill={colors.text}
@@ -62,6 +75,7 @@ export function Logo({ size = 'large', decorative = false }: LogoProps) {
         </Svg>
       </View>
       <Text
+        importantForAccessibility={hiddenPart}
         allowFontScaling={false}
         style={[
           styles.credit,
