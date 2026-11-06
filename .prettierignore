@@ -4,5 +4,6 @@ dist/
 coverage/
 package-lock.json
 design/
+assets/
 docs/
 *.md
