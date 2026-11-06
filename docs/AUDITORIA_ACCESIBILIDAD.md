@@ -51,7 +51,7 @@ Ejecutada por Sara Santacruz el 2026-11-06, mismo teléfono. (Sara escribió est
 
 | # | Qué hacer | Qué debe pasar | Tema | Resultado real | Estado |
 | --- | --- | --- | --- | --- | --- |
-| C-06c | Con TalkBack, borrar el ID y escribir un solo dígito en "ID de la Universidad" (anuncio con announceForAccessibility, D-27) | Después del eco del dígito, TalkBack lee "ID de la Universidad: Debe tener exactamente 10 dígitos." sin que el foco salga del campo | Claro | — | Pendiente |
+| C-06c | Con TalkBack, borrar el ID y escribir un solo dígito en "ID de la Universidad" (anuncio con announceForAccessibility, D-27) | Después del eco del dígito, TalkBack lee "ID de la Universidad: Debe tener exactamente 10 dígitos." sin que el foco salga del campo | Claro | "1 reemplazó 1" y luego dice "ID de la Universidad: Debe tener exactamente 10 dígitos." | Aprobado |
 
 Los anuncios de StatusBanner y LoadingState usan el mismo mecanismo (useAnnounce) y se verifican en pantallas reales en las Etapas 3 y 5: en el catálogo se montan cuatro mensajes a la vez y sus anuncios se pisarían.
 
