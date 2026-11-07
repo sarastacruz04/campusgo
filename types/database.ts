@@ -28,9 +28,10 @@ export type Database = {
           id: string;
           nombre: string;
           apellido: string;
-          id_universidad: string;
+          // NULL mientras registro_completo = false (migración 0004).
+          id_universidad: string | null;
           email: string;
-          telefono: string;
+          telefono: string | null;
           avatar_path: string | null;
           modo_actual: ModoUsuarioDb;
           registro_completo: boolean;
@@ -40,18 +41,19 @@ export type Database = {
           id: string;
           nombre: string;
           apellido: string;
-          id_universidad: string;
+          id_universidad?: string | null;
           email: string;
-          telefono: string;
+          telefono?: string | null;
           avatar_path?: string | null;
           modo_actual?: ModoUsuarioDb;
           registro_completo?: boolean;
           created_at?: string;
         };
         Update: {
+          id_universidad?: string | null;
           nombre?: string;
           apellido?: string;
-          telefono?: string;
+          telefono?: string | null;
           avatar_path?: string | null;
           modo_actual?: ModoUsuarioDb;
           registro_completo?: boolean;

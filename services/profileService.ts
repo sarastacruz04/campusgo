@@ -3,9 +3,10 @@ import type { ModoUsuario, Profile, TablesUpdate } from '@/types/database';
 import { unwrap } from './errors';
 import { supabase } from './supabase';
 
+// id_universidad se puede completar después si el perfil se creó incompleto (migración 0004).
 export type ProfileUpdate = Pick<
   TablesUpdate<'profiles'>,
-  'nombre' | 'apellido' | 'telefono' | 'avatar_path' | 'registro_completo'
+  'nombre' | 'apellido' | 'id_universidad' | 'telefono' | 'avatar_path' | 'registro_completo'
 >;
 
 export async function getProfile(userId: string): Promise<Profile> {
