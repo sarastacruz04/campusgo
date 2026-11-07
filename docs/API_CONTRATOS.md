@@ -300,6 +300,21 @@ Los thunks (`features/*/thunks.ts`) llaman a los servicios, atrapan el error y l
 | `loadWithCache({ userId, key, isOnline, fetcher })` | Con red pide los datos y guarda una copia. Sin red, o si falla por red, devuelve la copia con `fromCache: true` y `cachedAt`. Sin copia lanza `sin_conexion`. Los otros errores no se tapan. |
 | `saveCache`, `readCache`, `clearUserCache` | Tabla `cache(user_id, clave, datos JSON, cached_at)` en SQLite. Claves: `perfil`, `viajes_busqueda`, `viajes_creados`, `reservas`. |
 
+## Correcciones de la base hechas en la Etapa 3
+
+| Migración | Qué corrige |
+|-----------|-------------|
+| `0003_realtime.sql` | Habilita Realtime en viajes, reservas, notificaciones y mensajes (D-35). |
+| `0004_perfil_incompleto.sql` | Crear un usuario sin datos de perfil fallaba por los CHECK de 10 dígitos; ahora `id_universidad` y `telefono` aceptan NULL mientras el registro está incompleto (D-40). |
+| `0005_rls_sin_recursion.sql` | Recursión infinita (42P17) entre las políticas de `viajes` y `reservas`; ahora usan `tiene_reserva_aceptada` y `es_conductor_del_viaje` (`SECURITY DEFINER`) (D-41). |
+
+Funciones nuevas (no se llaman desde la app; las usan las políticas):
+
+| Función | Devuelve |
+|---------|----------|
+| `es_conductor_del_viaje(p_viaje_id, p_user_id)` | `TRUE` si el usuario es el conductor del viaje. |
+| `tiene_reserva_aceptada(p_viaje_id, p_user_id)` | `TRUE` si el usuario tiene una reserva aceptada en el viaje. |
+
 ## Hallazgos de la Etapa 3 para revisar en la base (Samuel)
 
 Detectados al leer las políticas de la migración 0001. **No se cambiaron en la Etapa 3**, porque son de la Etapa 2; quedan para que Samuel los evalúe:

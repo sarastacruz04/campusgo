@@ -199,6 +199,8 @@ Flujo del tema (Etapa 1): Ajustes llama a `setPreference('theme', 'dark')` → T
 39. **¿Cómo funciona la caché sin conexión?** `loadWithCache`: con red pide los datos y guarda una copia JSON en SQLite con la hora (`cachedAt`); sin red (NetInfo) o si la petición falla por red, devuelve la copia y marca `fromCache`. La pantalla muestra el banner "Sin conexión" con la hora. Sin copia, el error "Sin conexión" ofrece "Reintentar".
 40. **¿Por qué cada suscripción Realtime está en un `useEffect` con return?** Al montar se abre el canal. El `return` del `useEffect` (cleanup) lo cierra con `removeChannel` al desmontar o cuando cambia el usuario. Sin eso quedarían canales abiertos: fuga de memoria y eventos duplicados. La prueba realtime.test comprueba que la función de cierre se llama al desmontar.
 
+**Pregunta extra (recursión en RLS).** *¿Por qué las políticas de `viajes` y `reservas` usan funciones en lugar de una subconsulta?* La política de `viajes` necesita saber si el pasajero tiene una reserva aceptada, y la de `reservas` necesita saber si el usuario es el conductor del viaje. Si cada una consulta la otra tabla, cada consulta dispara la política de la otra y PostgreSQL corta el ciclo con el error 42P17 ("infinite recursion detected in policy"). Las funciones `SECURITY DEFINER` corren como el dueño de las tablas, sin RLS, así que la comprobación no vuelve a disparar ninguna política (migración 0005, D-41). Lo encontramos en el teléfono gracias a que en desarrollo el error muestra su código (D-42).
+
 ### Ejercicios de ajuste en vivo (Etapa 3)
 
 9. **Cambiar el tamaño de página.** En services/tripService.ts cambiar `TRIPS_PAGE_SIZE` de 20 a 10. La búsqueda trae páginas de 10 y `hasMore` se calcula con el nuevo valor sin tocar nada más.
