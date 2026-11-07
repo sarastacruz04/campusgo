@@ -1,18 +1,26 @@
 // =============================================================================
-// types/database.ts — tipos de la base de datos CampusGo
+// types/database.ts — tipos de la base de datos de CampusGo
 //
-// GENERADO CON: supabase gen types typescript --project-id <TU_PROJECT_ID>
+// Escrito a mano con la misma forma que produce
+//   npx supabase gen types typescript --project-id <PROJECT_ID> > types/database.ts
+// a partir de supabase/migrations/0001_schema_inicial.sql (D-28 y D-32).
 //
-// ⚠ Este archivo es un placeholder tipado a mano a partir del esquema de la
-//   migración 0001. Cuando tengas el proyecto de Supabase creado, reemplázalo
-//   ejecutando el comando de arriba y borrando este aviso.
-//
-// NO edites este archivo a mano en producción: vuelve a generarlo.
+// Diferencias a propósito con el archivo generado:
+// - Las columnas de estado y modo usan uniones de texto ('abierto' | 'lleno' | …)
+//   en lugar de `string`, porque en la base son TEXT con CHECK y así TypeScript
+//   detecta un estado mal escrito. Si se regenera el archivo, hay que volver a
+//   poner estas uniones (o convertir esas columnas en enums de Postgres).
+// - `Relationships` sale de las llaves foráneas de la migración; supabase-js las
+//   usa para tipar las consultas con joins (por ejemplo, viaje + sector).
 // =============================================================================
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
-export interface Database {
+type ModoUsuarioDb = 'pasajero' | 'conductor';
+type EstadoViajeDb = 'abierto' | 'lleno' | 'en_curso' | 'finalizado' | 'cancelado';
+type EstadoReservaDb = 'pendiente' | 'aceptada' | 'rechazada' | 'cancelada';
+
+export type Database = {
   public: {
     Tables: {
       profiles: {
@@ -24,7 +32,7 @@ export interface Database {
           email: string;
           telefono: string;
           avatar_path: string | null;
-          modo_actual: 'pasajero' | 'conductor';
+          modo_actual: ModoUsuarioDb;
           registro_completo: boolean;
           created_at: string;
         };
@@ -36,7 +44,7 @@ export interface Database {
           email: string;
           telefono: string;
           avatar_path?: string | null;
-          modo_actual?: 'pasajero' | 'conductor';
+          modo_actual?: ModoUsuarioDb;
           registro_completo?: boolean;
           created_at?: string;
         };
@@ -45,22 +53,17 @@ export interface Database {
           apellido?: string;
           telefono?: string;
           avatar_path?: string | null;
-          modo_actual?: 'pasajero' | 'conductor';
+          modo_actual?: ModoUsuarioDb;
           registro_completo?: boolean;
         };
+        Relationships: [];
       };
 
       sectores: {
-        Row: {
-          id: number;
-          nombre: string;
-        };
-        Insert: {
-          nombre: string;
-        };
-        Update: {
-          nombre?: string;
-        };
+        Row: { id: number; nombre: string };
+        Insert: { nombre: string };
+        Update: { nombre?: string };
+        Relationships: [];
       };
 
       vehiculos: {
@@ -94,6 +97,15 @@ export interface Database {
           foto_path?: string | null;
           soat_path?: string | null;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'vehiculos_propietario_id_fkey';
+            columns: ['propietario_id'];
+            isOneToOne: true;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
       };
 
       viajes: {
@@ -112,7 +124,7 @@ export interface Database {
           valor_por_cupo: number;
           cupos_totales: number;
           cupos_disponibles: number;
-          estado: 'abierto' | 'lleno' | 'en_curso' | 'finalizado' | 'cancelado';
+          estado: EstadoViajeDb;
           created_at: string;
         };
         Insert: {
@@ -130,7 +142,7 @@ export interface Database {
           valor_por_cupo?: number;
           cupos_totales: number;
           cupos_disponibles: number;
-          estado?: 'abierto' | 'lleno' | 'en_curso' | 'finalizado' | 'cancelado';
+          estado?: EstadoViajeDb;
           created_at?: string;
         };
         Update: {
@@ -145,8 +157,31 @@ export interface Database {
           valor_por_cupo?: number;
           cupos_totales?: number;
           cupos_disponibles?: number;
-          estado?: 'abierto' | 'lleno' | 'en_curso' | 'finalizado' | 'cancelado';
+          estado?: EstadoViajeDb;
         };
+        Relationships: [
+          {
+            foreignKeyName: 'viajes_conductor_id_fkey';
+            columns: ['conductor_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'viajes_vehiculo_id_fkey';
+            columns: ['vehiculo_id'];
+            isOneToOne: false;
+            referencedRelation: 'vehiculos';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'viajes_sector_id_fkey';
+            columns: ['sector_id'];
+            isOneToOne: false;
+            referencedRelation: 'sectores';
+            referencedColumns: ['id'];
+          },
+        ];
       };
 
       reservas: {
@@ -157,7 +192,7 @@ export interface Database {
           punto_recogida_texto: string;
           punto_lat: number;
           punto_lng: number;
-          estado: 'pendiente' | 'aceptada' | 'rechazada' | 'cancelada';
+          estado: EstadoReservaDb;
           created_at: string;
         };
         Insert: {
@@ -167,12 +202,26 @@ export interface Database {
           punto_recogida_texto: string;
           punto_lat: number;
           punto_lng: number;
-          estado?: 'pendiente' | 'aceptada' | 'rechazada' | 'cancelada';
+          estado?: EstadoReservaDb;
           created_at?: string;
         };
-        Update: {
-          estado?: 'pendiente' | 'aceptada' | 'rechazada' | 'cancelada';
-        };
+        Update: { estado?: EstadoReservaDb };
+        Relationships: [
+          {
+            foreignKeyName: 'reservas_viaje_id_fkey';
+            columns: ['viaje_id'];
+            isOneToOne: false;
+            referencedRelation: 'viajes';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'reservas_pasajero_id_fkey';
+            columns: ['pasajero_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
       };
 
       calificaciones: {
@@ -194,9 +243,30 @@ export interface Database {
           comentario?: string | null;
           created_at?: string;
         };
-        Update: {
-          comentario?: string | null;
-        };
+        Update: { comentario?: string | null };
+        Relationships: [
+          {
+            foreignKeyName: 'calificaciones_viaje_id_fkey';
+            columns: ['viaje_id'];
+            isOneToOne: false;
+            referencedRelation: 'viajes';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'calificaciones_autor_id_fkey';
+            columns: ['autor_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'calificaciones_destinatario_id_fkey';
+            columns: ['destinatario_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
       };
 
       notificaciones: {
@@ -220,9 +290,16 @@ export interface Database {
           leida?: boolean;
           created_at?: string;
         };
-        Update: {
-          leida?: boolean;
-        };
+        Update: { leida?: boolean };
+        Relationships: [
+          {
+            foreignKeyName: 'notificaciones_usuario_id_fkey';
+            columns: ['usuario_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
       };
 
       mensajes: {
@@ -240,7 +317,23 @@ export interface Database {
           contenido: string;
           created_at?: string;
         };
-        Update: never;
+        Update: Record<string, never>;
+        Relationships: [
+          {
+            foreignKeyName: 'mensajes_viaje_id_fkey';
+            columns: ['viaje_id'];
+            isOneToOne: false;
+            referencedRelation: 'viajes';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'mensajes_autor_id_fkey';
+            columns: ['autor_id'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
       };
     };
 
@@ -251,13 +344,14 @@ export interface Database {
           promedio: number;
           total: number;
         };
+        Relationships: [];
       };
     };
 
     Functions: {
       cambiar_modo: {
         Args: { p_nuevo_modo: string };
-        Returns: void;
+        Returns: undefined;
       };
       crear_reserva: {
         Args: {
@@ -268,54 +362,32 @@ export interface Database {
         };
         Returns: string;
       };
-      aceptar_reserva: {
-        Args: { p_reserva_id: string };
-        Returns: void;
-      };
-      rechazar_reserva: {
-        Args: { p_reserva_id: string };
-        Returns: void;
-      };
-      cancelar_reserva: {
-        Args: { p_reserva_id: string };
-        Returns: void;
-      };
-      iniciar_viaje: {
-        Args: { p_viaje_id: string };
-        Returns: void;
-      };
-      finalizar_viaje: {
-        Args: { p_viaje_id: string };
-        Returns: void;
-      };
-      cancelar_viaje: {
-        Args: { p_viaje_id: string };
-        Returns: void;
-      };
+      aceptar_reserva: { Args: { p_reserva_id: string }; Returns: undefined };
+      rechazar_reserva: { Args: { p_reserva_id: string }; Returns: undefined };
+      cancelar_reserva: { Args: { p_reserva_id: string }; Returns: undefined };
+      iniciar_viaje: { Args: { p_viaje_id: string }; Returns: undefined };
+      finalizar_viaje: { Args: { p_viaje_id: string }; Returns: undefined };
+      cancelar_viaje: { Args: { p_viaje_id: string }; Returns: undefined };
       es_participante_del_viaje: {
         Args: { p_viaje_id: string; p_user_id: string };
         Returns: boolean;
       };
     };
 
-    Enums: {
-      modo_usuario: 'pasajero' | 'conductor';
-      estado_viaje: 'abierto' | 'lleno' | 'en_curso' | 'finalizado' | 'cancelado';
-      estado_reserva: 'pendiente' | 'aceptada' | 'rechazada' | 'cancelada';
-    };
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
-}
+};
 
-// ─── Tipos de conveniencia derivados ────────────────────────────────────────
+// ─── Tipos de conveniencia ──────────────────────────────────────────────────
 
-export type Tables<T extends keyof Database['public']['Tables']> =
-  Database['public']['Tables'][T]['Row'];
+type PublicSchema = Database['public'];
 
-export type TablesInsert<T extends keyof Database['public']['Tables']> =
-  Database['public']['Tables'][T]['Insert'];
-
-export type TablesUpdate<T extends keyof Database['public']['Tables']> =
-  Database['public']['Tables'][T]['Update'];
+export type Tables<T extends keyof PublicSchema['Tables']> = PublicSchema['Tables'][T]['Row'];
+export type TablesInsert<T extends keyof PublicSchema['Tables']> =
+  PublicSchema['Tables'][T]['Insert'];
+export type TablesUpdate<T extends keyof PublicSchema['Tables']> =
+  PublicSchema['Tables'][T]['Update'];
 
 export type Profile = Tables<'profiles'>;
 export type Sector = Tables<'sectores'>;
@@ -325,7 +397,8 @@ export type Reserva = Tables<'reservas'>;
 export type Calificacion = Tables<'calificaciones'>;
 export type Notificacion = Tables<'notificaciones'>;
 export type Mensaje = Tables<'mensajes'>;
+export type PromedioCalificacion = PublicSchema['Views']['promedio_calificaciones']['Row'];
 
-export type EstadoViaje = Viaje['estado'];
-export type EstadoReserva = Reserva['estado'];
-export type ModoUsuario = Profile['modo_actual'];
+export type EstadoViaje = EstadoViajeDb;
+export type EstadoReserva = EstadoReservaDb;
+export type ModoUsuario = ModoUsuarioDb;
