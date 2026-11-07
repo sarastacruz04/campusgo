@@ -41,7 +41,14 @@ describe('toAppError', () => {
 
   it('deja pasar un AppError y usa "desconocido" para lo demás', () => {
     expect(toAppError(ERRORS.sinSesion)).toBe(ERRORS.sinSesion);
-    expect(toAppError({ code: 'XX000', message: 'raro' })).toEqual(ERRORS.desconocido);
+    // En desarrollo (__DEV__, como en Jest) el mensaje incluye el código original.
+    expect(toAppError({ code: '42P17', message: 'infinite recursion' })).toEqual({
+      code: 'desconocido',
+      message: 'Ocurrió un error inesperado. Intenta de nuevo. (código 42P17)',
+    });
+    // Un AppError "desconocido" ya traducido pasa tal cual (no se agrega el código dos veces).
+    const once = toAppError({ code: 'XX000', message: 'raro' });
+    expect(toAppError(once)).toBe(once);
     expect(toAppError('texto')).toEqual(ERRORS.desconocido);
     expect(isAppError(new Error('x'))).toBe(false);
   });

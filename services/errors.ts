@@ -134,6 +134,18 @@ export function toAppError(error: unknown): AppError {
   // Un AppError que ya estaba traducido (por ejemplo, relanzado por un servicio).
   if (isAppError(error)) return error;
 
+  return unknownError(code);
+}
+
+/**
+ * Error no reconocido. En desarrollo el mensaje incluye el código original para
+ * poder diagnosticarlo desde el teléfono (así se encontró el 42P17 de RLS, D-42).
+ * En producción la persona solo ve el mensaje genérico.
+ */
+function unknownError(code: unknown): AppError {
+  if (__DEV__ && typeof code === 'string' && code.length > 0) {
+    return { ...ERRORS.desconocido, message: `${ERRORS.desconocido.message} (código ${code})` };
+  }
   return ERRORS.desconocido;
 }
 

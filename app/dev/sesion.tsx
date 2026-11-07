@@ -129,6 +129,13 @@ function SessionTest() {
               onRetry={() => dispatch(searchTrips({ reset: true }))}
             />
           ) : null}
+          {reservationsState.error ? (
+            <StatusBanner
+              tone="error"
+              message={reservationsState.error.message}
+              onRetry={() => dispatch(fetchMyReservations())}
+            />
+          ) : null}
           <Button label="Recargar datos" onPress={loadAll} />
           <Button
             ref={signOutButtonRef}
