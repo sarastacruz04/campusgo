@@ -129,8 +129,8 @@ Flujo del tema (Etapa 1): Ajustes llama a `setPreference('theme', 'dark')` → T
 25. **¿Cómo funciona el cierre automático de cupos?** (R6, `aceptar_reserva`)
     La función bloquea la fila del viaje con `FOR UPDATE` para evitar condición de carrera (dos conductores aceptando al mismo tiempo). Luego decrementa `cupos_disponibles` y, en el mismo `UPDATE`, si el nuevo valor es 0, cambia `estado` a `'lleno'`. El viaje lleno ya no aparece en la búsqueda de pasajeros (la política RLS solo muestra viajes `'abierto'`).
 
-26. **¿Por qué el trigger `handle_new_user` crea el perfil con datos vacíos si `raw_user_meta_data` no llega?**
-    Usa `COALESCE(..., '')` para nunca dejar un `NULL` en columnas `NOT NULL`. La app siempre envía los datos al registro, pero el trigger no debe romperse si alguien crea el usuario desde el panel de Supabase; en ese caso el perfil queda con texto vacío y `registro_completo = FALSE`, y la guarda de sesión de la app dirigirá al usuario al paso pendiente.
+26. **¿Qué hace el trigger `handle_new_user` si `raw_user_meta_data` no trae los datos del perfil?** (corregida en la Etapa 3, D-40)
+    La primera versión ponía `''` en `id_universidad` y `telefono`. Los CHECK de 10 dígitos rechazaban ese texto vacío y Supabase cancelaba la creación del usuario ("Database error creating new user" al crearlo desde el panel). La migración 0004 permite `NULL` en esas dos columnas y el trigger usa `NULLIF(…, '')`. En PostgreSQL un CHECK no rechaza `NULL`, así que el usuario se crea con el perfil incompleto (`registro_completo = FALSE`) y la app lo lleva al paso pendiente (Etapa 4). Cualquier valor que sí llegue debe cumplir los 10 dígitos.
 
 27. **¿Qué pasa si dos pasajeros reservan el último cupo al mismo tiempo?** (condición de carrera)
     `crear_reserva` hace un `SELECT ... FOR UPDATE` sobre la fila del viaje antes de verificar `cupos_disponibles`. PostgreSQL serializa las dos transacciones: la segunda espera a que la primera termine, y cuando llega a la verificación ya ve `cupos_disponibles = 0` y lanza `sin_cupos`.

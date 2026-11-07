@@ -383,6 +383,7 @@ Vive en `supabase/`. Los detalles están en [API_CONTRATOS.md](API_CONTRATOS.md)
 - **RLS:** cada tabla tiene reglas de quién lee y quién escribe. Por ejemplo, un pasajero solo ve viajes abiertos con salida futura o en los que tiene una reserva aceptada.
 - **Storage:** buckets privados `avatars`, `vehiculos` y `soat`, con la ruta `{id del usuario}/archivo`.
 - **Migración 0003 (Sara, Etapa 3):** activa Realtime en viajes, reservas, notificaciones y mensajes.
+- **Migración 0004 (Sara, Etapa 3):** permite crear un usuario sin datos de perfil (por ejemplo, desde el panel). `id_universidad` y `telefono` quedan en NULL con `registro_completo = false`. Antes el trigger ponía texto vacío, los CHECK de 10 dígitos lo rechazaban y Supabase no creaba el usuario ("Database error creating new user"). Ver D-40.
 
 ---
 

@@ -13,7 +13,9 @@ Convención: los errores devueltos por las RPC son objetos `{ code: string; mess
 | Operación | Quién | Columnas de entrada | Resultado | Errores |
 |-----------|-------|---------------------|-----------|---------|
 | SELECT    | Cualquier autenticado | — | Todas las columnas de la fila propia o ajena | — |
-| UPDATE    | El dueño (`id = auth.uid()`) | `nombre`, `apellido`, `telefono`, `avatar_path`, `registro_completo` | Fila actualizada | `RLS_violation` si intenta editar ajeno |
+| UPDATE    | El dueño (`id = auth.uid()`) | `nombre`, `apellido`, `id_universidad`, `telefono`, `avatar_path`, `registro_completo` | Fila actualizada | `RLS_violation` si intenta editar ajeno |
+
+Desde la migración 0004, `id_universidad` y `telefono` pueden ser `NULL` mientras `registro_completo = false` (perfil creado sin datos, por ejemplo desde el panel de Supabase). Un valor presente debe tener 10 dígitos (D-40).
 | INSERT    | Prohibido por RLS | — | — | `RLS_violation` |
 
 ### `sectores`
