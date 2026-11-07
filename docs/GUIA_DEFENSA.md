@@ -104,3 +104,52 @@ Flujo del tema (Etapa 1): Ajustes llama a `setPreference('theme', 'dark')` → T
 | --- | --- | --- |
 | Sara | Configuración (E0) y todo el sistema de diseño (E1): theme/, hooks/, components/ui/, lib/contrast.ts, scripts/check-contrast.ts, app/settings/accessibility.tsx, app/dev/catalogo.tsx | Se completa desde E2 |
 | Samuel | Se completa desde E2 | E0: package.json, tsconfig.json, eslint.config.js, app.json. E1: theme/ThemeProvider.tsx, components/ui/Button.tsx, TextField.tsx, ConfirmDialog.tsx, hooks/useAnnounce.ts y useScreenFocus.ts, scripts/check-contrast.ts |
+
+---
+
+## Base de datos (Etapa 2 — Samuel)
+
+### Mapa de archivos nuevos
+
+| Ruta | Qué hace | Autor (etapa) |
+| --- | --- | --- |
+| supabase/migrations/0001_schema_inicial.sql | Tablas, índices, vista, funciones auxiliares, triggers y políticas RLS del esquema completo. | Samuel (E2) |
+| supabase/migrations/0002_storage_buckets.sql | Buckets privados (avatars, vehiculos, soat) con sus políticas de Storage. | Samuel (E2) |
+| supabase/seed.sql | 11 sectores geográficos para la semilla de producción. | Samuel (E2) |
+| supabase/dev_seed_viajes.sql | 200 viajes ficticios para pruebas de rendimiento; solo desarrollo. | Samuel (E2) |
+| supabase/tests/rls.sql | Protocolo de pruebas SQL de políticas RLS (bloques comentados con ESPERADO). | Samuel (E2) |
+| types/database.ts | Tipos TypeScript del esquema (placeholder a mano; se reemplaza con `supabase gen types typescript`). | Samuel (E2) |
+| docs/API_CONTRATOS.md | Contratos de cada tabla expuesta y de las 7 RPC: entrada, salida y errores. | Samuel (E2) |
+
+### Preguntas probables — Base de datos
+
+24. **¿Por qué las funciones RPC tienen `SECURITY DEFINER` y `SET search_path = public`?**
+    Con `SECURITY DEFINER` la función corre con los permisos del dueño (superusuario), no del llamador, lo que permite hacer `UPDATE` atómico sobre filas que el RLS del usuario no permitiría directamente. `SET search_path = public` evita que un atacante cree un esquema propio con tablas de igual nombre y lo inyecte en la función.
+
+25. **¿Cómo funciona el cierre automático de cupos?** (R6, `aceptar_reserva`)
+    La función bloquea la fila del viaje con `FOR UPDATE` para evitar condición de carrera (dos conductores aceptando al mismo tiempo). Luego decrementa `cupos_disponibles` y, en el mismo `UPDATE`, si el nuevo valor es 0, cambia `estado` a `'lleno'`. El viaje lleno ya no aparece en la búsqueda de pasajeros (la política RLS solo muestra viajes `'abierto'`).
+
+26. **¿Por qué el trigger `handle_new_user` crea el perfil con datos vacíos si `raw_user_meta_data` no llega?**
+    Usa `COALESCE(..., '')` para nunca dejar un `NULL` en columnas `NOT NULL`. La app siempre envía los datos al registro, pero el trigger no debe romperse si alguien crea el usuario desde el panel de Supabase; en ese caso el perfil queda con texto vacío y `registro_completo = FALSE`, y la guarda de sesión de la app dirigirá al usuario al paso pendiente.
+
+27. **¿Qué pasa si dos pasajeros reservan el último cupo al mismo tiempo?** (condición de carrera)
+    `crear_reserva` hace un `SELECT ... FOR UPDATE` sobre la fila del viaje antes de verificar `cupos_disponibles`. PostgreSQL serializa las dos transacciones: la segunda espera a que la primera termine, y cuando llega a la verificación ya ve `cupos_disponibles = 0` y lanza `sin_cupos`.
+
+28. **¿Qué significa `UNIQUE (viaje_id, pasajero_id)` en la tabla `reservas`?**
+    Garantiza en la base de datos que un pasajero no puede tener más de una reserva en el mismo viaje, aunque la RPC `crear_reserva` ya lo comprueba a nivel de aplicación (doble seguro, R5).
+
+29. **¿Por qué la vista `promedio_calificaciones` y no calcular el promedio en la app?**
+    PostgreSQL ejecuta el `AVG` en la base de datos y devuelve un solo número por usuario. Si lo calculáramos en la app, habría que traer todas las calificaciones de cada usuario solo para promediarlas.
+
+30. **¿Qué hace el trigger `fn_notificar_cambio_viaje` al cancelar un viaje?**
+    Actualiza las reservas `pendientes` y `aceptadas` a `cancelada` (R8, D-30) y luego itera sobre los pasajeros con reserva aceptada para insertar una notificación a cada uno. Las inserciones van por `crear_notificacion`, que también tiene `SECURITY DEFINER`.
+
+### Ejercicios de ajuste en vivo (Etapa 2)
+
+6. **Cambiar el límite de un comentario.** En la migración, `char_length(comentario) <= 280`. Cambiar a `<= 140` y volver a aplicar la migración en un entorno de prueba para ver el `CHECK` actualizado.
+7. **Agregar un índice.** Proponer `CREATE INDEX IF NOT EXISTS idx_viajes_conductor ON public.viajes (conductor_id)` y explicar cuándo lo usaría el planificador de consultas (cuando el conductor lista sus propios viajes).
+8. **Leer una política RLS.** Abrir `supabase/migrations/0001_schema_inicial.sql`, líneas de las políticas de `mensajes`, y explicar por qué `es_participante_del_viaje` evita repetir la misma subselect en cada política.
+
+| Persona | Mis archivos | Archivos del otro que debo dominar |
+| --- | --- | --- |
+| Samuel | supabase/migrations/, supabase/seed.sql, supabase/dev_seed_viajes.sql, supabase/tests/rls.sql, types/database.ts, docs/API_CONTRATOS.md | E0: package.json, tsconfig.json, app.json. E1: theme/ThemeProvider.tsx, components/ui/Button.tsx, TextField.tsx, ConfirmDialog.tsx, hooks/useAnnounce.ts, scripts/check-contrast.ts |
