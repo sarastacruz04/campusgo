@@ -201,7 +201,108 @@ El conductor cancela el viaje. El trigger cancela las reservas y notifica a los 
 
 ---
 
-## Servicios del cliente (se completa en la Etapa 3)
+## Servicios del cliente (Etapa 3)
 
-Los servicios en `services/` encapsulan las llamadas a Supabase y exponen funciones tipadas.
-Cada servicio se documentará aquí con su firma, parámetros, retorno y errores en la Etapa 3.
+Los servicios en `services/` son las únicas funciones que hablan con Supabase. No usan React. Cada una devuelve datos tipados (`types/database.ts` y `types/domain.ts`) o **lanza un `AppError`** `{ code, message }` con el mensaje en español.
+
+Los thunks (`features/*/thunks.ts`) llaman a los servicios, atrapan el error y lo entregan con `rejectWithValue`. Las pantallas nunca llaman a los servicios directamente.
+
+### Errores (`services/errors.ts`)
+
+`toAppError(error)` traduce cualquier error. Si aparece un error nuevo, se agrega allí.
+
+| Origen | Cómo llega | `code` del AppError |
+|--------|-----------|---------------------|
+| RPC con `RAISE EXCEPTION 'x'` | `{ code: 'P0001', message: 'x' }` | `x` (por ejemplo `reserva_duplicada`), con el mensaje de la tabla de RPC de arriba |
+| Supabase Auth | `AuthApiError.code` | `invalid_credentials`, `email_not_confirmed`, `user_already_exists`, `email_exists`, `weak_password`, `otp_expired`, `over_email_send_rate_limit`, `over_request_rate_limit` |
+| CHECK de correo en el trigger `handle_new_user` (R1) | `"Database error saving new user"` | `correo_no_institucional` |
+| PostgreSQL y PostgREST | `23505`, `23514`, `23503`, `42501`, `PGRST116` | `duplicado`, `datos_invalidos`, `referencia_invalida`, `sin_permiso`, `no_encontrado` |
+| Sin red | `"Network request failed"` o `AuthRetryableFetchError` | `sin_conexion` |
+| Propios de la app | — | `sin_sesion`, `mensaje_invalido`, `desconocido` |
+
+### `authService`
+
+| Función | Entrada | Salida | Errores principales |
+|---------|---------|--------|---------------------|
+| `signIn(email, password)` | correo y contraseña | `{ userId, email }` | `invalid_credentials`, `email_not_confirmed`, `sin_conexion` |
+| `signUp(input)` | `{ email, password, nombre, apellido, idUniversidad, telefono }`; los datos van en `options.data` con las claves que lee `handle_new_user` | `void` (Supabase envía el código de 6 dígitos) | `correo_no_institucional` (se revisa en la app y en la base), `user_already_exists`, `weak_password` |
+| `verifySignUpCode(email, token)` | correo y código de 6 dígitos (`verifyOtp`, tipo `email`) | `{ userId, email }` | `otp_expired` |
+| `resendSignUpCode(email)` | correo | `void` | `over_email_send_rate_limit` |
+| `signOut()` | — | `void`; borra la sesión cifrada y su llave | sin red no bloquea el cierre |
+| `getCurrentUser()` | — | `{ userId, email }` o `null` (lee la sesión guardada, sin red) | — |
+| `onSessionChange(callback)` | función | función para dejar de escuchar | — |
+
+### `profileService`
+
+| Función | Entrada | Salida | Errores |
+|---------|---------|--------|---------|
+| `getProfile(userId)` | id | `Profile` | `no_encontrado` |
+| `updateProfile(userId, changes)` | `nombre`, `apellido`, `telefono`, `avatar_path`, `registro_completo` | `Profile` | `datos_invalidos` (teléfono que no tiene 10 dígitos) |
+| `changeMode(modo)` | `'pasajero'` o `'conductor'` (RPC `cambiar_modo`) | `void` | `sin_vehiculo`, `modo_invalido` |
+
+### `vehicleService`
+
+| Función | Entrada | Salida | Errores |
+|---------|---------|--------|---------|
+| `getMyVehicle(userId)` | id | `Vehiculo` o `null` | — |
+| `createVehicle(input)` | fila de `vehiculos`; la placa se pasa a mayúsculas | `Vehiculo` | `duplicado` (placa o segundo carro), `datos_invalidos` |
+| `updateVehicle(id, changes)` | cambios | `Vehiculo` | `sin_permiso` |
+| `deleteVehicle(id)` | id | `void` | `sin_permiso` |
+
+### `tripService`
+
+| Función | Entrada | Salida | Errores |
+|---------|---------|--------|---------|
+| `listSectores()` | — | `Sector[]` ordenados por nombre | — |
+| `searchOpenTrips(params)` | `{ sectorId, minCupos, offset, excludeConductorId }` | `TripListItem[]` (páginas de 20, `estado = 'abierto'` y salida futura, de la más próxima a la más lejana) | `sin_conexion` |
+| `listMyCreatedTrips(conductorId)` | id | `TripListItem[]` | — |
+| `getTrip(id)` | id | `TripListItem` | `no_encontrado` |
+| `createTrip(input)` | `CreateTripInput`; `cupos_disponibles` empieza en `cupos_totales` | `TripListItem` | `sin_permiso` (RLS: no es conductor o no tiene carro), `datos_invalidos` |
+| `startTrip(id)` / `finishTrip(id)` / `cancelTrip(id)` | id (RPC del ciclo del viaje) | `void` | los de las RPC `iniciar_viaje`, `finalizar_viaje` y `cancelar_viaje` |
+| `subscribeToTripChanges(onChange)` | función | función que cierra el canal Realtime | — |
+
+`TripListItem` = fila de `viajes` + `sector_nombre` + `conductor_nombre`. Se obtienen en una sola consulta: `select('*, sector:sectores(nombre), conductor:profiles(nombre, apellido)')`.
+
+### `reservationService`
+
+| Función | Entrada | Salida | Errores |
+|---------|---------|--------|---------|
+| `createReservation(input)` | `{ viajeId, puntoRecogidaTexto, puntoLat, puntoLng }` (RPC `crear_reserva`) | `ReservationItem` | los de `crear_reserva` |
+| `getReservation(id)` | id | `ReservationItem` | `no_encontrado` |
+| `listMyReservations(pasajeroId)` | id | `ReservationItem[]`, las más recientes primero | — |
+| `listRequestsForMyTrips(conductorId)` | id | `ReservationItem[]` de sus viajes | — |
+| `acceptReservation` / `rejectReservation` / `cancelReservation` | id de la reserva | `void` | los de las RPC |
+| `subscribeToReservationChanges(onChange)` | función | función que cierra el canal | — |
+
+`ReservationItem` = fila de `reservas` + `viaje` (`TripListItem` o `null` si RLS ya no deja verlo) + `pasajero_nombre`.
+
+### Otros servicios
+
+| Servicio | Funciones |
+|----------|-----------|
+| `storageService` | `uploadImage({ bucket, userId, fileName, uri, contentType })` devuelve la ruta `{userId}/{fileName}`; `getSignedUrl(bucket, path, segundos)`; `removeFile(bucket, path)`. Buckets: `avatars`, `vehiculos`, `soat`. |
+| `ratingService` | `submitRating({ viajeId, autorId, destinatarioId, estrellas, comentario })`; `getAverages(userIds)` sobre la vista `promedio_calificaciones`. |
+| `notificationService` | `listNotifications(userId)` (50 más recientes); `markAsRead(id)`; `markAllAsRead(userId)`; `subscribeToNotifications(userId, onInsert)`. |
+| `chatService` | `listMessages(viajeId)`; `sendMessage(viajeId, autorId, contenido)` (máximo 500 caracteres); `subscribeToMessages(viajeId, onInsert)`. |
+
+### Realtime
+
+- La migración `0003_realtime.sql` agrega `viajes`, `reservas`, `notificaciones` y `mensajes` a la publicación `supabase_realtime`. Sin ella, Realtime no envía nada.
+- Realtime respeta RLS: cada usuario solo recibe cambios de filas que puede leer.
+- **Limitación conocida:** cuando un viaje pasa a `lleno`, un pasajero sin reserva deja de poder verlo por RLS, así que Realtime no le envía ese último cambio. La app lo saca de la búsqueda cuando ve `cupos_disponibles = 0`, pero ese evento tampoco llega. La pantalla de búsqueda (Etapa 5) debe volver a consultar al recibir el foco o al deslizar para actualizar. Así lo confirma `searchOpenTrips`, que solo trae viajes abiertos.
+
+### Caché sin conexión (`db/`)
+
+| Función | Qué hace |
+|---------|----------|
+| `loadWithCache({ userId, key, isOnline, fetcher })` | Con red pide los datos y guarda una copia. Sin red, o si falla por red, devuelve la copia con `fromCache: true` y `cachedAt`. Sin copia lanza `sin_conexion`. Los otros errores no se tapan. |
+| `saveCache`, `readCache`, `clearUserCache` | Tabla `cache(user_id, clave, datos JSON, cached_at)` en SQLite. Claves: `perfil`, `viajes_busqueda`, `viajes_creados`, `reservas`. |
+
+## Hallazgos de la Etapa 3 para revisar en la base (Samuel)
+
+Detectados al leer las políticas de la migración 0001. **No se cambiaron en la Etapa 3**, porque son de la Etapa 2; quedan para que Samuel los evalúe:
+
+1. **La política de UPDATE de `reservas` deja que el pasajero cambie el `estado` directamente.** Su `USING` acepta al pasajero y no tiene `WITH CHECK`. Con una llamada directa a PostgREST un pasajero podría poner su reserva en `'aceptada'` sin pasar por `aceptar_reserva`, y por lo tanto sin descontar cupo. Como las RPC son `SECURITY DEFINER` y no necesitan esa política, se podría quitar el UPDATE para usuarios o limitarlo con `WITH CHECK`.
+2. **La política de UPDATE de `profiles` no limita las columnas.** El dueño podría cambiar `modo_actual` a `'conductor'` sin carro, saltándose `cambiar_modo` (R3). Una opción es un trigger que impida cambiar `modo_actual` fuera de la RPC, o `REVOKE UPDATE (modo_actual)` para el rol `authenticated`.
+3. **La política de UPDATE de `viajes` deja al conductor editar `cupos_disponibles` y `estado` directamente.** Esto no pasa por las RPC del ciclo del viaje.
+4. **`types/database.ts` está escrito a mano.** Se recomienda regenerarlo con `npx supabase gen types typescript --project-id <id>` y conservar las uniones de estado (D-32).

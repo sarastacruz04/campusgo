@@ -153,3 +153,60 @@ Flujo del tema (Etapa 1): Ajustes llama a `setPreference('theme', 'dark')` → T
 | Persona | Mis archivos | Archivos del otro que debo dominar |
 | --- | --- | --- |
 | Samuel | supabase/migrations/, supabase/seed.sql, supabase/dev_seed_viajes.sql, supabase/tests/rls.sql, types/database.ts, docs/API_CONTRATOS.md | E0: package.json, tsconfig.json, app.json. E1: theme/ThemeProvider.tsx, components/ui/Button.tsx, TextField.tsx, ConfirmDialog.tsx, hooks/useAnnounce.ts, scripts/check-contrast.ts |
+
+---
+
+## Capa de cliente (Etapa 3 — Sara)
+
+### Mapa de archivos nuevos
+
+| Ruta | Qué hace | Autor (etapa) |
+| --- | --- | --- |
+| services/supabase.ts | Cliente único de Supabase con la sesión cifrada y el refresco de token ligado a AppState. | Sara (E3) |
+| services/secureSessionStorage.ts | Guarda la sesión: llave AES en SecureStore y sesión cifrada en AsyncStorage (D-33). | Sara (E3) |
+| services/errors.ts | `AppError`, `toAppError` (traduce todos los errores al español) y `unwrap`. | Sara (E3) |
+| services/*Service.ts | Un servicio por dominio (auth, profile, vehicle, trip, reservation, storage, rating, notification, chat). Solo hablan con Supabase. | Sara (E3) |
+| store/store.ts, hooks.ts, createAppAsyncThunk.ts, types.ts | Store de Redux Toolkit, hooks tipados, thunk tipado y tipos de estado de carga. | Sara (E3) |
+| features/*/slice.ts, thunks.ts, selectors.ts | Estado, acciones asíncronas y selectores memoizados de los 9 dominios. | Sara (E3) |
+| db/database.ts y db/cache.ts | SQLite: migración por `user_version` y caché sin conexión con `loadWithCache`. | Sara (E3) |
+| hooks/useAuthSession.ts, useConnectivity.ts, useRealtime.ts | Sesión, conexión y suscripciones Realtime, cada una con su cleanup. | Sara (E3) |
+| components/ConnectionBanner.tsx | Banner "Sin conexión: mostrando datos guardados". | Sara (E3) |
+| app/dev/sesion.tsx | Pantalla temporal (solo desarrollo) para probar la Etapa 3 (D-38). | Sara (E3) |
+| supabase/migrations/0003_realtime.sql | Habilita Realtime en viajes, reservas, notificaciones y mensajes (D-35). | Sara (E3) |
+| types/domain.ts | Tipos de la app sobre las filas: `TripListItem`, `ReservationItem`, `CreateTripInput`. | Sara (E3) |
+
+### Flujo de datos paso a paso (ejemplo: reservar un viaje)
+
+1. **Pantalla:** `dispatch(createReservation({ viajeId, puntoRecogidaTexto, puntoLat, puntoLng }))`.
+2. **Thunk** (features/reservations/thunks.ts): `createAppAsyncThunk` despacha `pending`. El reducer pone `mutation.status = 'loading'` y el botón muestra carga.
+3. **Servicio** (services/reservationService.ts): `supabase.rpc('crear_reserva', …)` y luego `getReservation(id)` para traer la reserva con su viaje.
+4. **Supabase:** la RPC valida R5 con bloqueo de fila y el trigger crea la notificación para el conductor.
+5. **Reducer:** si salió bien, `fulfilled` hace `upsertOne` y agrega el id a `myIds`. Si falló, el thunk atrapó el error, `toAppError` lo tradujo (por ejemplo, "Ya tienes una reserva en este viaje.") y `rejectWithValue` lo deja en `mutation.error`.
+6. **Selector:** `selectMyReservations` y `makeSelectMyReservationsByEstado('pendiente')` recalculan solo si cambiaron las reservas.
+7. **Pantalla:** se vuelve a dibujar con la reserva o con el error y "Reintentar".
+8. **Realtime:** cuando el conductor acepta, llega el cambio de la fila. `useRealtimeTripsAndReservations` despacha `reservationChanged` y la reserva pasa a la pestaña Aceptados sin recargar.
+
+### Preguntas probables — Capa de cliente
+
+31. **¿Por qué las pantallas no llaman a Supabase directamente?** Para separar responsabilidades (sección 4): la pantalla solo despacha thunks y lee selectores, el servicio solo habla con Supabase y el reducer solo cambia el estado. Así cada parte se prueba sola: en las pruebas se simula el servicio y se comprueba el reducer sin red.
+32. **¿Qué es un thunk y por qué `createAsyncThunk`?** Una función que hace trabajo asíncrono antes de cambiar el estado. `createAsyncThunk` despacha `pending`, `fulfilled` y `rejected` por nosotros, y con eso cada slice maneja los estados idle, loading, succeeded y failed que pide la especificación.
+33. **¿Qué hace `rejectWithValue`?** Entrega un valor controlado (nuestro `AppError` con el mensaje en español) en lugar del error crudo, y queda en `action.payload` del `rejected`. Además, `createAppAsyncThunk` declara que ese valor siempre es `AppError`, así TypeScript lo sabe en el reducer.
+34. **¿Qué es `createEntityAdapter` y por qué lo usan en viajes?** Guarda los viajes normalizados (`ids` + `entities`). Un viaje existe una sola vez aunque esté en la búsqueda y en "Creados", y un cambio por Realtime (`updateOne`) lo actualiza en todas partes.
+35. **¿Qué es un selector memoizado y qué gana la FlatList?** `createSelector` recuerda su último resultado y solo recalcula si cambian sus entradas. `selectSearchTrips` devuelve el mismo arreglo si los viajes no cambiaron (hay una prueba de eso), así la FlatList no se vuelve a dibujar por un cambio ajeno, como la conexión.
+36. **¿Cómo evitan que una respuesta vieja pise una nueva?** Cada `searchTrips` tiene un `requestId`. En `pending` se guarda el último. En `fulfilled` y `rejected`, si el requestId no es el último, se ignora (D-37). Hay una prueba que hace llegar la respuesta lenta al final.
+37. **¿Cómo guardan la sesión de forma segura?** SecureStore puede rechazar valores de más de 2048 bytes. Se cifra la sesión con AES-256 y la llave va en SecureStore (Keystore de Android); el texto cifrado va en AsyncStorage. Sin la llave no se puede leer. Al cerrar sesión se borran las dos partes (D-33).
+38. **¿Por qué el refresco del token depende de AppState?** En segundo plano React Native pausa los temporizadores y el refresco fallaría. `bindAutoRefreshToAppState` lo inicia al volver a primer plano y lo detiene al salir; su función de limpieza quita el listener.
+39. **¿Cómo funciona la caché sin conexión?** `loadWithCache`: con red pide los datos y guarda una copia JSON en SQLite con la hora (`cachedAt`); sin red (NetInfo) o si la petición falla por red, devuelve la copia y marca `fromCache`. La pantalla muestra el banner "Sin conexión" con la hora. Sin copia, el error "Sin conexión" ofrece "Reintentar".
+40. **¿Por qué cada suscripción Realtime está en un `useEffect` con return?** Al montar se abre el canal. El `return` del `useEffect` (cleanup) lo cierra con `removeChannel` al desmontar o cuando cambia el usuario. Sin eso quedarían canales abiertos: fuga de memoria y eventos duplicados. La prueba realtime.test comprueba que la función de cierre se llama al desmontar.
+
+### Ejercicios de ajuste en vivo (Etapa 3)
+
+9. **Cambiar el tamaño de página.** En services/tripService.ts cambiar `TRIPS_PAGE_SIZE` de 20 a 10. La búsqueda trae páginas de 10 y `hasMore` se calcula con el nuevo valor sin tocar nada más.
+10. **Traducir un error nuevo.** En services/errors.ts agregar un código al mapa `RPC_MESSAGES` (o cambiar el texto de `reserva_duplicada`), correr `npm test` y ver cómo cambia la prueba de errors.test.
+
+### Mis archivos y los del otro (actualizado en la Etapa 3)
+
+| Persona | Mis archivos | Archivos del otro que debo dominar |
+| --- | --- | --- |
+| Sara | E0, E1 y E3: services/, store/, features/, db/, hooks/useAuthSession, useConnectivity y useRealtime, components/ConnectionBanner.tsx, supabase/migrations/0003_realtime.sql | E2: supabase/migrations/0001 (en especial `aceptar_reserva`, `crear_reserva`, `handle_new_user` y las políticas de viajes y reservas), 0002 (buckets), supabase/tests/rls.sql |
+| Samuel | E2 | E3: services/supabase.ts, services/errors.ts, services/tripService.ts, features/trips/ (slice, thunks y selectores), db/cache.ts, hooks/useRealtime.ts |
