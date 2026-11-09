@@ -2,9 +2,11 @@ import { initialAuthState } from '@/features/auth/slice';
 import {
   makeSelectMyReservationsByEstado,
   selectMyReservations,
+  selectMyTripsInCourse,
   selectPendingRequests,
 } from '@/features/reservations/selectors';
 import { reservationChanged } from '@/features/reservations/slice';
+import { tripChanged } from '@/features/trips/slice';
 import {
   changeReservationState,
   createReservation,
@@ -67,6 +69,22 @@ describe('reservations', () => {
     expect(makeSelectMyReservationsByEstado('aceptada')(store.getState()).map((r) => r.id)).toEqual(
       ['r1'],
     );
+  });
+
+  it('un cambio del viaje por Realtime actualiza la copia dentro de la reserva', async () => {
+    service.listMyReservations.mockResolvedValue([aceptada]);
+    const store = loggedStore();
+    await store.dispatch(fetchMyReservations());
+    expect(selectMyTripsInCourse(store.getState())).toEqual([]);
+
+    const { sector_nombre: _s, conductor_nombre: _c, ...row } = aceptada.viaje!;
+    store.dispatch(tripChanged({ ...row, estado: 'en_curso', cupos_disponibles: 1 }));
+
+    const [enCurso] = selectMyTripsInCourse(store.getState());
+    expect(enCurso.id).toBe('r2');
+    expect(enCurso.viaje?.cupos_disponibles).toBe(1);
+    // Conserva lo que no viene en el evento de Realtime.
+    expect(enCurso.viaje?.sector_nombre).toBe('Colina');
   });
 
   it('crear una reserva la agrega a mis reservas (TC-07)', async () => {
