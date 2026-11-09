@@ -18,6 +18,8 @@ type RadioGroupProps<T extends string> = {
   value: T;
   onChange: (value: T) => void;
   direction?: 'column' | 'row';
+  /** true si el título ya está visible arriba (por ejemplo, en la lista de SelectField). */
+  hideVisibleLabel?: boolean;
 };
 
 /**
@@ -31,14 +33,17 @@ export function RadioGroup<T extends string>({
   value,
   onChange,
   direction = 'column',
+  hideVisibleLabel = false,
 }: RadioGroupProps<T>) {
   const { colors } = useTheme();
 
   return (
     <View accessibilityRole="radiogroup" accessibilityLabel={label} style={styles.container}>
-      <AppText variant="label" importantForAccessibility="no">
-        {label}
-      </AppText>
+      {hideVisibleLabel ? null : (
+        <AppText variant="label" importantForAccessibility="no">
+          {label}
+        </AppText>
+      )}
       <View style={[styles.options, direction === 'row' && styles.row]}>
         {options.map((option) => {
           const checked = option.value === value;

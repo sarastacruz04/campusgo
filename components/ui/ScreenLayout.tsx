@@ -38,6 +38,8 @@ type ScreenLayoutProps = {
   bottomBar?: ReactNode;
   /** false si el contenido ya es una lista con scroll propio (FlatList). */
   scrollable?: boolean;
+  /** Si cambia, el foco del lector vuelve al título (al volver a una pestaña, T-03). */
+  titleFocusKey?: string | number;
 };
 
 /**
@@ -57,6 +59,7 @@ export function ScreenLayout({
   bandContent,
   bottomBar,
   scrollable = true,
+  titleFocusKey,
 }: ScreenLayoutProps) {
   const { colors } = useTheme();
 
@@ -69,9 +72,8 @@ export function ScreenLayout({
       {children}
     </ScrollView>
   ) : (
-    <View style={[styles.flex, styles.content, { backgroundColor: colors.background }]}>
-      {children}
-    </View>
+    // Sin padding: la lista pone el suyo para que el contenido llegue hasta los bordes al desplazar.
+    <View style={[styles.flex, { backgroundColor: colors.background }]}>{children}</View>
   );
 
   return (
@@ -92,7 +94,7 @@ export function ScreenLayout({
         </View>
       ) : null}
       <View style={[styles.band, { backgroundColor: colors.titleBand }]}>
-        <ScreenTitle>{title}</ScreenTitle>
+        <ScreenTitle focusKey={titleFocusKey}>{title}</ScreenTitle>
         {bandContent}
       </View>
       <KeyboardAvoidingView
