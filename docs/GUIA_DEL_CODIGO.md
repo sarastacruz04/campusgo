@@ -2,8 +2,8 @@
 
 Guía para entender qué hay en el código, cómo funciona y dónde tocar si en la defensa piden un cambio. Se actualiza al terminar cada etapa (la tuya o la de Samuel).
 
-- **Incluye hasta:** Etapa 0 (preparación), Etapa 1 (sistema de diseño y accesibilidad base), Etapa 2 (base de datos, Samuel) y Etapa 3 (capa de cliente: Supabase, Redux, caché y Realtime).
-- **Todavía no existe:** las pantallas reales de registro, inicio de sesión, viajes, reservas, mapas, chat y notificaciones (Etapas 4 a 7). La lógica que usarán ya está en los slices y servicios (secciones 12 y 13).
+- **Incluye hasta:** Etapa 5 (flujo de pasajero). Las secciones 12 a 15 explican las Etapas 2, 3, 4 y 5.
+- **Todavía no existe:** crear viajes y aceptar solicitudes (Etapa 6), y las pantallas de calificaciones, notificaciones y chat (Etapa 7). Su lógica de datos ya está en los slices y servicios (sección 13).
 - Las preguntas de defensa con respuesta modelo están en [GUIA_DEFENSA.md](GUIA_DEFENSA.md). Esta guía explica el código; aquella, cómo responder.
 
 ---
@@ -15,7 +15,7 @@ Hasta ahora CampusGo tiene tres capas listas:
 - **En el medio, la capa de cliente (Etapa 3):** servicios que hablan con Supabase, Redux que guarda el estado, caché para usar la app sin internet y Realtime para recibir cambios en vivo.
 - **Arriba, las piezas accesibles (Etapa 1):** colores, letras, botones, campos, diálogos y el esqueleto de las pantallas.
 
-Las etapas siguientes arman las pantallas reales uniendo las tres capas.
+Las pantallas de autenticación y perfil (Etapa 4) y las del pasajero (Etapa 5) ya unen las tres capas. Faltan las del conductor (Etapa 6) y las de calificaciones, notificaciones y chat (Etapa 7).
 
 ---
 
@@ -47,7 +47,7 @@ campusgo/
 └── docs/                 Documentación (esta guía, decisiones, matriz, etc.).
 ```
 
-Las carpetas `components/trips` y `components/maps` siguen vacías; se llenan en la Etapa 5.
+Desde la Etapa 4 existen `app/(auth)/`, `app/(tabs)/` y `app/profile.tsx`. Desde la Etapa 5, `app/trip/[id]/reserve.tsx`, `components/trips/` (tarjetas, filtros y lista) y `components/maps/` (mapa).
 
 ---
 
@@ -266,7 +266,7 @@ Regla de todas: **no conocen Redux ni Supabase**. Reciben datos por props y avis
 | `npm start` | Abre el servidor; se escanea el QR con Expo Go | — |
 | `npm run typecheck` | Revisa los tipos de TypeScript | Pasa |
 | `npm run lint` | Revisa estilo, formato y errores de accesibilidad en el código | Pasa |
-| `npm test` | Corre las pruebas automáticas | 125 de 125 |
+| `npm test` | Corre las pruebas automáticas | 185 de 185 |
 | `npm run a11y:contrast` | Revisa los colores | 66 de 66 |
 | `npm run format` | Ordena el formato del código con Prettier | — |
 
@@ -314,6 +314,12 @@ Además, `eslint.config.js` incluye el plugin de accesibilidad: si alguien escri
 | Agregar un filtro a la búsqueda | types/domain.ts (`TripFilters`), services/tripService.ts (`searchOpenTrips`, un `query = query.eq(…)`) y features/trips/slice.ts (valor inicial de `filters`) | Agrego el campo y su condición | `npm run typecheck` muestra lo que falta; luego `npm test` |
 | Guardar otra cosa en la caché | db/cache.ts, tipo `CacheKey`, y el thunk que la lee con `loadWithCache` | Agrego la clave nueva | `npm test`; en el teléfono, con modo avión |
 | Cambiar el texto del banner sin conexión | components/ConnectionBanner.tsx | Cambio el mensaje | Modo avión en "Sesión de prueba" |
+| Cambiar lo que dice una tarjeta de viaje | components/trips/TripCard.tsx: `TripDetails` (lo que se ve) y `tripAccessibilityLabel` (lo que lee TalkBack) | Cambio los dos | `npm test` (trips.test) y TalkBack |
+| Cambiar el tiempo de espera de los filtros | hooks/useTripSearch.ts, `FILTER_DEBOUNCE_MS` | Cambio 300 | Escribo en el filtro y miro cuándo busca |
+| Cambiar la zona o el zoom inicial del mapa | components/maps/MapPicker.tsx, `DELTA` (zoom) y la prop `center` | Cambio el valor | Abro una reserva |
+| Cambiar el mensaje de confirmación de la reserva | app/trip/[id]/reserve.tsx, `ConfirmDialog` al final | Cambio `title` o `message` | Hago una reserva; passenger.test compara el texto |
+| Cambiar la pantalla a la que va "¡Listo!" | app/trip/[id]/reserve.tsx, función `finish` | Cambio la ruta | passenger.test compara la ruta |
+| Agregar un estado a las pestañas de reservas | app/(tabs)/reservas.tsx, `TABS` y `EMPTY_TEXT` | Agrego la pestaña | `npm run typecheck` muestra lo que falta |
 
 **Antes de cualquier commit:** `npm run typecheck`, `npm run lint` y `npm test` deben pasar.
 
@@ -359,6 +365,10 @@ Resultado: 18 de los 26 compromisos de accesibilidad están aprobados. El detall
 - **Selector**: una función que lee una parte del estado; memoizado = recuerda su resultado.
 - **Caché**: copia local de los datos para verlos sin internet.
 - **Realtime**: aviso instantáneo de la base cuando cambia una fila.
+- **Debounce**: esperar a que la persona deje de escribir antes de buscar.
+- **Paginación**: traer la lista por partes (20 viajes cada vez).
+- **React.memo**: no volver a dibujar un componente si sus datos no cambiaron.
+- **Geocodificación**: convertir un punto del mapa en dirección (inversa) o una dirección en punto.
 
 ---
 
@@ -464,9 +474,77 @@ Están en [API_CONTRATOS.md](API_CONTRATOS.md), sección "Hallazgos de la Etapa 
 
 ---
 
-## 14. Registro de actualizaciones de esta guía
+## 14. Autenticación, registro y perfil (Etapa 4, Samuel)
+
+Usa los thunks de la Etapa 3: no agregó servicios ni slices.
+
+- **Guardia de sesión (app/_layout.tsx):** decide a dónde va la persona según `userId` y `profile`.
+  - Sin sesión e intentando entrar a una ruta privada: va a `/`.
+  - Con registro incompleto: va a `/register/photo`. Siempre retoma desde la foto, no desde el paso exacto.
+  - Con registro completo y en bienvenida o autenticación: va a `/(tabs)`.
+- **Registro en 7 pasos (app/(auth)/register/):**
+  1. `index`: valida con `lib/validators.ts` y llama a `signUp`. La base crea el perfil con el trigger.
+  2. `verify`: confirma el código de 6 dígitos. Aquí nace la sesión.
+  3. `photo`: foto opcional en el bucket `avatars`.
+  4. `has-car`: con "No" termina en modo pasajero.
+  5. `car` y 6. `car-photo`: los datos viajan como parámetros de ruta, sin guardarse todavía.
+  7. `soat`: sube las fotos, registra el carro, marca el registro completo y cambia a modo conductor.
+- **app/(auth)/login.tsx:** inicio de sesión con la pantalla de error del Figma y el mensaje específico.
+- **app/profile.tsx:** datos del perfil, edición, cierre de sesión y carro (ver o eliminar), con diálogos de confirmación.
+- **lib/validators.ts:** una función por regla (correo, contraseña, ID, teléfono, placa, capacidad, código). Devuelven el mensaje de error o `null`.
+- **lib/imagePicker.ts:** abre la galería y devuelve la imagen elegida.
+
+---
+
+## 15. Flujo de pasajero (Etapa 5)
+
+Recorrido completo: buscar → tocar una tarjeta → elegir el punto → reservar → seguir el estado → cancelar o viajar.
+
+### 15.1 Inicio (app/(tabs)/index.tsx)
+
+- La pantalla elige según el modo: en pasajero muestra `TripFilters` y `TripList`; en conductor, el panel que completa la Etapa 6.
+- **hooks/useTripSearch.ts** tiene la lógica:
+  - Guarda sector y puestos, y solo deja dígitos en puestos.
+  - Con `useDebouncedValue` espera 300 ms sin cambios y busca. La lupa busca de inmediato.
+  - Vuelve a buscar al recuperar o perder la red, y al regresar a la pantalla, salvo que la persona haya bajado varias páginas.
+  - Anuncia a TalkBack cuántos viajes se cargaron.
+- **components/trips/TripList.tsx:** la FlatList. Muestra carga, vacío, error con "Reintentar" y banner sin conexión. `onEndReached` trae la página siguiente.
+- **components/trips/TripCard.tsx:** toda la tarjeta es un solo botón con una etiqueta compuesta. El "+" es solo visual.
+
+### 15.2 Reservar (app/trip/[id]/reserve.tsx)
+
+- **MapPicker** muestra el mapa real. Un toque marca el punto.
+- **hooks/useLocationPoint.ts** une mapa y dirección:
+  - Tocar el mapa escribe la dirección (geocodificación inversa).
+  - "Usar mi ubicación actual" pide el permiso y marca la posición.
+  - Si se toca dos veces seguidas, solo cuenta la última respuesta.
+- **lib/location.ts** nunca lanza errores: sin permiso o sin resultado devuelve `null` y se puede escribir.
+- Al tocar "Reservar":
+  1. Valida que haya dirección.
+  2. Usa las coordenadas del mapa; si solo hay texto, las busca; si no se encuentran, usa las del origen del viaje (D-50).
+  3. Llama a la RPC `crear_reserva`. La base revisa todas las reglas.
+  4. Si sale bien: vibración y diálogo de éxito. "¡Listo!" lleva a Reservas. Si falla: mensaje de la RPC con "Reintentar".
+
+### 15.3 Reservas y Curso
+
+- **app/(tabs)/reservas.tsx:** pestañas internas Pendientes, Aceptados y Rechazados. Cada una usa su selector memoizado. La papelera abre el diálogo "¿Está seguro…?" con la opción segura primero. Se recarga al entrar.
+- **app/(tabs)/curso.tsx:** el pasajero ve sus reservas aceptadas de viajes iniciados. El botón del chat llega en la Etapa 7 (D-51).
+- **En vivo:** cuando el conductor acepta, llega `reservationChanged` y la reserva cambia de pestaña. Cuando cambian los cupos o el viaje inicia, llega `tripChanged`, que actualiza la búsqueda y la copia del viaje dentro de cada reserva.
+- **Migración 0006:** un viaje lleno sigue siendo legible, para que Realtime avise y salga de la búsqueda (D-48).
+
+### 15.4 Piezas nuevas reutilizables
+
+- **SelectField** (components/ui): lista desplegable con diálogo y radios. La usará también la creación de viajes.
+- **InnerTabs** (components/ui): pestañas internas con subrayado y negrita.
+- **useModeSwitch** y **ModeSwitchDialogs:** el cambio de modo, compartido por las pestañas. Al cambiar, vuelve a Inicio.
+- **useFocusCounter:** hace que el foco de TalkBack vuelva al título al regresar a una pestaña.
+
+---
+
+## 16. Registro de actualizaciones de esta guía
 
 | Fecha | Etapa | Quién la hizo | Qué se agregó a la guía |
 | --- | --- | --- | --- |
 | 2026-11-06 | E0 y E1 | Sara | Primera versión: arranque de la app, sistema de diseño, hooks, componentes, pantallas, pruebas, recetas y hallazgos en el teléfono |
 | 2026-11-07 | E2 y E3 | Samuel (E2) y Sara (E3) | Resumen de la base de datos (sección 12), la capa de cliente (sección 13), la pantalla de sesión de prueba, las pruebas nuevas, 6 recetas más y términos de Supabase y Redux en el glosario |
+| 2026-11-09 | E4 y E5 | Samuel (E4) y Sara (E5) | Secciones 14 y 15, 6 recetas más y términos nuevos en el glosario |

@@ -1,6 +1,7 @@
 import { createEntityAdapter, createSlice, isAnyOf, type PayloadAction } from '@reduxjs/toolkit';
 
 import { sessionCleared } from '@/features/auth/actions';
+import { tripChanged } from '@/features/trips/slice';
 import { initialCacheInfo, initialRequest, type CacheInfo, type RequestState } from '@/store/types';
 import type { Reserva } from '@/types/database';
 import type { ReservationItem } from '@/types/domain';
@@ -49,6 +50,18 @@ const reservationsSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(sessionCleared, () => initialReservationsState)
+
+      // La reserva guarda una copia de su viaje: cuando el viaje cambia por Realtime
+      // (cupos o inicio del viaje), la copia se actualiza para que la tarjeta y la
+      // pestaña Curso lo reflejen sin recargar.
+      .addCase(tripChanged, (state, action) => {
+        for (const id of state.ids) {
+          const item = state.entities[id];
+          if (item?.viaje?.id === action.payload.id) {
+            item.viaje = { ...item.viaje, ...action.payload };
+          }
+        }
+      })
 
       .addCase(fetchMyReservations.pending, (state) => {
         state.mine.status = 'loading';

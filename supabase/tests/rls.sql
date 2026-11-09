@@ -48,10 +48,10 @@
 -- BLOQUE 2: Viajes — solo se ven los abiertos (pasajero) o propios (conductor)
 -- =============================================================================
 
--- RV-01: usuario_b (pasajero) solo ve viajes con estado 'abierto' y salida futura
--- ESPERADO: solo viajes abiertos
+-- RV-01: usuario_b (pasajero) solo ve viajes 'abierto' o 'lleno' con salida futura (migración 0006)
+-- ESPERADO: solo viajes abiertos o llenos
 -- SET LOCAL "request.jwt.claims" TO '{"sub": "<usuario_b>"}';
--- SELECT estado FROM public.viajes;  -- solo 'abierto'
+-- SELECT estado FROM public.viajes;  -- solo 'abierto' o 'lleno'
 
 -- RV-02: usuario_a (conductor) ve todos sus viajes sin importar estado
 -- ESPERADO: todos los estados de sus viajes

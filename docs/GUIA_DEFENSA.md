@@ -245,3 +245,44 @@ Flujo del tema (Etapa 1): Ajustes llama a `setPreference('theme', 'dark')` → T
 11. **Cambiar la validación de capacidad de vehículo.** En `lib/validators.ts`, cambiar el rango permitido en `validateVehicleCapacity` (por ejemplo, de 1 a 6 cupos) y verificar con `npm test -- __tests__/lib/validators.test.ts`.
 12. **Modificar el tiempo de espera del temporizador de reenvío de OTP.** En `app/(auth)/register/verify.tsx`, cambiar `countdown` de 30 a 60 segundos y verificar el estado del botón accesible de reenvío.
 
+
+---
+
+## Flujo de pasajero (Etapa 5 — Sara)
+
+### Mapa de archivos nuevos
+
+| Ruta | Qué hace | Autor (etapa) |
+| --- | --- | --- |
+| app/(tabs)/index.tsx | Inicio: filtros y lista de viajes en modo pasajero (pantalla 10). | Sara (E5) |
+| app/trip/[id]/reserve.tsx | Reserva con mapa y confirmación (pantallas 11 y 12). | Sara (E5) |
+| app/(tabs)/reservas.tsx | Reservas por estado y cancelación (pantalla 13). | Sara (E5) |
+| app/(tabs)/curso.tsx | Viajes en curso del pasajero (pantalla 14). | Sara (E5) |
+| components/trips/ | TripCard, ReservationCard, TripFilters y TripList. | Sara (E5) |
+| components/maps/MapPicker.tsx | Mapa real para elegir un punto con un toque. | Sara (E5) |
+| components/ui/SelectField.tsx e InnerTabs.tsx | Lista desplegable accesible y pestañas internas. | Sara (E5) |
+| hooks/useTripSearch.ts, useDebouncedValue.ts, useLocationPoint.ts, useModeSwitch.ts y useFocusCounter.ts | Búsqueda con debounce, punto del mapa, cambio de modo y foco al volver a una pestaña. | Sara (E5) |
+| lib/location.ts | Permiso, posición y geocodificación con expo-location, sin claves. | Sara (E5) |
+| supabase/migrations/0006_viajes_llenos_visibles.sql | Permite que Realtime avise cuando un viaje se llena (D-48). | Sara (E5) |
+
+### Preguntas probables — Flujo de pasajero
+
+45. **¿Cómo optimizaron la lista de viajes?** FlatList con `keyExtractor` estable fuera del componente, `renderItem` con `useCallback`, `TripCard` con `React.memo`, `initialNumToRender` y `windowSize` ajustados y paginación por rango con `onEndReached`. Al memo le pasamos el promedio como números sueltos: un objeto nuevo en cada carga rompería la comparación.
+46. **¿Para qué sirve el debounce de 300 ms?** Para no lanzar una consulta por cada tecla. `useDebouncedValue` solo actualiza el valor cuando lleva 300 ms sin cambiar; el cleanup del `useEffect` cancela el temporizador anterior. La lupa busca de inmediato.
+47. **¿Por qué TripCard es un solo foco y la tarjeta de reserva no?** En la búsqueda toda la tarjeta es una acción: un `Pressable` con etiqueta compuesta (S-04). En la reserva hay dos acciones distintas (leer y cancelar): si la papelera estuviera dentro de un elemento `accessible`, TalkBack no llegaría a ella, así que es un hermano posicionado encima.
+48. **¿Cómo se actualizan los cupos en vivo?** Supabase Realtime envía el cambio de la fila, `useRealtimeTripsAndReservations` despacha `tripChanged` y el reducer actualiza el viaje conservando sector y conductor. La reserva guarda una copia de su viaje, y `tripChanged` también la actualiza. Si el viaje ya no es reservable, sale de la búsqueda.
+49. **¿Por qué necesitaron la migración 0006?** Realtime respeta RLS y evalúa la fila ya cambiada. Antes, un viaje `lleno` dejaba de ser legible, así que el pasajero no recibía ese cambio. Ahora se puede leer y la búsqueda filtra por `abierto` (D-48).
+50. **¿Qué pasa si no doy permiso de ubicación?** En Android la geocodificación necesita el permiso. Sin él, `lib/location.ts` devuelve `null`, la app avisa y la persona escribe la dirección. Si esa dirección no se encuentra, se guardan las coordenadas del origen del viaje y el conductor se guía por el texto (D-50).
+51. **¿Cómo evitan que una dirección vieja reemplace a la nueva?** `useLocationPoint` numera cada toque del mapa. Cuando llega la respuesta, solo se usa si su número es el último.
+
+### Ejercicios de ajuste en vivo (Etapa 5)
+
+13. **Cambiar el debounce.** En hooks/useTripSearch.ts cambiar `FILTER_DEBOUNCE_MS` de 300 a 800 y ver en el teléfono que la búsqueda tarda más en dispararse.
+14. **Agregar un dato a la tarjeta.** En components/trips/TripCard.tsx agregar una `Line` en `TripDetails` y el mismo dato en `tripAccessibilityLabel`, para que TalkBack también lo lea.
+
+### Mis archivos y los del otro (actualizado en la Etapa 5)
+
+| Persona | Mis archivos | Archivos del otro que debo dominar |
+| --- | --- | --- |
+| Sara | E0, E1, E3 y E5 | E2 (migraciones 0001 y 0002) y E4: app/_layout.tsx (guardia de sesión), app/(auth)/register/, app/profile.tsx, lib/validators.ts |
+| Samuel | E2 y E4 | E5: components/trips/TripCard.tsx, TripList.tsx, hooks/useTripSearch.ts, app/trip/[id]/reserve.tsx, app/(tabs)/reservas.tsx |

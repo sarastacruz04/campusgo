@@ -19,6 +19,8 @@ export type TextFieldProps = Omit<TextInputProps, 'style' | 'accessibilityLabel'
   error?: string;
   /** Campo de contraseña con botón accesible "Mostrar contraseña" (T-08). */
   password?: boolean;
+  /** surface: campo blanco. brand: campo azul para los filtros sobre la banda (V-03). */
+  tone?: 'surface' | 'brand';
   /** Referencia al TextInput, para saltar al siguiente campo con returnKeyType="next" (T-03). */
   ref?: Ref<TextInputRef>;
 };
@@ -31,6 +33,7 @@ export function TextField({
   hint,
   error,
   password = false,
+  tone = 'surface',
   ref,
   onFocus,
   onBlur,
@@ -47,8 +50,12 @@ export function TextField({
   }, [error, label, announce]);
 
   const hasError = Boolean(error);
+  const isBrand = tone === 'brand';
+  // Sobre azul, el borde de foco azul no se vería: se usa el color claro de la marca.
+  const idleBorder = isBrand ? colors.onBrand : colors.border;
+  const focusBorder = isBrand ? colors.onBrand : colors.focus;
   // Error: borde de 2 px + ícono + texto, no solo color (V-05).
-  const borderColor = hasError ? colors.error : focused ? colors.focus : colors.border;
+  const borderColor = hasError ? colors.error : focused ? focusBorder : idleBorder;
   const borderWidth = hasError || focused ? borders.focus : borders.thin;
   // La pista accesible incluye el error para que se oiga al volver al campo.
   const accessibilityHint = [hasError ? `Error: ${error}` : null, hint].filter(Boolean).join('. ');
@@ -62,13 +69,20 @@ export function TextField({
         </AppText>
       ) : null}
       <View
-        style={[styles.inputRow, { borderColor, borderWidth, backgroundColor: colors.surface }]}
+        style={[
+          styles.inputRow,
+          {
+            borderColor,
+            borderWidth,
+            backgroundColor: isBrand ? colors.brandSurface : colors.surface,
+          },
+        ]}
       >
         <TextInput
           ref={ref}
           accessibilityLabel={label}
           accessibilityHint={accessibilityHint || undefined}
-          placeholderTextColor={colors.placeholder}
+          placeholderTextColor={isBrand ? colors.onBrandMuted : colors.placeholder}
           secureTextEntry={password && !showPassword}
           allowFontScaling
           maxFontSizeMultiplier={MAX_FONT_SIZE_MULTIPLIER}
@@ -80,7 +94,7 @@ export function TextField({
             setFocused(false);
             onBlur?.(event);
           }}
-          style={[styles.input, typography.body, { color: colors.text }]}
+          style={[styles.input, typography.body, { color: isBrand ? colors.onBrand : colors.text }]}
           {...inputProps}
         />
         {password ? (

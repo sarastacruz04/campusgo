@@ -37,7 +37,7 @@ Desde la migración 0004, `id_universidad` y `telefono` pueden ser `NULL` mientr
 
 | Operación | Quién | Columnas de entrada | Resultado | Errores |
 |-----------|-------|---------------------|-----------|---------|
-| SELECT    | Conductor (todos sus viajes) o pasajero (solo `abierto` y futuro, o con reserva aceptada) | — | Filas visibles según RLS | — |
+| SELECT    | Conductor (todos sus viajes) o pasajero (`abierto` o `lleno` con salida futura, o con reserva aceptada) | — | Filas visibles según RLS | — |
 | INSERT    | Conductor en modo conductor con vehículo | `conductor_id`, `vehiculo_id`, `sector_id`, `origen_*`, `destino_*`, `salida_at`, `valor_por_cupo`, `cupos_totales`, `cupos_disponibles` | Viaje creado con `estado='abierto'` | `RLS_violation`, `check_violation` (cupos, valor), `foreign_key_violation` |
 
 ### `notificaciones`
@@ -291,7 +291,7 @@ Los thunks (`features/*/thunks.ts`) llaman a los servicios, atrapan el error y l
 
 - La migración `0003_realtime.sql` agrega `viajes`, `reservas`, `notificaciones` y `mensajes` a la publicación `supabase_realtime`. Sin ella, Realtime no envía nada.
 - Realtime respeta RLS: cada usuario solo recibe cambios de filas que puede leer.
-- **Limitación conocida:** cuando un viaje pasa a `lleno`, un pasajero sin reserva deja de poder verlo por RLS, así que Realtime no le envía ese último cambio. La app lo saca de la búsqueda cuando ve `cupos_disponibles = 0`, pero ese evento tampoco llega. La pantalla de búsqueda (Etapa 5) debe volver a consultar al recibir el foco o al deslizar para actualizar. Así lo confirma `searchOpenTrips`, que solo trae viajes abiertos.
+- Un viaje que pasa a `lleno` sigue siendo legible (migración 0006), así que Realtime avisa y `tripChanged` lo saca de la búsqueda en vivo. Los viajes nuevos no entran por Realtime: aparecen al volver a la pantalla o al deslizar para actualizar.
 
 ### Caché sin conexión (`db/`)
 
@@ -307,6 +307,7 @@ Los thunks (`features/*/thunks.ts`) llaman a los servicios, atrapan el error y l
 | `0003_realtime.sql` | Habilita Realtime en viajes, reservas, notificaciones y mensajes (D-35). |
 | `0004_perfil_incompleto.sql` | Crear un usuario sin datos de perfil fallaba por los CHECK de 10 dígitos; ahora `id_universidad` y `telefono` aceptan NULL mientras el registro está incompleto (D-40). |
 | `0005_rls_sin_recursion.sql` | Recursión infinita (42P17) entre las políticas de `viajes` y `reservas`; ahora usan `tiene_reserva_aceptada` y `es_conductor_del_viaje` (`SECURITY DEFINER`) (D-41). |
+| `0006_viajes_llenos_visibles.sql` | Los viajes `lleno` con salida futura se pueden leer, para que Realtime avise cuando un viaje se llena (D-48). La búsqueda sigue trayendo solo `abierto`. |
 
 Funciones nuevas (no se llaman desde la app; las usan las políticas):
 

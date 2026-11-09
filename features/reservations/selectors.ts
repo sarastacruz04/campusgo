@@ -26,6 +26,11 @@ export const selectMyReservations = createSelector(
 export const makeSelectMyReservationsByEstado = (estado: EstadoReserva) =>
   createSelector([selectMyReservations], (items) => items.filter((item) => item.estado === estado));
 
+/** Reservas aceptadas de viajes ya iniciados (pestaña Curso del pasajero, pantalla 14). */
+export const selectMyTripsInCourse = createSelector([selectMyReservations], (items) =>
+  items.filter((item) => item.estado === 'aceptada' && item.viaje?.estado === 'en_curso'),
+);
+
 /** Solicitudes pendientes de responder (inicio de conductor y pantalla de solicitudes). */
 export const selectPendingRequests = createSelector(
   [(state: RootState) => state.reservations.requestIds, selectReservationEntities],
