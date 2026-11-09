@@ -76,11 +76,12 @@ function RootNavigator() {
     const inAuthGroup = segment0 === '(auth)';
     const inTabsGroup = segment0 === '(tabs)';
     const inProfile = segment0 === 'profile';
+    const inTrip = segment0 === 'trip';
     const isRoot = !segment0 || segment0 === 'index';
 
     if (!userId) {
       // Sin sesión: redirige al inicio si intenta acceder a rutas privadas
-      if (inTabsGroup || inProfile) {
+      if (inTabsGroup || inProfile || inTrip) {
         router.replace('/');
       }
     } else {
