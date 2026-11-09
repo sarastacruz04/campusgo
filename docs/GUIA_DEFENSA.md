@@ -211,4 +211,37 @@ Flujo del tema (Etapa 1): Ajustes llama a `setPreference('theme', 'dark')` → T
 | Persona | Mis archivos | Archivos del otro que debo dominar |
 | --- | --- | --- |
 | Sara | E0, E1 y E3: services/, store/, features/, db/, hooks/useAuthSession, useConnectivity y useRealtime, components/ConnectionBanner.tsx, supabase/migrations/0003_realtime.sql | E2: supabase/migrations/0001 (en especial `aceptar_reserva`, `crear_reserva`, `handle_new_user` y las políticas de viajes y reservas), 0002 (buckets), supabase/tests/rls.sql |
-| Samuel | E2 | E3: services/supabase.ts, services/errors.ts, services/tripService.ts, features/trips/ (slice, thunks y selectores), db/cache.ts, hooks/useRealtime.ts |
+| Samuel | E2 y E4: app/(auth)/, app/(tabs)/, app/profile.tsx, app/index.tsx, lib/validators.ts, lib/imagePicker.ts, __tests__/lib/validators.test.ts, __tests__/screens/ | E3: services/supabase.ts, services/errors.ts, services/tripService.ts, features/trips/ (slice, thunks y selectores), db/cache.ts, hooks/useRealtime.ts |
+
+---
+
+## Autenticación, registro y perfil (Etapa 4 — Samuel)
+
+### Mapa de archivos nuevos
+
+| Ruta | Qué hace | Autor (etapa) |
+| --- | --- | --- |
+| lib/validators.ts | Validadores puros de datos: correo @unisabana.edu.co, contraseña (≥6 caracteres), ID de 10 dígitos, teléfono de 10 dígitos, placa colombiana (`^[A-Z]{3}[0-9]{3}$`), capacidad (1 a 8 cupos) y código OTP de 6 dígitos. | Samuel (E4) |
+| lib/imagePicker.ts | Selector accesible de imágenes con `expo-image-picker` para avatar, foto del vehículo y SOAT, con validación de peso máximo y opciones de compresión. | Samuel (E4) |
+| app/index.tsx | Pantalla 1 de bienvenida según Figma: logo grande, "Iniciar Sesión", "Registrarse" y accesos de desarrollo. | Samuel (E4) |
+| app/(auth)/login.tsx | Pantalla 2 de inicio de sesión y pantalla ERROR del Figma con mensaje descriptivo y botón "Volver". | Samuel (E4) |
+| app/(auth)/register/ | Flujo guiado de registro en 7 pasos accesibles (§6.7, T-08): datos personales (1), código OTP con temporizador de reenvío de 30 s (2), foto de perfil (3), pregunta de vehículo (4), datos del carro (5), foto del carro (6) y foto del SOAT con guardado final (7). | Samuel (E4) |
+| app/profile.tsx | Pantalla 15 de Mi Perfil: lectura de datos personales, modal accesible para edición (nombre, apellido, teléfono), pestañas Pasajero/Carro, eliminación de carro con `ConfirmDialog`, cierre de sesión con `ConfirmDialog` y cambio de modo validando carro. | Samuel (E4) |
+| app/(tabs)/_layout.tsx | Pestañas inferiores con `BottomTabBar` que oculta dinámicamente "Reservas" en modo conductor y "Creados" en modo pasajero. | Samuel (E4) |
+| app/_layout.tsx (actualizado) | Guardia de sesión global: redirige usuarios no autenticados a `/`, usuarios con registro incompleto a su paso pendiente (`/register/photo`), y usuarios autenticados completos a `/(tabs)`. | Samuel (E4) |
+| \_\_tests\_\_/lib/validators.test.ts | 17 pruebas unitarias de todos los casos borde de los validadores. | Samuel (E4) |
+| \_\_tests\_\_/screens/auth.test.tsx | Pruebas de integración de la pantalla de Login, validación en línea y estado de ERROR. | Samuel (E4) |
+| \_\_tests\_\_/screens/profile.test.tsx | Pruebas de renderizado de perfil, cambio de pestañas Pasajero/Carro y diálogos de confirmación de logout y borrado de carro. | Samuel (E4) |
+
+### Preguntas probables — Autenticación y perfil
+
+41. **¿Cómo funciona el guardia de sesión en app/_layout.tsx?** Evalúa `userId` y `profile.registro_completo` contra la ruta actual de `useSegments()`. Si el usuario no tiene sesión y busca una ruta privada, `router.replace('/')` lo envía a la bienvenida. Si tiene sesión pero `registro_completo` es falso, lo redirige al paso pendiente de registro. Si está completo y visita `/` o rutas de auth, lo redirige a `/(tabs)`.
+42. **¿Por qué la verificación por código usa un temporizador de 30 segundos?** Para evitar el agotamiento de límites de tasa (rate limiting) de envío de correos de Supabase y dar retroalimentación visual al usuario del tiempo de espera antes de poder solicitar otro código.
+43. **¿Cómo se garantiza que un conductor tenga carro antes de cambiar de modo?** En el cliente, tanto `AppHeader` como `ProfileScreen` interceptan el toque del selector de modo: si no existe vehículo registrado en el store, no se llama al thunk sino que se despliega un `ConfirmDialog` informativo que ofrece "Registrar Carro" llevando al flujo de vehículo. En el backend, la RPC `cambiar_modo` exige que el conductor tenga carro mediante una excepción de base de datos (`sin_vehiculo`).
+44. **¿Por qué se suben las imágenes antes de marcar el registro como completo?** Para asegurar la atomicidad del flujo: el avatar, la foto del vehículo y el SOAT se envían a sus respectivos buckets de Supabase Storage; una vez registrados los paths en la base de datos se actualiza `registro_completo = true`, garantizando que ningún usuario quede en estado inconsistente.
+
+### Ejercicios de ajuste en vivo (Etapa 4)
+
+11. **Cambiar la validación de capacidad de vehículo.** En `lib/validators.ts`, cambiar el rango permitido en `validateVehicleCapacity` (por ejemplo, de 1 a 6 cupos) y verificar con `npm test -- __tests__/lib/validators.test.ts`.
+12. **Modificar el tiempo de espera del temporizador de reenvío de OTP.** En `app/(auth)/register/verify.tsx`, cambiar `countdown` de 30 a 60 segundos y verificar el estado del botón accesible de reenvío.
+
