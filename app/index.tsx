@@ -9,30 +9,51 @@ import { ScreenTitle } from '@/components/ui/ScreenTitle';
 import { spacing } from '@/theme/layout';
 import { useTheme } from '@/theme/ThemeProvider';
 
-// Pantalla provisional hasta la Etapa 4, donde se convierte en la bienvenida con
-// redirección según la sesión. Por ahora da acceso a Ajustes y, en desarrollo, al
-// catálogo de componentes y a la sesión de prueba de la Etapa 3.
-export default function Index() {
+export default function WelcomeScreen() {
   const { colors } = useTheme();
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.surface }]}>
-      <Logo size="large" />
-      <View style={styles.texts}>
-        <ScreenTitle>Te damos la bienvenida</ScreenTitle>
-        <AppText style={styles.centered}>Conectando estudiantes, compartiendo trayectos</AppText>
-      </View>
-      <View style={styles.actions}>
-        <Button
-          label="Ajustes de accesibilidad"
-          variant="secondary"
-          onPress={() => router.push('/settings/accessibility')}
-        />
-        {__DEV__ ? (
-          <>
-            <Button label="Catálogo de componentes" onPress={() => router.push('/dev/catalogo')} />
-            <Button label="Sesión de prueba" onPress={() => router.push('/dev/sesion')} />
-          </>
-        ) : null}
+      <View style={styles.content}>
+        <View style={styles.logoContainer}>
+          <Logo size="large" />
+        </View>
+
+        <View style={styles.texts}>
+          <ScreenTitle>Te damos la bienvenida</ScreenTitle>
+          <AppText variant="body" style={[styles.centered, { color: colors.textMuted }]}>
+            Conectando estudiantes, compartiendo trayectos
+          </AppText>
+        </View>
+
+        <View style={styles.actions}>
+          <Button label="Iniciar Sesión" onPress={() => router.push('/(auth)/login')} />
+          <Button
+            label="Registrarse"
+            variant="secondary"
+            onPress={() => router.push('/(auth)/register')}
+          />
+          <Button
+            label="Ajustes de accesibilidad"
+            variant="secondary"
+            onPress={() => router.push('/settings/accessibility')}
+          />
+
+          {__DEV__ ? (
+            <View style={styles.devActions}>
+              <Button
+                label="Catálogo de componentes"
+                variant="secondary"
+                onPress={() => router.push('/dev/catalogo')}
+              />
+              <Button
+                label="Sesión de prueba"
+                variant="secondary"
+                onPress={() => router.push('/dev/sesion')}
+              />
+            </View>
+          ) : null}
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -41,17 +62,28 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  content: {
+    flex: 1,
     justifyContent: 'center',
     padding: spacing.xl,
     gap: spacing.xxl,
   },
+  logoContainer: {
+    alignItems: 'center',
+  },
   texts: {
     gap: spacing.sm,
+    alignItems: 'center',
   },
   centered: {
     textAlign: 'center',
   },
   actions: {
     gap: spacing.md,
+  },
+  devActions: {
+    gap: spacing.sm,
+    marginTop: spacing.md,
   },
 });
