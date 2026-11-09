@@ -44,10 +44,10 @@ Pendientes por etapa: flujos de conductor (E6), calificaciones, notificaciones y
 | TC-03 | Inicio de sesión correcto | Por definir (E4) | — | — | — | Pendiente |
 | TC-04 | Credenciales incorrectas | Por definir (E4) | — | — | — | Pendiente |
 | TC-05 | Correo de otro dominio rechazado | Por definir (E4) | — | — | — | Pendiente |
-| TC-06 | Filtro por sector y por cupos | 1. En Inicio (modo pasajero), abrir "Sectores" y elegir uno. 2. Escribir 3 en "Cantidad de puestos disponibles". 3. Elegir "Todos los sectores" y borrar los puestos. | Paso 1: solo viajes de ese sector. Paso 2: solo viajes con 3 cupos o más. Paso 3: vuelve la lista completa. TalkBack anuncia cuántos viajes se cargaron | — | — | Pendiente |
-| TC-07 | Reservar viaje | 1. Tocar una tarjeta. 2. Tocar el mapa y revisar que se llene la dirección. 3. Tocar "Reservar". 4. Tocar "¡Listo!". | Paso 3: "Reserva realizada con éxito" y vibración. Paso 4: la reserva aparece en Reservas > Pendientes | — | — | Pendiente |
-| TC-08 | Reserva duplicada rechazada | 1. Abrir otra vez el viaje ya reservado. 2. Escribir una dirección y tocar "Reservar". | Mensaje "Ya tienes una reserva en este viaje." con "Reintentar"; no se crea otra reserva | — | — | Pendiente |
-| TC-09 | Cancelar reserva | 1. En Reservas > Pendientes tocar la papelera. 2. Tocar "No, volver". 3. Tocar la papelera y "Sí, cancelar reserva". | Paso 2: la reserva sigue. Paso 3: desaparece de la lista y se anuncia "Reserva cancelada." | — | — | Pendiente |
+| TC-06 | Filtro por sector y por cupos | 1. En Inicio (modo pasajero), abrir "Sectores" y elegir uno. 2. Escribir 3 en "Cantidad de puestos disponibles". 3. Elegir "Todos los sectores" y borrar los puestos. | Paso 1: solo viajes de ese sector. Paso 2: solo viajes con 3 cupos o más. Paso 3: vuelve la lista completa. TalkBack anuncia cuántos viajes se cargaron | Sí sucede | Prueba manual de Sara en su teléfono | Aprobado |
+| TC-07 | Reservar viaje | 1. Tocar una tarjeta. 2. Tocar el mapa y revisar que se llene la dirección. 3. Tocar "Reservar". 4. Tocar "¡Listo!". | Paso 3: "Reserva realizada con éxito" y vibración. Paso 4: la reserva aparece en Reservas > Pendientes | Sí sucede | Prueba manual de Sara en su teléfono | Aprobado |
+| TC-08 | Reserva duplicada rechazada | 1. Abrir otra vez el viaje ya reservado. 2. Escribir una dirección y tocar "Reservar". | Mensaje "Ya tienes una reserva en este viaje." con "Reintentar"; no se crea otra reserva | Sí sucede | Prueba manual de Sara en su teléfono | Aprobado |
+| TC-09 | Cancelar reserva | 1. En Reservas > Pendientes tocar la papelera. 2. Tocar "No, volver". 3. Tocar la papelera y "Sí, cancelar reserva". | Paso 2: la reserva sigue. Paso 3: desaparece de la lista y se anuncia "Reserva cancelada." | Sí sucede | Prueba manual de Sara en su teléfono | Aprobado |
 | TC-10 | Crear viaje | Por definir (E6) | — | — | — | Pendiente |
 | TC-11 | Crear viaje con campos faltantes | Por definir (E6) | — | — | — | Pendiente |
 | TC-12 | Aceptar reservas hasta llenar los cupos (cierre automático) | Por definir (E6) | — | — | — | Pendiente |
@@ -62,3 +62,17 @@ Pendientes por etapa: flujos de conductor (E6), calificaciones, notificaciones y
 | TC-21 | Cerrar sesión limpia la sesión segura | Por definir (E4) | — | — | — | Pendiente |
 | TC-22 | La sesión persiste al reiniciar la app | 1. Iniciar sesión en "Sesión de prueba" con el usuario creado a mano. 2. Cerrar la app por completo (quitarla de recientes) o recargar Expo Go. 3. Abrirla y entrar a "Sesión de prueba". | Sigue con la sesión iniciada y no pide el correo otra vez | Sí lo hace | Prueba manual de Sara en su teléfono | Aprobado |
 | TC-23 | RLS: un usuario no lee datos ajenos | Por definir (E2) | — | — | — | Pendiente |
+
+## 3. Verificaciones en vivo de la Etapa 5
+
+Lo que la Etapa 5 exige además de los casos TC. Mientras no exista la pantalla del conductor (Etapa 6), aceptar y rechazar se hace con las RPC reales desde el SQL Editor.
+
+| ID | Descripción | Pasos | Resultado esperado | Resultado real | Evidencia | Estado |
+| --- | --- | --- | --- | --- | --- | --- |
+| V5-01 | Reserva aceptada en vivo | Con la pestaña Reservas abierta, ejecutar `aceptar_reserva` como el conductor. | La reserva pasa sola de Pendientes a Aceptados | Sí sucede | Prueba manual de Sara en su teléfono | Aprobado |
+| V5-02 | Reserva rechazada en vivo | Con la pestaña Reservas abierta, ejecutar `rechazar_reserva` como el conductor. | La reserva pasa sola a Rechazados | Sí sucede | Prueba manual de Sara en su teléfono | Aprobado |
+| V5-03 | Cupos en vivo | Con Inicio abierto y la tarjeta a la vista, aceptar una reserva de ese viaje. | La tarjeta pasa de "Cupos: 4" a "Cupos: 3" sin tocar el teléfono | Sí sucede | Prueba manual de Sara en su teléfono | Aprobado |
+| V5-04 | Lista de 200 viajes | Cargar supabase/dev_seed_viajes.sql y bajar rápido por la lista de Inicio. | La lista se mueve fluida y sigue cargando páginas | Sí sucede | Prueba manual de Sara en su teléfono | Aprobado |
+| V5-05 | Reservar solo escribiendo | Reservar un viaje sin tocar el mapa, escribiendo la dirección. | La reserva se crea y aparece en Pendientes | Sí sucede | Prueba manual de Sara en su teléfono | Aprobado |
+| V5-06 | TalkBack en la tarjeta de viaje | Con TalkBack, recorrer las tarjetas de Inicio. | Cada tarjeta se lee como una sola frase; el "+" no es un foco aparte | — | — | Pendiente |
+| V5-07 | TalkBack en la papelera | Con TalkBack, recorrer una reserva pendiente. | Los datos son un foco y la papelera otro, con el nombre "Cancelar reserva de …" | — | — | Pendiente |
