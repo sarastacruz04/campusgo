@@ -130,3 +130,111 @@ export function validateVerificationCode(code: string): string | null {
   }
   return null;
 }
+
+/**
+ * Valida formato de fecha DD/MM/AAAA.
+ */
+export function validateDate(dateStr: string): string | null {
+  const trimmed = dateStr.trim();
+  if (!trimmed) {
+    return 'Por favor ingresa la fecha del viaje.';
+  }
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(trimmed);
+  if (!match) {
+    return 'La fecha debe tener el formato DD/MM/AAAA (ej: 15/11/2026).';
+  }
+  const day = parseInt(match[1], 10);
+  const month = parseInt(match[2], 10);
+  const year = parseInt(match[3], 10);
+  if (month < 1 || month > 12 || day < 1 || day > 31) {
+    return 'La fecha ingresada no es válida.';
+  }
+  const date = new Date(year, month - 1, day);
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+    return 'La fecha ingresada no existe en el calendario.';
+  }
+  return null;
+}
+
+/**
+ * Valida formato de hora HH:MM (24 horas).
+ */
+export function validateTime(timeStr: string): string | null {
+  const trimmed = timeStr.trim();
+  if (!trimmed) {
+    return 'Por favor ingresa la hora de salida.';
+  }
+  const match = /^(\d{2}):(\d{2})$/.exec(trimmed);
+  if (!match) {
+    return 'La hora debe tener el formato HH:MM (ej: 07:30 o 14:15).';
+  }
+  const hours = parseInt(match[1], 10);
+  const minutes = parseInt(match[2], 10);
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+    return 'La hora ingresada no es válida.';
+  }
+  return null;
+}
+
+/**
+ * Valida que la salida combinada (fecha y hora) sea en el futuro (R4).
+ */
+export function validateFutureDeparture(
+  dateStr: string,
+  timeStr: string,
+): { error: string | null; iso: string | null } {
+  const errDate = validateDate(dateStr);
+  if (errDate) return { error: errDate, iso: null };
+  const errTime = validateTime(timeStr);
+  if (errTime) return { error: errTime, iso: null };
+
+  const [d, m, y] = dateStr
+    .trim()
+    .split('/')
+    .map((n) => parseInt(n, 10));
+  const [h, min] = timeStr
+    .trim()
+    .split(':')
+    .map((n) => parseInt(n, 10));
+  const departureDate = new Date(y, m - 1, d, h, min, 0, 0);
+
+  if (departureDate.getTime() <= Date.now()) {
+    return {
+      error: 'La hora de salida debe ser en el futuro.',
+      iso: null,
+    };
+  }
+
+  return { error: null, iso: departureDate.toISOString() };
+}
+
+/**
+ * Valida los cupos ofertados por el conductor para el viaje (R4: entero de 1 hasta la capacidad del vehículo).
+ */
+export function validateTripCupos(cupos: string | number, maxCapacidad = 8): string | null {
+  const parsed = typeof cupos === 'number' ? cupos : parseInt(cupos.trim(), 10);
+  if (isNaN(parsed) || !Number.isInteger(parsed)) {
+    return 'Los cupos deben ser un número entero.';
+  }
+  if (parsed < 1) {
+    return 'Debes ofrecer al menos 1 cupo.';
+  }
+  if (parsed > maxCapacidad) {
+    return `Los cupos no pueden superar la capacidad de tu vehículo (${maxCapacidad} puestos).`;
+  }
+  return null;
+}
+
+/**
+ * Valida el valor por cupo en pesos colombianos (R4: 0 o más).
+ */
+export function validatePrice(price: string | number): string | null {
+  const parsed = typeof price === 'number' ? price : parseInt(price.trim(), 10);
+  if (isNaN(parsed) || !Number.isInteger(parsed)) {
+    return 'El valor por cupo debe ser un número entero en pesos.';
+  }
+  if (parsed < 0) {
+    return 'El valor no puede ser negativo.';
+  }
+  return null;
+}

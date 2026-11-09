@@ -1,11 +1,16 @@
 import {
   validateCapacidad,
+  validateDate,
   validateEmail,
+  validateFutureDeparture,
   validateIdUniversidad,
   validatePassword,
   validatePhone,
   validatePlaca,
+  validatePrice,
   validateRequired,
+  validateTime,
+  validateTripCupos,
   validateVerificationCode,
 } from '@/lib/validators';
 
@@ -131,6 +136,42 @@ describe('lib/validators', () => {
       expect(validateVerificationCode('12345')).toMatch(/exactamente 6 dígitos/i);
       expect(validateVerificationCode('1234567')).toMatch(/exactamente 6 dígitos/i);
       expect(validateVerificationCode('12345a')).toMatch(/exactamente 6 dígitos/i);
+    });
+  });
+
+  describe('validateDate y validateTime', () => {
+    it('valida formatos DD/MM/AAAA y HH:MM', () => {
+      expect(validateDate('15/11/2026')).toBeNull();
+      expect(validateDate('32/01/2026')).toMatch(/no es válida|no existe/i);
+      expect(validateDate('15-11-2026')).toMatch(/DD\/MM\/AAAA/i);
+
+      expect(validateTime('08:30')).toBeNull();
+      expect(validateTime('25:00')).toMatch(/no es válida/i);
+      expect(validateTime('8:30')).toMatch(/HH:MM/i);
+    });
+
+    it('valida que la salida sea en el futuro', () => {
+      const past = validateFutureDeparture('01/01/2020', '10:00');
+      expect(past.error).toMatch(/futuro/i);
+      expect(past.iso).toBeNull();
+
+      const future = validateFutureDeparture('31/12/2099', '12:00');
+      expect(future.error).toBeNull();
+      expect(future.iso).toContain('2099');
+    });
+  });
+
+  describe('validateTripCupos y validatePrice', () => {
+    it('valida cupos del viaje según la capacidad máxima del carro', () => {
+      expect(validateTripCupos(3, 4)).toBeNull();
+      expect(validateTripCupos(0, 4)).toMatch(/al menos 1 cupo/i);
+      expect(validateTripCupos(5, 4)).toMatch(/superar la capacidad/i);
+    });
+
+    it('valida valor por cupo no negativo', () => {
+      expect(validatePrice(5000)).toBeNull();
+      expect(validatePrice(0)).toBeNull();
+      expect(validatePrice(-100)).toMatch(/no puede ser negativo/i);
     });
   });
 });
