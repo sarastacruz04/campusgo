@@ -147,10 +147,10 @@ Cada ID queda con archivo exacto, prueba y resultado en docs/MATRIZ_ACCESIBILIDA
 
 - [x] React Native con Expo SDK 58, que abre en Expo Go → §3, E0 (evidencia: proyecto en SDK 58, bundle de Android compilado con `expo export` y Sara confirmó el 2026-11-06 que la app abre en Expo Go en su teléfono)
 - [ ] Navegación con Expo Router → §3, §4
-- [ ] Estado global con Redux Toolkit → §3, E3
+- [x] Estado global con Redux Toolkit → §3, E3 (evidencia: store/store.ts con 9 slices en features/ y pruebas en __tests__/features/, 2026-11-07)
 - [ ] Backend y persistencia en Supabase (Auth, Postgres, Realtime, Storage, RLS) → §3, §5, E2 (evidencia parcial: migraciones 0001 y 0002 listas; Samuel debe aplicarlas en su proyecto y confirmar)
-- [ ] Caché sin conexión con SQLite → §3, E3
-- [ ] Sesión guardada en almacenamiento seguro → §3, E3
+- [x] Caché sin conexión con SQLite → §3, E3 (evidencia: db/cache.ts, __tests__/db/cache.test.ts y TC-17 aprobado en el teléfono)
+- [x] Sesión guardada en almacenamiento seguro → §3, E3 (evidencia: services/secureSessionStorage.ts y TC-22 aprobado en el teléfono)
 - [ ] Mapas y ubicación sin claves de Google ni servicios de pago → §3, §6
 - [ ] Regla de negocio: cierre automático de reservas cuando los cupos llegan a cero → §5, E2, E6 (evidencia parcial: RPC `aceptar_reserva` implementada en 0001; verificación funcional pendiente de aplicar en Supabase)
 - [ ] Verificación por código con correo institucional @unisabana.edu.co → §5 (R16), E4

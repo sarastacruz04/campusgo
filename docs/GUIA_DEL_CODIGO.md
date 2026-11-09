@@ -2,15 +2,20 @@
 
 Guía para entender qué hay en el código, cómo funciona y dónde tocar si en la defensa piden un cambio. Se actualiza al terminar cada etapa (la tuya o la de Samuel).
 
-- **Incluye hasta:** Etapa 0 (preparación) y Etapa 1 (sistema de diseño y accesibilidad base).
-- **Todavía no existe:** base de datos, inicio de sesión, Redux, viajes, reservas ni mapas (Etapas 2 a 7).
+- **Incluye hasta:** Etapa 0 (preparación), Etapa 1 (sistema de diseño y accesibilidad base), Etapa 2 (base de datos, Samuel) y Etapa 3 (capa de cliente: Supabase, Redux, caché y Realtime).
+- **Todavía no existe:** las pantallas reales de registro, inicio de sesión, viajes, reservas, mapas, chat y notificaciones (Etapas 4 a 7). La lógica que usarán ya está en los slices y servicios (secciones 12 y 13).
 - Las preguntas de defensa con respuesta modelo están en [GUIA_DEFENSA.md](GUIA_DEFENSA.md). Esta guía explica el código; aquella, cómo responder.
 
 ---
 
 ## 1. La idea en una frase
 
-Hasta ahora CampusGo es **una caja de piezas accesibles**: colores, letras, botones, campos, diálogos y el esqueleto de las pantallas. Todavía no hay viajes ni usuarios. Las etapas siguientes arman las pantallas reales con estas piezas, así que si una pieza cumple la accesibilidad, todas las pantallas que la usen también.
+Hasta ahora CampusGo tiene tres capas listas:
+- **Abajo, la base de datos (Etapa 2):** Supabase guarda usuarios, carros, viajes y reservas, y aplica las reglas del negocio.
+- **En el medio, la capa de cliente (Etapa 3):** servicios que hablan con Supabase, Redux que guarda el estado, caché para usar la app sin internet y Realtime para recibir cambios en vivo.
+- **Arriba, las piezas accesibles (Etapa 1):** colores, letras, botones, campos, diálogos y el esqueleto de las pantallas.
+
+Las etapas siguientes arman las pantallas reales uniendo las tres capas.
 
 ---
 
@@ -22,18 +27,27 @@ campusgo/
 │   ├── _layout.tsx       Envuelve toda la app: fuentes, tema y navegación.
 │   ├── index.tsx         Pantalla inicial provisional (ruta "/").
 │   ├── settings/accessibility.tsx   Ajustes de accesibilidad.
-│   └── dev/catalogo.tsx  Catálogo de componentes (solo en desarrollo).
+│   ├── dev/catalogo.tsx  Catálogo de componentes (solo en desarrollo).
+│   └── dev/sesion.tsx    Sesión de prueba de la Etapa 3 (solo en desarrollo).
 ├── components/ui/        Las piezas reutilizables (botones, campos, diálogos…).
-├── hooks/                Funciones de accesibilidad (anunciar, vibrar, foco…).
+├── components/ConnectionBanner.tsx   Banner "Sin conexión" (lee Redux).
+├── hooks/                Accesibilidad (anunciar, vibrar, foco…) y conexión con el
+│                         exterior (sesión, internet, Realtime).
 ├── theme/                Colores, letras, medidas y el "proveedor" del tema.
-├── lib/contrast.ts       La fórmula matemática del contraste.
+├── services/             Lo único que habla con Supabase (uno por tema).
+├── store/                El store de Redux y sus ayudas.
+├── features/             Un dominio por carpeta: slice, thunks y selectores.
+├── db/                   La caché local en SQLite.
+├── types/                Tipos de la base de datos y de la app.
+├── lib/                  Contraste y formatos de texto.
+├── supabase/             Migraciones SQL, semilla y pruebas de RLS.
 ├── scripts/check-contrast.ts   El script que revisa los colores.
 ├── __tests__/            Pruebas automáticas.
-├── test-utils/render.tsx Ayuda para las pruebas.
+├── test-utils/           Ayudas y datos de ejemplo SOLO para las pruebas.
 └── docs/                 Documentación (esta guía, decisiones, matriz, etc.).
 ```
 
-Las carpetas `features/`, `services/`, `store/`, `db/`, `types/`, `supabase/` y `components/trips` y `maps` existen pero están vacías (tienen un `.gitkeep`). Se llenan desde la Etapa 2.
+Las carpetas `components/trips` y `components/maps` siguen vacías; se llenan en la Etapa 5.
 
 ---
 
@@ -43,10 +57,11 @@ Las carpetas `features/`, `services/`, `store/`, `db/`, `types/`, `supabase/` y 
 2. Expo Router mira la carpeta **app/** y convierte cada archivo en una pantalla: `app/index.tsx` es `/`, `app/settings/accessibility.tsx` es `/settings/accessibility`.
 3. Antes de cualquier pantalla se ejecuta **app/_layout.tsx**, que hace esto en orden:
    - Deja visible la pantalla de carga nativa (splash) con `SplashScreen.preventAutoHideAsync()`.
-   - Envuelve todo con `SafeAreaProvider` (para no dibujar debajo de la cámara o la barra de estado) y con `ThemeProvider` (el tema y las preferencias).
+   - Envuelve todo con `SafeAreaProvider` (para no dibujar debajo de la cámara o la barra de estado), con el `Provider` de Redux (el estado global, Etapa 3) y con `ThemeProvider` (el tema y las preferencias).
    - Carga la fuente Noto Sans en tres pesos: normal, semi negrita y negrita (`useFonts`).
-   - Espera dos cosas: que carguen las fuentes y que el ThemeProvider haya leído las preferencias guardadas (`ready`). Mientras tanto devuelve `null` y se sigue viendo el splash.
-   - Cuando ambas están listas, oculta el splash y muestra la navegación (`Stack`) sin encabezado nativo. Si el usuario activó "reducir movimiento", el cambio de pantalla es un fundido de 150 ms en lugar de deslizar.
+   - Arranca tres conexiones que viven en toda la app (sección 13.5): la sesión (`useAuthSession`), el estado de internet (`useConnectivity`) y Realtime (`useRealtime…`).
+   - Espera tres cosas: que carguen las fuentes, que el ThemeProvider haya leído las preferencias guardadas (`ready`) y que se haya leído la sesión guardada (`authInitialized`). Mientras tanto devuelve `null` y se sigue viendo el splash.
+   - Cuando todo está listo, oculta el splash y muestra la navegación (`Stack`) sin encabezado nativo. Si el usuario activó "reducir movimiento", el cambio de pantalla es un fundido de 150 ms en lugar de deslizar.
    - Si la fuente fallara, la app sigue con la del sistema en vez de quedarse trabada.
 4. Se muestra **app/index.tsx**.
 
@@ -240,6 +255,7 @@ Regla de todas: **no conocen Redux ni Supabase**. Reciben datos por props y avis
 | `/` | app/index.tsx | **Provisional.** Logo grande, título "Te damos la bienvenida", el lema y dos botones: "Ajustes de accesibilidad" y, solo en desarrollo, "Catálogo de componentes". En la Etapa 4 será la bienvenida real con "Iniciar Sesión" y "Registrarse". |
 | `/settings/accessibility` | app/settings/accessibility.tsx | Tema (Sistema, Claro, Oscuro, Alto contraste), Tamaño del texto (Sistema, Grande, Extra grande) con una frase de ejemplo, y los interruptores Reducir movimiento y Vibración. Todo se aplica al instante y queda guardado. |
 | `/dev/catalogo` | app/dev/catalogo.tsx | Todas las piezas juntas para revisarlas con TalkBack. Arriba tiene un selector de tema. Si la app no está en desarrollo (`__DEV__` falso), redirige a `/`. |
+| `/dev/sesion` | app/dev/sesion.tsx | **Temporal (Etapa 3), solo en desarrollo.** Iniciar sesión con un usuario creado a mano; muestra nombre, modo, carro, sectores, viajes abiertos, reservas y notificaciones sin leer, con el banner "Sin conexión" y "Reintentar". Tiene "Recargar datos" y "Cerrar Sesión" (con diálogo). En la Etapa 4 la reemplazan las pantallas reales. |
 
 ---
 
@@ -250,7 +266,7 @@ Regla de todas: **no conocen Redux ni Supabase**. Reciben datos por props y avis
 | `npm start` | Abre el servidor; se escanea el QR con Expo Go | — |
 | `npm run typecheck` | Revisa los tipos de TypeScript | Pasa |
 | `npm run lint` | Revisa estilo, formato y errores de accesibilidad en el código | Pasa |
-| `npm test` | Corre las pruebas automáticas | 73 de 73 |
+| `npm test` | Corre las pruebas automáticas | 125 de 125 |
 | `npm run a11y:contrast` | Revisa los colores | 66 de 66 |
 | `npm run format` | Ordena el formato del código con Prettier | — |
 
@@ -261,8 +277,15 @@ Qué revisa cada archivo de `__tests__/`:
 - **components/**: cada pieza tiene su rol, nombre, estado y tamaño mínimo correctos; las que exigen etiqueta no compilan sin ella.
 - **hooks/hooks.test.tsx**: anuncia, vibra según la plataforma y el ajuste, y limpia el listener de "reducir movimiento".
 - **smoke.test.tsx**: la pantalla inicial abre con el logo y el título.
+- **services/errors.test.ts** (E3): cada tipo de error se traduce al mensaje correcto en español.
+- **db/cache.test.ts** (E3): la caché guarda, lee y borra por usuario, y `loadWithCache` usa la copia solo cuando falta la red.
+- **features/** (E3): los thunks y reducers de cada dominio con servicios simulados. Por ejemplo: la búsqueda paginada, la respuesta vieja ignorada, el viaje lleno que sale de la búsqueda, el error de reserva duplicada y el cierre de sesión que limpia todo.
+- **hooks/realtime.test.tsx** (E3): las suscripciones se cierran al desmontar y la notificación nueva se anuncia.
 
-Archivos de apoyo: **jest.setup.ts** simula AsyncStorage solo en las pruebas, y **test-utils/render.tsx** (`renderWithProviders`) renderiza con el tema como en la app real.
+Archivos de apoyo:
+- **jest.setup.ts** simula AsyncStorage, NetInfo y el cliente de Supabase, solo en las pruebas.
+- **test-utils/render.tsx** (`renderWithProviders`) renderiza con Redux y el tema, como en la app real.
+- **test-utils/factories.ts** tiene datos de ejemplo y **test-utils/fakeDatabase.ts** una base SQLite falsa en memoria; los dos se usan solo en las pruebas.
 
 Además, `eslint.config.js` incluye el plugin de accesibilidad: si alguien escribe un rol inválido, `npm run lint` falla. La única regla apagada es la que obligaba a poner pista en todo (D-08).
 
@@ -285,6 +308,12 @@ Además, `eslint.config.js` incluye el plugin de accesibilidad: si alguien escri
 | Cambiar el tiempo antes de mover el foco al título | hooks/useScreenFocus.ts, `SCREEN_FOCUS_DELAY_MS` | Cambio 500 | TalkBack al entrar a una pantalla |
 | Que el diálogo no tenga animación nunca | components/ui/ConfirmDialog.tsx, `animationType` | Pongo `'none'` | Abro un diálogo |
 | Cambiar los colores del tema oscuro | theme/colors.ts, objeto `dark` | Cambio el valor | `npm run a11y:contrast` y Ajustes > Oscuro |
+| Cambiar un mensaje de error (por ejemplo, el de reserva duplicada) | services/errors.ts, mapa `RPC_MESSAGES` (o `AUTH_MESSAGES` para inicio de sesión) | Cambio el texto | `npm test` (errors.test y reservations.test comparan el texto) |
+| Traer más o menos viajes por página | services/tripService.ts, `TRIPS_PAGE_SIZE` | Cambio 20 | La búsqueda trae páginas del nuevo tamaño; `hasMore` se ajusta solo |
+| Cambiar el orden de la búsqueda | services/tripService.ts, `searchOpenTrips`, línea `.order('salida_at', …)` | Cambio la columna o `ascending` | "Sesión de prueba" o el inicio de pasajero (E5) |
+| Agregar un filtro a la búsqueda | types/domain.ts (`TripFilters`), services/tripService.ts (`searchOpenTrips`, un `query = query.eq(…)`) y features/trips/slice.ts (valor inicial de `filters`) | Agrego el campo y su condición | `npm run typecheck` muestra lo que falta; luego `npm test` |
+| Guardar otra cosa en la caché | db/cache.ts, tipo `CacheKey`, y el thunk que la lee con `loadWithCache` | Agrego la clave nueva | `npm test`; en el teléfono, con modo avión |
+| Cambiar el texto del banner sin conexión | components/ConnectionBanner.tsx | Cambio el mensaje | Modo avión en "Sesión de prueba" |
 
 **Antes de cualquier commit:** `npm run typecheck`, `npm run lint` y `npm test` deben pasar.
 
@@ -320,11 +349,124 @@ Resultado: 18 de los 26 compromisos de accesibilidad están aprobados. El detall
 - **hitSlop**: área táctil invisible alrededor de un elemento.
 - **lineHeight**: alto de cada línea de texto.
 - **WCAG AA**: el estándar de accesibilidad que seguimos (contraste de 4,5:1 para texto).
+- **Supabase**: el servicio en la nube que da la base de datos (PostgreSQL), los usuarios (Auth), los archivos (Storage) y los cambios en vivo (Realtime).
+- **RLS (Row Level Security)**: reglas en la base que deciden qué filas puede leer o cambiar cada usuario.
+- **RPC**: una función de la base que la app llama por nombre (por ejemplo, `crear_reserva`).
+- **Redux / store**: el lugar único donde vive el estado de la app (sesión, viajes, reservas…).
+- **Slice**: la parte del store de un tema, con su estado inicial y sus reducers.
+- **Reducer**: la función que recibe una acción y devuelve el nuevo estado.
+- **Thunk**: una acción asíncrona; pasa por pending → fulfilled o rejected.
+- **Selector**: una función que lee una parte del estado; memoizado = recuerda su resultado.
+- **Caché**: copia local de los datos para verlos sin internet.
+- **Realtime**: aviso instantáneo de la base cuando cambia una fila.
 
 ---
 
-## 12. Registro de actualizaciones de esta guía
+## 12. La base de datos (Etapa 2, Samuel)
+
+Vive en `supabase/`. Los detalles están en [API_CONTRATOS.md](API_CONTRATOS.md).
+
+- **Tablas:** `profiles` (perfil de cada usuario), `sectores` (11 zonas sembradas), `vehiculos` (un carro por conductor), `viajes`, `reservas`, `calificaciones` (más la vista `promedio_calificaciones`), `notificaciones` y `mensajes`.
+- **Reglas en la base, no solo en la app:**
+  - Correo @unisabana.edu.co (CHECK).
+  - Placa con 3 letras y 3 números.
+  - Un pasajero no reserva dos veces el mismo viaje (UNIQUE).
+  - Los cupos nunca superan el total.
+- **Trigger `handle_new_user`:** cuando alguien se registra, crea su fila en `profiles` con los datos que manda la app.
+- **RPC (funciones que la app llama por nombre):**
+  - `cambiar_modo`: exige carro para ser conductor.
+  - `crear_reserva`: bloquea la fila del viaje para que dos personas no tomen el último cupo.
+  - `aceptar_reserva`: descuenta un cupo y, si llega a 0, pone el viaje en `lleno`. Ese es el **cierre automático**.
+  - `rechazar_reserva` y `cancelar_reserva`: esta última devuelve el cupo.
+  - `iniciar_viaje`, `finalizar_viaje` y `cancelar_viaje`.
+- **Triggers de notificaciones:** crean una notificación cuando hay una solicitud nueva, una reserva aceptada o rechazada, un viaje iniciado, finalizado o cancelado, o un mensaje nuevo.
+- **RLS:** cada tabla tiene reglas de quién lee y quién escribe. Por ejemplo, un pasajero solo ve viajes abiertos con salida futura o en los que tiene una reserva aceptada.
+- **Storage:** buckets privados `avatars`, `vehiculos` y `soat`, con la ruta `{id del usuario}/archivo`.
+- **Migración 0003 (Sara, Etapa 3):** activa Realtime en viajes, reservas, notificaciones y mensajes.
+- **Migración 0004 (Sara, Etapa 3):** permite crear un usuario sin datos de perfil (por ejemplo, desde el panel). `id_universidad` y `telefono` quedan en NULL con `registro_completo = false`. Antes el trigger ponía texto vacío, los CHECK de 10 dígitos lo rechazaban y Supabase no creaba el usuario ("Database error creating new user"). Ver D-40.
+- **Migración 0005 (Sara, Etapa 3):** corrige una **recursión infinita** entre políticas. La de `viajes` preguntaba por `reservas`, y la de `reservas` preguntaba por `viajes`. PostgreSQL rechazaba la búsqueda de viajes con el error 42P17. Ahora las dos políticas usan funciones `SECURITY DEFINER` (`tiene_reserva_aceptada` y `es_conductor_del_viaje`), que hacen la comprobación sin pasar por RLS y cortan el ciclo. Quién ve qué no cambió. Ver D-41.
+
+---
+
+## 13. La capa de cliente (Etapa 3)
+
+Es la parte de la app que conecta las pantallas con Supabase. Regla de oro: **la pantalla nunca llama a Supabase**. Todo pasa por este camino:
+
+```
+Pantalla → dispatch(thunk) → servicio → Supabase → reducer → selector → Pantalla
+```
+
+### 13.1 El cliente y la sesión segura (services/supabase.ts y secureSessionStorage.ts)
+
+- `supabase.ts` crea **un solo cliente** con la URL y la anon key del `.env`. Si faltan, la app muestra un error que dice qué hacer.
+- La anon key es pública por diseño: lo que protege los datos es RLS. La `service_role` key nunca entra a la app.
+- **Sesión segura:** la sesión (los tokens) se cifra con AES-256. La llave va en SecureStore (el almacén seguro del teléfono) y el texto cifrado en AsyncStorage. Se hace así porque SecureStore puede rechazar valores de más de 2048 bytes y la sesión pesa más (D-33).
+- **Refresco del token:** `bindAutoRefreshToAppState` renueva el token solo con la app en primer plano.
+
+### 13.2 Los errores (services/errors.ts)
+
+- Todo error se convierte en un **AppError** `{ code, message }` con el mensaje en español.
+- `toAppError` es el único traductor. Ejemplos:
+  - Una RPC que falla con `reserva_duplicada` → "Ya tienes una reserva en este viaje.".
+  - Sin red → "Sin conexión a internet…".
+  - Correo de otro dominio → "Solo se aceptan correos @unisabana.edu.co.".
+- `unwrap(respuesta)` devuelve los datos o lanza el AppError. Por eso cada servicio cabe en pocas líneas.
+
+### 13.3 Los servicios (services/*Service.ts)
+
+Uno por tema. Cada uno solo hace consultas a Supabase y devuelve datos tipados.
+
+| Servicio | Lo más importante |
+| --- | --- |
+| authService | Iniciar sesión, registrarse (manda nombre, apellido, ID y teléfono para el trigger), verificar el código de 6 dígitos, reenviarlo, cerrar sesión, leer la sesión guardada y escuchar sus cambios. |
+| tripService | Sectores, búsqueda de viajes abiertos **por páginas de 20** con filtros, mis viajes creados, crear un viaje e iniciar, finalizar o cancelar uno. Cada viaje trae el nombre del sector y del conductor en la misma consulta. |
+| reservationService | Reservar (RPC), mis reservas, solicitudes de mis viajes, y aceptar, rechazar o cancelar. |
+| profileService y vehicleService | Leer y editar el perfil, cambiar de modo, y registrar o eliminar el carro. |
+| storageService, ratingService, notificationService y chatService | Fotos, calificaciones y promedios, notificaciones y chat. |
+
+Los servicios de viajes, reservas, notificaciones y chat también tienen `subscribeTo…`. Abren un canal de Realtime y devuelven la función que lo cierra.
+
+### 13.4 Redux (store/ y features/)
+
+- **store/store.ts** une los 9 slices: `auth`, `profile`, `vehicle`, `trips`, `reservations`, `notifications`, `chat`, `ratings` y `settings`. `makeStore()` permite que cada prueba cree su propio store.
+- **store/hooks.ts:** `useAppDispatch` y `useAppSelector` son los hooks tipados que usan las pantallas.
+- **Cada carpeta de features/** tiene tres archivos:
+  - **thunks.ts:** las acciones que van a la red. Todas siguen el mismo molde: `try { return await servicio(...) } catch (error) { return rejectWithValue(toAppError(error)) }`.
+  - **slice.ts:** el estado y cómo cambia en `pending`, `fulfilled` y `rejected`. Cada petición tiene `status` (`idle`, `loading`, `succeeded` o `failed`) y `error`.
+  - **selectors.ts:** cómo leer el estado. Los que arman listas usan `createSelector` para no recalcular sin necesidad.
+- **Normalización (`createEntityAdapter`):** viajes, reservas, notificaciones y mensajes se guardan como `{ ids, entities }`. Un viaje existe una sola vez aunque esté en la búsqueda y en "Creados".
+- **Cerrar sesión limpia todo:** `signOut` borra la sesión y la caché del usuario y despacha `sessionCleared`. Todos los slices escuchan esa acción y vuelven a su estado inicial.
+
+Lógica clave de **features/trips** (la más preguntable):
+- **Búsqueda paginada:** `searchTrips({ reset: true })` trae la primera página y `searchTrips({ reset: false })` la siguiente. La `condition` impide pedir otra página si ya está cargando o si no hay más.
+- **Respuesta obsoleta:** cada búsqueda tiene un `requestId`. Si llega tarde la respuesta de una búsqueda vieja, el reducer la ignora (D-37).
+- **Cierre automático en vivo:** cuando llega por Realtime un viaje `lleno` o sin cupos, `tripChanged` lo saca de la búsqueda. Si solo cambiaron los cupos, actualiza la tarjeta.
+
+### 13.5 La caché y la conexión (db/ y hooks/)
+
+- **db/database.ts** abre SQLite y crea la tabla `cache` (migración con `PRAGMA user_version`).
+- **db/cache.ts → `loadWithCache`:**
+  - Con red: pide los datos y guarda una copia con la hora.
+  - Sin red (o si falla por red): devuelve la copia con `fromCache: true`.
+  - Sin copia: error "Sin conexión" con "Reintentar".
+  - Se usa para el perfil, la búsqueda de viajes, mis viajes creados y mis reservas.
+- **hooks/useConnectivity:** escucha NetInfo y guarda en `settings.isOnline` si hay internet.
+- **hooks/useAuthSession:** al abrir la app lee la sesión guardada (por eso la sesión persiste al reiniciar) y escucha sus cambios.
+- **hooks/useRealtime:** abre los canales de viajes, reservas y notificaciones con sesión iniciada. Cada notificación nueva se anuncia a TalkBack.
+- **Los tres hooks cierran lo que abren** en el `return` de su `useEffect` (cleanup).
+- **components/ConnectionBanner:** muestra "Sin conexión: mostrando datos guardados (guardados a las 7:05 a. m.)".
+
+### 13.6 Lo que encontramos al leer la base (para Samuel)
+
+Están en [API_CONTRATOS.md](API_CONTRATOS.md), sección "Hallazgos de la Etapa 3":
+- Algunas políticas de UPDATE dejan cambiar directamente el estado de una reserva, el modo del perfil o los cupos de un viaje, sin pasar por las RPC.
+- Realtime no avisa al pasajero cuando un viaje que estaba mirando se llena, porque RLS ya no le deja verlo. La Etapa 5 debe volver a consultar al entrar a la pantalla.
+
+---
+
+## 14. Registro de actualizaciones de esta guía
 
 | Fecha | Etapa | Quién la hizo | Qué se agregó a la guía |
 | --- | --- | --- | --- |
 | 2026-11-06 | E0 y E1 | Sara | Primera versión: arranque de la app, sistema de diseño, hooks, componentes, pantallas, pruebas, recetas y hallazgos en el teléfono |
+| 2026-11-07 | E2 y E3 | Samuel (E2) y Sara (E3) | Resumen de la base de datos (sección 12), la capa de cliente (sección 13), la pantalla de sesión de prueba, las pruebas nuevas, 6 recetas más y términos de Supabase y Redux en el glosario |

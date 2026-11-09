@@ -6,5 +6,6 @@ package-lock.json
 design/
 assets/
 expo-env.d.ts
+tsconfig.json
 docs/
 *.md

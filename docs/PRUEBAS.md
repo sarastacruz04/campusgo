@@ -19,11 +19,18 @@ Se ejecutan con `npm test` (jest-expo y Testing Library).
 | __tests__/components/feedback.test.tsx | ConfirmDialog (orden seguro, modal, escape, foco al título), StatusBanner (anuncio, un solo foco, Reintentar), LoadingState y StepIndicator. | E1 | Aprobado |
 | __tests__/components/identity.test.tsx | Logo (con nombre o decorativo), AppText (escalado, tamaño de Ajustes, alto contraste), ScreenTitle (foco), PhotoPicker ("foto cargada") y orden de foco de ScreenLayout. | E1 | Aprobado |
 | __tests__/hooks/hooks.test.tsx | useAnnounce (anuncia en Android y en iOS), useReduceMotion (sistema, preferencia y cleanup del listener) y useHaptics (Android, iOS y apagado). | E1 | Aprobado |
-| `npm run a11y:contrast` | 22 pares de color por tema en claro, oscuro y alto contraste. | E1 | Aprobado: 66 de 66 pares cumplen WCAG AA |
+| __tests__/services/errors.test.ts | Traducción de errores: códigos de las RPC (P0001), Supabase Auth, falta de red, correo de otro dominio (R1), códigos de PostgreSQL y `unwrap`. | E3 | Aprobado |
+| __tests__/db/cache.test.ts | Caché SQLite (con una base falsa en memoria): guardar, leer y borrar por usuario; `loadWithCache` con red, sin red, con fallo de red, sin copia (sin_conexion) y sin tapar errores que no son de red. | E3 | Aprobado |
+| __tests__/features/auth.test.ts | signIn (éxito y error en español), signUp (correo pendiente), restoreSession (inicializa con y sin sesión) y signOut (borra la caché y limpia todos los slices). | E3 | Aprobado |
+| __tests__/features/trips.test.ts | Búsqueda paginada, condición de "no hay más", respuesta obsoleta ignorada, caché sin conexión, error sin conexión, cierre automático en vivo (viaje lleno sale de la búsqueda), crear viaje, error de RPC y selector memoizado. | E3 | Aprobado |
+| __tests__/features/reservations.test.ts | Reservas por estado, cambio de estado en vivo, crear, reserva duplicada (error de RPC), cancelar y solicitudes pendientes del conductor. | E3 | Aprobado |
+| __tests__/features/domains.test.ts | Perfil (nombre completo, error sin carro al cambiar de modo), vehículo (registrar y eliminar), notificaciones (no leídas, en vivo, marcar todas), chat (orden, sin duplicados, largo máximo), calificaciones (promedio numérico) y conexión. | E3 | Aprobado |
+| __tests__/hooks/realtime.test.tsx | Las suscripciones Realtime se abren con sesión y se cierran en el cleanup; la notificación nueva entra al store y se anuncia; useConnectivity escucha NetInfo y deja de escuchar; banner "Sin conexión" con la hora. | E3 | Aprobado |
+| __tests__/lib/format.test.ts | Hora en formato de 12 horas de Colombia ("7:05 a. m."). | E3 | Aprobado |
 
-Última ejecución: 2026-11-06, `npm test` con 11 archivos y 73 de 73 pruebas aprobadas, ejecutado por Claude Code en WSL (Node 22.20.0).
+Última ejecución: 2026-11-07, `npm test` con 19 archivos y 125 de 125 pruebas aprobadas, ejecutado por Claude Code en WSL (Node 22.20.0). Los servicios se simulan solo dentro de las pruebas.
 
-Pendientes por etapa: validators, reducers, selectores, thunks con servicios simulados, flujos de pantalla y pruebas SQL de RLS (sección 10).
+Pendientes por etapa: validators (E4), flujos de pantalla (E4 a E7) y pruebas SQL de RLS (supabase/tests/rls.sql, E2).
 
 ## 2. Casos funcionales
 
@@ -45,10 +52,10 @@ Pendientes por etapa: validators, reducers, selectores, thunks con servicios sim
 | TC-14 | Iniciar y finalizar viaje | Por definir (E6) | — | — | — | Pendiente |
 | TC-15 | Calificar viaje | Por definir (E7) | — | — | — | Pendiente |
 | TC-16 | Chat en tiempo real | Por definir (E7) | — | — | — | Pendiente |
-| TC-17 | Sin conexión, con caché y banner | Por definir (E3) | — | — | — | Pendiente |
-| TC-18 | Error de red y "Reintentar" | Por definir (E3) | — | — | — | Pendiente |
+| TC-17 | Sin conexión, con caché y banner | 1. En "Sesión de prueba", con sesión iniciada y red, tocar "Recargar datos". 2. Activar el modo avión. 3. Cerrar la app por completo y abrirla de nuevo. 4. Entrar a "Sesión de prueba". | Se ven nombre, sectores, viajes y reservas de la última carga, y el banner "Sin conexión: mostrando datos guardados (guardados a las HH:MM)", que TalkBack anuncia | Sí lo hace | Prueba manual de Sara en su teléfono | Aprobado |
+| TC-18 | Error de red y "Reintentar" | 1. Cerrar sesión. 2. Activar el modo avión. 3. Escribir correo y contraseña y tocar "Iniciar Sesión". 4. Quitar el modo avión y tocar "Reintentar". | Paso 3: mensaje "Sin conexión a internet. Revisa tu red e intenta de nuevo." con botón "Reintentar". Paso 4: la sesión se inicia | Sí lo hace | Prueba manual de Sara en su teléfono | Aprobado |
 | TC-19 | Cambio a modo conductor sin carro bloqueado | Por definir (E4) | — | — | — | Pendiente |
 | TC-20 | Eliminar carro | Por definir (E4) | — | — | — | Pendiente |
 | TC-21 | Cerrar sesión limpia la sesión segura | Por definir (E4) | — | — | — | Pendiente |
-| TC-22 | La sesión persiste al reiniciar la app | Por definir (E3) | — | — | — | Pendiente |
+| TC-22 | La sesión persiste al reiniciar la app | 1. Iniciar sesión en "Sesión de prueba" con el usuario creado a mano. 2. Cerrar la app por completo (quitarla de recientes) o recargar Expo Go. 3. Abrirla y entrar a "Sesión de prueba". | Sigue con la sesión iniciada y no pide el correo otra vez | Sí lo hace | Prueba manual de Sara en su teléfono | Aprobado |
 | TC-23 | RLS: un usuario no lee datos ajenos | Por definir (E2) | — | — | — | Pendiente |

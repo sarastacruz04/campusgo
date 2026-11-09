@@ -9,12 +9,20 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Provider } from 'react-redux';
 
+import { selectAuthInitialized, selectUserId } from '@/features/auth/selectors';
+import { useAuthSession } from '@/hooks/useAuthSession';
+import { useConnectivity } from '@/hooks/useConnectivity';
+import { useRealtimeNotifications, useRealtimeTripsAndReservations } from '@/hooks/useRealtime';
 import { useReduceMotion } from '@/hooks/useReduceMotion';
+import { useAppSelector } from '@/store/hooks';
+import { store } from '@/store/store';
 import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 
-// La pantalla de carga nativa se mantiene hasta tener fuentes y preferencias, para no
-// mostrar un instante la fuente del sistema o el tema equivocado.
+// La pantalla de carga nativa se mantiene hasta tener fuentes, preferencias y la
+// sesión guardada, para no mostrar un instante la fuente del sistema, el tema
+// equivocado o una pantalla que luego cambia por la de inicio de sesión.
 SplashScreen.preventAutoHideAsync();
 
 function RootNavigator() {
@@ -28,11 +36,21 @@ function RootNavigator() {
   // Si la fuente falla, la app sigue con la del sistema en lugar de quedarse bloqueada.
   const fontsDone = fontsLoaded || Boolean(fontError);
 
-  useEffect(() => {
-    if (fontsDone && ready) SplashScreen.hideAsync();
-  }, [fontsDone, ready]);
+  // Sesión, conexión y Realtime viven aquí para que estén activos en toda la app.
+  useAuthSession();
+  useConnectivity();
+  const authInitialized = useAppSelector(selectAuthInitialized);
+  const userId = useAppSelector(selectUserId);
+  useRealtimeTripsAndReservations(userId !== null);
+  useRealtimeNotifications(userId);
 
-  if (!fontsDone || !ready) return null;
+  const appReady = fontsDone && ready && authInitialized;
+
+  useEffect(() => {
+    if (appReady) SplashScreen.hideAsync();
+  }, [appReady]);
+
+  if (!appReady) return null;
 
   return (
     <>
@@ -54,9 +72,11 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <ThemeProvider>
-        <RootNavigator />
-      </ThemeProvider>
+      <Provider store={store}>
+        <ThemeProvider>
+          <RootNavigator />
+        </ThemeProvider>
+      </Provider>
     </SafeAreaProvider>
   );
 }

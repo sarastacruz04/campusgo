@@ -11,7 +11,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 
 // Pantalla provisional hasta la Etapa 4, donde se convierte en la bienvenida con
 // redirección según la sesión. Por ahora da acceso a Ajustes y, en desarrollo, al
-// catálogo de componentes.
+// catálogo de componentes y a la sesión de prueba de la Etapa 3.
 export default function Index() {
   const { colors } = useTheme();
   return (
@@ -28,7 +28,10 @@ export default function Index() {
           onPress={() => router.push('/settings/accessibility')}
         />
         {__DEV__ ? (
-          <Button label="Catálogo de componentes" onPress={() => router.push('/dev/catalogo')} />
+          <>
+            <Button label="Catálogo de componentes" onPress={() => router.push('/dev/catalogo')} />
+            <Button label="Sesión de prueba" onPress={() => router.push('/dev/sesion')} />
+          </>
         ) : null}
       </View>
     </SafeAreaView>
