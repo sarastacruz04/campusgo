@@ -1,6 +1,6 @@
 // Datos de ejemplo SOLO para las pruebas automáticas. La app nunca los usa
 // (sección 14: cero datos simulados en la app).
-import type { Notificacion, Profile } from '@/types/database';
+import type { Notificacion, Profile, Vehiculo } from '@/types/database';
 import type { ReservationItem, TripListItem } from '@/types/domain';
 
 const FUTURE = '2099-01-01T12:00:00.000Z';
@@ -56,6 +56,21 @@ export function makeProfile(overrides: Partial<Profile> = {}): Profile {
     avatar_path: null,
     modo_actual: 'pasajero',
     registro_completo: true,
+    created_at: '2026-11-01T10:00:00.000Z',
+    ...overrides,
+  };
+}
+
+export function makeVehicle(overrides: Partial<Vehiculo> = {}): Vehiculo {
+  return {
+    id: 'vehiculo-1',
+    propietario_id: 'usuario-1',
+    placa: 'ABC123',
+    capacidad: 4,
+    marca: 'Mazda',
+    modelo: '2',
+    foto_path: null,
+    soat_path: null,
     created_at: '2026-11-01T10:00:00.000Z',
     ...overrides,
   };
