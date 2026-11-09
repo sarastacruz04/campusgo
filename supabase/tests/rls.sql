@@ -147,3 +147,20 @@
 -- ESPERADO: 1 objeto si existe
 -- SELECT name FROM storage.objects WHERE bucket_id = 'avatars' AND name LIKE '<usuario_a>/%';
 
+-- =============================================================================
+-- BLOQUE 8: Protección de UPDATE frente a bypass de RPCs (Migración 0007, E6)
+-- =============================================================================
+
+-- RU-01: usuario_b NO puede modificar directamente el estado de su reserva
+-- ESPERADO: 0 filas actualizadas o error de RLS (debe usar aceptar_reserva / rechazar_reserva / cancelar_reserva)
+-- UPDATE public.reservas SET estado = 'aceptada' WHERE id = '<id_reserva>';
+
+-- RU-02: usuario_a (conductor) NO puede modificar directamente cupos o estado de su viaje
+-- ESPERADO: 0 filas actualizadas o error de RLS (debe usar iniciar_viaje / finalizar_viaje / cancelar_viaje)
+-- UPDATE public.viajes SET estado = 'finalizado', cupos_disponibles = 10 WHERE id = '<id_viaje>';
+
+-- RU-03: usuario_b NO puede cambiar directamente modo_actual a 'conductor' en su perfil
+-- ESPERADO: error de excepción 'sin_permiso' (debe usar la función cambiar_modo que valida vehículo R3)
+-- UPDATE public.profiles SET modo_actual = 'conductor' WHERE id = '<usuario_b>';
+
+

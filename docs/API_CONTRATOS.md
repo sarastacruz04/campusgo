@@ -308,6 +308,7 @@ Los thunks (`features/*/thunks.ts`) llaman a los servicios, atrapan el error y l
 | `0004_perfil_incompleto.sql` | Crear un usuario sin datos de perfil fallaba por los CHECK de 10 dígitos; ahora `id_universidad` y `telefono` aceptan NULL mientras el registro está incompleto (D-40). |
 | `0005_rls_sin_recursion.sql` | Recursión infinita (42P17) entre las políticas de `viajes` y `reservas`; ahora usan `tiene_reserva_aceptada` y `es_conductor_del_viaje` (`SECURITY DEFINER`) (D-41). |
 | `0006_viajes_llenos_visibles.sql` | Los viajes `lleno` con salida futura se pueden leer, para que Realtime avise cuando un viaje se llena (D-48). La búsqueda sigue trayendo solo `abierto`. |
+| `0007_proteger_updates_rls.sql` | Resuelve los hallazgos 1, 2 y 3: elimina la política de UPDATE directa en `reservas` y `viajes` (todo cambio de estado pasa por las RPCs SECURITY DEFINER), y protege `profiles.modo_actual` con trigger para forzar el paso por `cambiar_modo` (R3, E6). |
 
 Funciones nuevas (no se llaman desde la app; las usan las políticas):
 
@@ -316,11 +317,11 @@ Funciones nuevas (no se llaman desde la app; las usan las políticas):
 | `es_conductor_del_viaje(p_viaje_id, p_user_id)` | `TRUE` si el usuario es el conductor del viaje. |
 | `tiene_reserva_aceptada(p_viaje_id, p_user_id)` | `TRUE` si el usuario tiene una reserva aceptada en el viaje. |
 
-## Hallazgos de la Etapa 3 para revisar en la base (Samuel)
+## Hallazgos de RLS resueltos en la Etapa 6 (Samuel)
 
-Detectados al leer las políticas de la migración 0001. **No se cambiaron en la Etapa 3**, porque son de la Etapa 2; quedan para que Samuel los evalúe:
+Detectados originalmente en la Etapa 3 y resueltos en la migración `0007_proteger_updates_rls.sql`:
 
-1. **La política de UPDATE de `reservas` deja que el pasajero cambie el `estado` directamente.** Su `USING` acepta al pasajero y no tiene `WITH CHECK`. Con una llamada directa a PostgREST un pasajero podría poner su reserva en `'aceptada'` sin pasar por `aceptar_reserva`, y por lo tanto sin descontar cupo. Como las RPC son `SECURITY DEFINER` y no necesitan esa política, se podría quitar el UPDATE para usuarios o limitarlo con `WITH CHECK`.
-2. **La política de UPDATE de `profiles` no limita las columnas.** El dueño podría cambiar `modo_actual` a `'conductor'` sin carro, saltándose `cambiar_modo` (R3). Una opción es un trigger que impida cambiar `modo_actual` fuera de la RPC, o `REVOKE UPDATE (modo_actual)` para el rol `authenticated`.
-3. **La política de UPDATE de `viajes` deja al conductor editar `cupos_disponibles` y `estado` directamente.** Esto no pasa por las RPC del ciclo del viaje.
-4. **`types/database.ts` está escrito a mano.** Se recomienda regenerarlo con `npx supabase gen types typescript --project-id <id>` y conservar las uniones de estado (D-32).
+1. **Protección en `reservas` (RESUELTO):** Se eliminó la política de UPDATE directa en PostgREST. Toda mutación de estado pasa por las RPCs transaccionales `aceptar_reserva`, `rechazar_reserva` y `cancelar_reserva`.
+2. **Protección en `profiles.modo_actual` (RESUELTO):** Trigger `trg_proteger_modo_actual_perfil` impide que un usuario autenticado modifique `modo_actual` directamente, forzando la validación de vehículo en `cambiar_modo` (R3).
+3. **Protección en `viajes` (RESUELTO):** Se eliminó la política de UPDATE directa en PostgREST. Todo avance de estado (`iniciar_viaje`, `finalizar_viaje`, `cancelar_viaje`) se ejecuta por sus respectivas RPCs con validación estricta de reglas de negocio.
+4. **`types/database.ts`:** Se mantiene tipado y consistente con las uniones de estado de los dominios (D-32).
