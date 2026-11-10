@@ -1,7 +1,11 @@
 import { initialAuthState } from '@/features/auth/slice';
-import { makeSelectMessagesForTrip } from '@/features/chat/selectors';
+import {
+  makeSelectMessagesForTrip,
+  makeSelectMessagesNewestFirst,
+  selectAuthorNames,
+} from '@/features/chat/selectors';
 import { messageReceived } from '@/features/chat/slice';
-import { sendMessage } from '@/features/chat/thunks';
+import { fetchAuthorNames, fetchMessages, sendMessage } from '@/features/chat/thunks';
 import { selectUnreadCount } from '@/features/notifications/selectors';
 import { notificationReceived } from '@/features/notifications/slice';
 import { fetchNotifications, markAllNotificationsRead } from '@/features/notifications/thunks';
@@ -41,7 +45,9 @@ jest.mock('@/services/notificationService', () => ({
 }));
 jest.mock('@/services/chatService', () => ({
   MAX_MESSAGE_LENGTH: 500,
+  isParticipant: jest.fn(),
   listMessages: jest.fn(),
+  getAuthorNames: jest.fn(),
   sendMessage: jest.fn(),
 }));
 jest.mock('@/services/ratingService', () => ({ getAverages: jest.fn(), submitRating: jest.fn() }));
@@ -153,6 +159,58 @@ describe('chat', () => {
     expect(store.getState().chat.send.error?.code).toBe('mensaje_invalido');
     await store.dispatch(sendMessage({ viajeId: 'viaje-1', contenido: 'x'.repeat(501) }));
     expect(chatService.sendMessage).not.toHaveBeenCalled();
+  });
+
+  it('a quien no participa del viaje no le carga mensajes (R10)', async () => {
+    jest.mocked(chatService.isParticipant).mockResolvedValue(false);
+    const store = loggedStore();
+    await store.dispatch(fetchMessages('viaje-1'));
+    expect(chatService.isParticipant).toHaveBeenCalledWith('viaje-1', 'usuario-1');
+    expect(chatService.listMessages).not.toHaveBeenCalled();
+    expect(store.getState().chat.load).toMatchObject({
+      status: 'failed',
+      viajeId: 'viaje-1',
+      error: { code: 'chat_sin_acceso' },
+    });
+  });
+
+  it('guarda los mensajes y los nombres de sus autores', async () => {
+    jest.mocked(chatService.isParticipant).mockResolvedValue(true);
+    jest.mocked(chatService.listMessages).mockResolvedValue({
+      messages: [message('m1', '2026-11-05T10:00:00Z')],
+      authorNames: { 'usuario-1': 'Sara Santacruz' },
+    });
+    const store = loggedStore();
+    await store.dispatch(fetchMessages('viaje-1'));
+    expect(store.getState().chat.load.status).toBe('succeeded');
+    expect(selectAuthorNames(store.getState())).toEqual({ 'usuario-1': 'Sara Santacruz' });
+    const newestFirst = makeSelectMessagesNewestFirst('viaje-1');
+    store.dispatch(messageReceived(message('m2', '2026-11-05T10:01:00Z')));
+    expect(newestFirst(store.getState()).map((m) => m.id)).toEqual(['m2', 'm1']);
+  });
+
+  it('ignora la respuesta de una carga vieja (sección 4)', async () => {
+    let resolveOld: (value: boolean) => void = () => undefined;
+    jest
+      .mocked(chatService.isParticipant)
+      .mockImplementationOnce(() => new Promise((resolve) => (resolveOld = resolve)))
+      .mockResolvedValueOnce(false);
+    const store = loggedStore();
+    const old = store.dispatch(fetchMessages('viaje-viejo'));
+    await store.dispatch(fetchMessages('viaje-1'));
+    jest.mocked(chatService.listMessages).mockResolvedValue({ messages: [], authorNames: {} });
+    resolveOld(true);
+    await old;
+    expect(store.getState().chat.load).toMatchObject({ status: 'failed', viajeId: 'viaje-1' });
+  });
+
+  it('no vuelve a pedir el nombre de un autor conocido o ya pedido', async () => {
+    jest.mocked(chatService.getAuthorNames).mockResolvedValue({ c1: 'Miguel Ordóñez' });
+    const store = loggedStore();
+    await store.dispatch(fetchAuthorNames(['c1']));
+    await store.dispatch(fetchAuthorNames(['c1']));
+    expect(chatService.getAuthorNames).toHaveBeenCalledTimes(1);
+    expect(selectAuthorNames(store.getState()).c1).toBe('Miguel Ordóñez');
   });
 });
 

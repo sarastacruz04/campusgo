@@ -1,10 +1,11 @@
 import { createEntityAdapter, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { sessionCleared } from '@/features/auth/actions';
+import type { AuthorNames } from '@/services/chatService';
 import { initialRequest, type RequestState } from '@/store/types';
 import type { Mensaje } from '@/types/database';
 
-import { fetchMessages, sendMessage } from './thunks';
+import { fetchAuthorNames, fetchMessages, sendMessage } from './thunks';
 
 // Mensajes de todos los chats abiertos, del más antiguo al más nuevo.
 export const messagesAdapter = createEntityAdapter<Mensaje>({
@@ -12,13 +13,22 @@ export const messagesAdapter = createEntityAdapter<Mensaje>({
 });
 
 export type ChatState = ReturnType<typeof messagesAdapter.getInitialState> & {
-  load: RequestState;
+  /** Carga del chat abierto; viajeId dice de qué viaje es el estado. */
+  load: RequestState & { viajeId: string | null };
   send: RequestState;
+  authorNames: AuthorNames;
+  /** Ids cuyo nombre ya se está pidiendo, para no repetir la consulta. */
+  requestedAuthorIds: string[];
+  /** requestId de la última carga: una respuesta vieja no pisa a la nueva (sección 4). */
+  loadRequestId: string | null;
 };
 
 export const initialChatState: ChatState = messagesAdapter.getInitialState({
-  load: initialRequest,
+  load: { ...initialRequest, viajeId: null },
   send: initialRequest,
+  authorNames: {},
+  requestedAuthorIds: [],
+  loadRequestId: null,
 });
 
 const chatSlice = createSlice({
@@ -36,15 +46,31 @@ const chatSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(sessionCleared, () => initialChatState)
-      .addCase(fetchMessages.pending, (state) => {
-        state.load = { status: 'loading', error: null };
+      .addCase(fetchMessages.pending, (state, action) => {
+        state.loadRequestId = action.meta.requestId;
+        state.load = { status: 'loading', error: null, viajeId: action.meta.arg };
       })
       .addCase(fetchMessages.fulfilled, (state, action) => {
+        if (action.meta.requestId !== state.loadRequestId) return;
         messagesAdapter.upsertMany(state, action.payload.messages);
-        state.load = { status: 'succeeded', error: null };
+        Object.assign(state.authorNames, action.payload.authorNames);
+        state.load = { status: 'succeeded', error: null, viajeId: action.meta.arg };
       })
       .addCase(fetchMessages.rejected, (state, action) => {
-        state.load = { status: 'failed', error: action.payload ?? null };
+        if (action.meta.requestId !== state.loadRequestId) return;
+        state.load = { status: 'failed', error: action.payload ?? null, viajeId: action.meta.arg };
+      })
+      .addCase(fetchAuthorNames.pending, (state, action) => {
+        state.requestedAuthorIds.push(...action.meta.arg);
+      })
+      .addCase(fetchAuthorNames.fulfilled, (state, action) => {
+        Object.assign(state.authorNames, action.payload);
+      })
+      .addCase(fetchAuthorNames.rejected, (state, action) => {
+        // Se olvidan para poder reintentar con el siguiente mensaje.
+        state.requestedAuthorIds = state.requestedAuthorIds.filter(
+          (id) => !action.meta.arg.includes(id),
+        );
       })
       .addCase(sendMessage.pending, (state) => {
         state.send = { status: 'loading', error: null };
