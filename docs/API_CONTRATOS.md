@@ -220,7 +220,7 @@ Los thunks (`features/*/thunks.ts`) llaman a los servicios, atrapan el error y l
 | CHECK de correo en el trigger `handle_new_user` (R1) | `"Database error saving new user"` | `correo_no_institucional` |
 | PostgreSQL y PostgREST | `23505`, `23514`, `23503`, `42501`, `PGRST116` | `duplicado`, `datos_invalidos`, `referencia_invalida`, `sin_permiso`, `no_encontrado` |
 | Sin red | `"Network request failed"` o `AuthRetryableFetchError` | `sin_conexion` |
-| Propios de la app | — | `sin_sesion`, `mensaje_invalido`, `desconocido` |
+| Propios de la app | — | `sin_sesion`, `mensaje_invalido`, `chat_sin_acceso`, `desconocido` |
 
 ### `authService`
 
@@ -285,7 +285,7 @@ Los thunks (`features/*/thunks.ts`) llaman a los servicios, atrapan el error y l
 | `storageService` | `uploadImage({ bucket, userId, fileName, uri, contentType })` devuelve la ruta `{userId}/{fileName}`; `getSignedUrl(bucket, path, segundos)`; `removeFile(bucket, path)`. Buckets: `avatars`, `vehiculos`, `soat`. |
 | `ratingService` | `submitRating({ viajeId, autorId, destinatarioId, estrellas, comentario })`; `getAverages(userIds)` sobre la vista `promedio_calificaciones`. |
 | `notificationService` | `listNotifications(userId)` (50 más recientes); `markAsRead(id)`; `markAllAsRead(userId)`; `subscribeToNotifications(userId, onInsert)`. |
-| `chatService` | `listMessages(viajeId)`; `sendMessage(viajeId, autorId, contenido)` (máximo 500 caracteres); `subscribeToMessages(viajeId, onInsert)`. |
+| `chatService` | `isParticipant(viajeId, userId)` llama a la función `es_participante_del_viaje` y devuelve boolean; `listMessages(viajeId)` devuelve `{ messages, authorNames }` (mensajes del más antiguo al más nuevo y el nombre de cada autor, con `autor:profiles(nombre, apellido)`); `getAuthorNames(ids)` para autores que llegan por Realtime; `sendMessage(viajeId, autorId, contenido)` (máximo 500 caracteres); `subscribeToMessages(viajeId, onInsert)`. El thunk `fetchMessages` falla con `chat_sin_acceso` si `isParticipant` es false (D-56). |
 
 ### Realtime
 

@@ -528,7 +528,7 @@ Recorrido completo: buscar → tocar una tarjeta → elegir el punto → reserva
 ### 15.3 Reservas y Curso
 
 - **app/(tabs)/reservas.tsx:** pestañas internas Pendientes, Aceptados y Rechazados. Cada una usa su selector memoizado. La papelera abre el diálogo "¿Está seguro…?" con la opción segura primero. Se recarga al entrar.
-- **app/(tabs)/curso.tsx:** el pasajero ve sus reservas aceptadas de viajes iniciados. El botón del chat llega en la Etapa 7 (D-51).
+- **app/(tabs)/curso.tsx:** el pasajero ve sus reservas aceptadas de viajes iniciados, con el botón "Abrir chat" (Etapa 7).
 - **En vivo:** cuando el conductor acepta, llega `reservationChanged` y la reserva cambia de pestaña. Cuando cambian los cupos o el viaje inicia, llega `tripChanged`, que actualiza la búsqueda y la copia del viaje dentro de cada reserva.
 - **Migración 0006:** un viaje lleno sigue siendo legible, para que Realtime avise y salga de la búsqueda (D-48).
 
@@ -541,10 +541,56 @@ Recorrido completo: buscar → tocar una tarjeta → elegir el punto → reserva
 
 ---
 
-## 16. Registro de actualizaciones de esta guía
+## 16. Flujo de conductor (Etapa 6, Samuel)
+
+Recorrido completo: crear un viaje → recibir solicitudes → aceptar o rechazar → iniciar → finalizar.
+
+- **Inicio de conductor (app/(tabs)/index.tsx):** tarjeta "Crea un viaje" con "+" y tarjeta "Viajes Pendientes" con el número de solicitudes y "Ver más", que lleva a app/requests.tsx.
+- **Crear viaje (app/trip/create.tsx):** mapa para el punto de partida, campos con error bajo cada uno y un resumen que nombra los que faltan (S-07). Las reglas están en **lib/validators.ts**: `validateDate`, `validateTime`, `validateFutureDeparture`, `validateTripCupos` y `validatePrice`. Al publicar sale el diálogo de éxito con "¡Listo!".
+- **Solicitudes (app/requests.tsx):** pestañas internas Pendientes, Aceptadas y Rechazadas. Cada solicitud es una **RequestCard** con "Aceptar reserva" y "Rechazar reserva". Al responder vibra y se anuncia (T-04). Las solicitudes vienen de `fetchRequestsForMyTrips` y del selector `selectAllRequests`.
+- **Viajes creados (app/(tabs)/creados.tsx):** una **CreatedTripCard** por viaje con su estado. "Iniciar viaje" solo se activa con al menos una reserva aceptada (R8); "Cancelar viaje" pasa por ConfirmDialog (T-06).
+- **Curso (app/(tabs)/curso.tsx), modo conductor:** sus viajes en curso con "Finalizar viaje" y confirmación.
+- **Los cambios de estado** van por el thunk `changeTripState({ tripId, action })`, que llama a las RPC `iniciar_viaje`, `finalizar_viaje` o `cancelar_viaje`.
+- **Migración 0007:** quita los UPDATE directos sobre `viajes` y `reservas` y protege `profiles.modo_actual` con un trigger. Así todo cambio de estado tiene que pasar por las RPC, que validan las reglas (D-53).
+
+### Si me piden… (Etapa 6)
+
+- **Cambiar el texto de un botón del conductor:** components/trips/CreatedTripCard.tsx (los `label` y `accessibilityLabel` de cada Button).
+- **Cambiar una regla de la creación de viajes:** la función correspondiente en lib/validators.ts y su prueba en __tests__/lib/validators.test.ts.
+
+---
+
+## 17. Chat del viaje (Etapa 7, Sara)
+
+Recorrido completo: "Abrir chat" → comprobar acceso → cargar mensajes → escribir y enviar → recibir en vivo.
+
+- **Dónde está el botón "Abrir chat":** en el pasajero, en Reservas > Aceptados y en Curso (`onPressChat` de ReservationCard). En el conductor, en Creados y en Curso, solo si el viaje tiene pasajeros aceptados y no está cancelado (`onOpenChat` de CreatedTripCard). Todos llevan a `/trip/<id>/chat`.
+- **Al abrir (app/trip/[id]/chat.tsx):**
+  1. `fetchMessages(id)` pregunta a la base con `es_participante_del_viaje` si quien abre es el conductor o un pasajero aceptado.
+  2. Si no lo es, falla con `chat_sin_acceso` y la pantalla muestra "No tienes acceso a este chat" sin campo de escribir. Hace falta esta pregunta porque RLS no da error: solo devuelve cero filas (D-56).
+  3. Si lo es, trae los mensajes con el nombre de cada autor.
+  4. A la vez, `fetchTrip(id)` trae el viaje para el sector, la hora y saber si está cancelado.
+- **La lista:** FlatList `inverted`, con los datos del más nuevo al más antiguo, así el más nuevo queda abajo (D-57). Cada mensaje es una **MessageBubble**: un solo foco que dice "Tú, 3:15 p. m.: Hola". Lo propio va a la derecha, en azul y con "Tú", no solo con color (V-05).
+- **Escribir:** TextField "Mensaje" con `maxLength` de 500, contador "x de 500 caracteres" y aviso al llegar al límite. El botón "Enviar mensaje" es un IconButton relleno de 48 dp, deshabilitado si el texto está vacío, si se está enviando o si el viaje está cancelado.
+- **En vivo:** `useRealtimeMessages(id)` escucha los mensajes nuevos y los mete al store con `messageReceived`. Si llega alguien que no había escrito, `fetchAuthorNames` trae su nombre una sola vez.
+- **Anuncios (S-07):** "Mensaje nuevo de X: texto" solo para mensajes de otras personas que llegan después de abrir; "Mensaje enviado." al enviar (D-59).
+- **Estados:** cargando ("Cargando mensajes…"), vacío ("Todavía no hay mensajes"), error con "Reintentar", sin acceso y viaje cancelado (se lee, pero no se escribe).
+- **RLS verificado:** supabase/tests/chat_rls.sql prueba como pasajero, conductor y ajeno. Corre dentro de una transacción y termina con un error a propósito que dice "6 de 6 correctas" y deshace todo (D-60).
+- **Base de datos:** no se cambió nada. Se usan la tabla `mensajes`, sus dos políticas, la función `es_participante_del_viaje` (0001) y Realtime (0003), todo de Samuel.
+
+### Si me piden… (Etapa 7)
+
+- **Cambiar el límite de 500:** `MAX_MESSAGE_LENGTH` en services/chatService.ts y el texto `mensajeInvalido` en services/errors.ts. La base tiene su propio CHECK de 500: subirlo necesita una migración de Samuel.
+- **Cambiar el color de mis mensajes:** en components/chat/MessageBubble.tsx, `brandSurface` (fondo) y `onBrand` (texto). Luego correr `npm run a11y:contrast` si se cambia el token.
+- **Cambiar el texto del estado vacío:** en app/trip/[id]/chat.tsx, el bloque "Todavía no hay mensajes".
+
+---
+
+## 18. Registro de actualizaciones de esta guía
 
 | Fecha | Etapa | Quién la hizo | Qué se agregó a la guía |
 | --- | --- | --- | --- |
 | 2026-11-06 | E0 y E1 | Sara | Primera versión: arranque de la app, sistema de diseño, hooks, componentes, pantallas, pruebas, recetas y hallazgos en el teléfono |
 | 2026-11-07 | E2 y E3 | Samuel (E2) y Sara (E3) | Resumen de la base de datos (sección 12), la capa de cliente (sección 13), la pantalla de sesión de prueba, las pruebas nuevas, 6 recetas más y términos de Supabase y Redux en el glosario |
 | 2026-11-09 | E4 y E5 | Samuel (E4) y Sara (E5) | Secciones 14 y 15, 6 recetas más y términos nuevos en el glosario |
+| 2026-11-10 | E6 y E7 (chat) | Samuel (E6) y Sara (E7, chat) | Secciones 16 (flujo de conductor) y 17 (chat del viaje), con sus recetas "Si me piden…" |
