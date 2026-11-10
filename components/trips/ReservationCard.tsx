@@ -2,6 +2,7 @@ import { memo, useRef, type RefObject } from 'react';
 import { StyleSheet, View, type HostInstance } from 'react-native';
 
 import { AppText } from '@/components/ui/AppText';
+import { Button } from '@/components/ui/Button';
 import { IconButton } from '@/components/ui/IconButton';
 import { spacing } from '@/theme/layout';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -21,6 +22,8 @@ type ReservationCardProps = TripRatingProps & {
   reservation: ReservationItem;
   /** Si se pasa, muestra la papelera. Recibe la referencia para devolverle el foco. */
   onPressCancel?: (reservationId: string, button: RefObject<HostInstance | null>) => void;
+  /** Si se pasa, muestra "Abrir chat" (solo reservas aceptadas, R10). Recibe el id del viaje. */
+  onPressChat?: (viajeId: string) => void;
 };
 
 /**
@@ -33,6 +36,7 @@ export const ReservationCard = memo(function ReservationCard({
   ratingAverage,
   ratingTotal,
   onPressCancel,
+  onPressChat,
 }: ReservationCardProps) {
   const { colors } = useTheme();
   const cancelRef = useRef<HostInstance>(null);
@@ -78,6 +82,16 @@ export const ReservationCard = memo(function ReservationCard({
           />
         </View>
       ) : null}
+      {onPressChat && viaje ? (
+        <View style={styles.chat}>
+          <Button
+            label="Abrir chat"
+            variant="secondary"
+            accessibilityLabel={`Abrir chat del viaje a ${sector}`}
+            onPress={() => onPressChat(viaje.id)}
+          />
+        </View>
+      ) : null}
     </View>
   );
 });
@@ -88,6 +102,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   pickup: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
+  },
+  chat: {
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.lg,
   },

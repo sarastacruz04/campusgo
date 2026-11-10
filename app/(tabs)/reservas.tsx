@@ -46,6 +46,8 @@ const EMPTY_TEXT: Record<TabKey, string> = {
 
 const keyExtractor = (item: ReservationItem) => item.id;
 
+const openChat = (tripId: string) => router.push(`/trip/${tripId}/chat`);
+
 type CancelTarget = { id: string; button: RefObject<HostInstance | null> };
 
 /** "Viajes reservados" (pantalla 13): reservas por estado y cancelación con confirmación. */
@@ -90,6 +92,8 @@ export default function ReservasTab() {
           ratingTotal={rating?.total ?? 0}
           // Una reserva rechazada ya no se puede cancelar (R7).
           onPressCancel={item.estado === 'rechazada' ? undefined : requestCancel}
+          // El chat es solo para reservas aceptadas (R10).
+          onPressChat={item.estado === 'aceptada' ? openChat : undefined}
         />
       );
     },
