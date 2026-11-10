@@ -27,13 +27,15 @@ Se ejecutan con `npm test` (jest-expo y Testing Library).
 | __tests__/features/domains.test.ts | Perfil (nombre completo, error sin carro al cambiar de modo), vehículo (registrar y eliminar), notificaciones (no leídas, en vivo, marcar todas), chat (orden, sin duplicados, largo máximo), calificaciones (promedio numérico) y conexión. | E3 | Aprobado |
 | __tests__/hooks/realtime.test.tsx | Las suscripciones Realtime se abren con sesión y se cierran en el cleanup; la notificación nueva entra al store y se anuncia; useConnectivity escucha NetInfo y deja de escuchar; banner "Sin conexión" con la hora. | E3 | Aprobado |
 | __tests__/lib/format.test.ts | Hora, fecha de salida, pesos, cupos y calificación en formato de Colombia. | E3, E5 | Aprobado |
+| __tests__/lib/validators.test.ts | Validadores puros: fecha DD/MM/AAAA, hora HH:MM, salida futura con margen de 5 min, cupos según vehículo y precio. | E4, E6 | Aprobado |
+| __tests__/screens/driver.test.tsx | Inicio del conductor (pantalla 17), crear viaje con errores y éxito (pantalla 18), viajes creados (pantalla 19), solicitudes (aceptar/rechazar) y en curso (pantalla 14). | E6 | Aprobado |
 | __tests__/components/trips.test.tsx | TripCard como un solo foco con etiqueta compuesta, ReservationCard (papelera aparte, viaje oculto por RLS), filtros, lista de sectores modal y pestañas internas. | E5 | Aprobado |
 | __tests__/hooks/passenger-hooks.test.tsx | Debounce, punto del mapa con dirección, respuesta vieja ignorada, sin permiso y dirección solo escrita. | E5 | Aprobado |
 | __tests__/screens/passenger.test.tsx | Inicio (búsqueda, filtro con debounce, error y Reintentar), reserva (validación, mapa, solo texto, éxito, duplicada), reservas por estado, cancelación con confirmación y viajes en curso. | E5 | Aprobado |
 
-Última ejecución: 2026-11-09, `npm test` con 25 archivos y 185 de 185 pruebas aprobadas, ejecutado por Claude Code en WSL (Node 22.20.0). Los servicios se simulan solo dentro de las pruebas.
+Última ejecución: 2026-11-09, `npm test` con 26 archivos y 196 de 196 pruebas aprobadas, ejecutado por Antigravity en Windows (Node 24.18.0). Los servicios se simulan solo dentro de las pruebas.
 
-Pendientes por etapa: flujos de conductor (E6), calificaciones, notificaciones y chat (E7), y pruebas SQL de RLS (supabase/tests/rls.sql).
+Pendientes por etapa: calificaciones, notificaciones y chat (E7), y verificación en Supabase de pruebas SQL de RLS (supabase/tests/rls.sql).
 
 ## 2. Casos funcionales
 
@@ -48,11 +50,11 @@ Pendientes por etapa: flujos de conductor (E6), calificaciones, notificaciones y
 | TC-07 | Reservar viaje | 1. Tocar una tarjeta. 2. Tocar el mapa y revisar que se llene la dirección. 3. Tocar "Reservar". 4. Tocar "¡Listo!". | Paso 3: "Reserva realizada con éxito" y vibración. Paso 4: la reserva aparece en Reservas > Pendientes | Sí sucede | Prueba manual de Sara en su teléfono | Aprobado |
 | TC-08 | Reserva duplicada rechazada | 1. Abrir otra vez el viaje ya reservado. 2. Escribir una dirección y tocar "Reservar". | Mensaje "Ya tienes una reserva en este viaje." con "Reintentar"; no se crea otra reserva | Sí sucede | Prueba manual de Sara en su teléfono | Aprobado |
 | TC-09 | Cancelar reserva | 1. En Reservas > Pendientes tocar la papelera. 2. Tocar "No, volver". 3. Tocar la papelera y "Sí, cancelar reserva". | Paso 2: la reserva sigue. Paso 3: desaparece de la lista y se anuncia "Reserva cancelada." | Sí sucede | Prueba manual de Sara en su teléfono | Aprobado |
-| TC-10 | Crear viaje | Por definir (E6) | — | — | — | Pendiente |
-| TC-11 | Crear viaje con campos faltantes | Por definir (E6) | — | — | — | Pendiente |
-| TC-12 | Aceptar reservas hasta llenar los cupos (cierre automático) | Por definir (E6) | — | — | — | Pendiente |
-| TC-13 | Rechazar reserva | Por definir (E6) | — | — | — | Pendiente |
-| TC-14 | Iniciar y finalizar viaje | Por definir (E6) | — | — | — | Pendiente |
+| TC-10 | Crear viaje | 1. En modo conductor, pulsar "+ Crea un viaje". 2. Indicar origen con mapa o texto, seleccionar sector, fecha futura, hora, cupos y valor por cupo. 3. Pulsar "Publicar viaje". 4. Confirmar en el modal de éxito. | Paso 3: modal "¡Viaje creado con éxito!". Paso 4: redirige a "Viajes creados" mostrando el viaje en estado 'abierto'. | — | Protocolo listo para Samuel en su teléfono | Pendiente |
+| TC-11 | Crear viaje con campos faltantes | 1. Entrar a "Crea tu viaje". 2. Borrar el punto de partida y dejar fecha en blanco. 3. Pulsar "Publicar viaje". | Aparecen errores inline bajo los campos faltantes, banner de resumen superior con advertencia accesible y vibración háptica de error. | — | Protocolo listo para Samuel en su teléfono | Pendiente |
+| TC-12 | Aceptar reservas hasta llenar los cupos (cierre automático) | 1. En modo conductor, entrar a Solicitudes pendientes. 2. Aceptar solicitudes sucesivas hasta agotar los cupos disponibles. | Al aceptar la última solicitud que agote cupos, el viaje pasa a estado 'lleno' y deja de mostrarse en la búsqueda de pasajeros. | — | Protocolo listo para Samuel en su teléfono | Pendiente |
+| TC-13 | Rechazar reserva | 1. En Solicitudes pendientes, presionar "Rechazar" en una reserva. 2. Verificar que se mueva a la pestaña "Rechazadas". | La reserva desaparece de pendientes y pasa a la pestaña Rechazadas; se actualiza en tiempo real. | — | Protocolo listo para Samuel en su teléfono | Pendiente |
+| TC-14 | Iniciar y finalizar viaje | 1. En "Viajes creados", cuando haya al menos 1 reserva aceptada, presionar "Iniciar viaje". 2. Confirmar inicio. 3. En la pestaña "En curso", presionar "Finalizar viaje" y confirmar. | Paso 1: el viaje pasa a estado 'en_curso'. Paso 3: el viaje pasa a estado 'finalizado' y las reservas asociadas a 'completada'. | — | Protocolo listo para Samuel en su teléfono | Pendiente |
 | TC-15 | Calificar viaje | Por definir (E7) | — | — | — | Pendiente |
 | TC-16 | Chat en tiempo real | Por definir (E7) | — | — | — | Pendiente |
 | TC-17 | Sin conexión, con caché y banner | 1. En "Sesión de prueba", con sesión iniciada y red, tocar "Recargar datos". 2. Activar el modo avión. 3. Cerrar la app por completo y abrirla de nuevo. 4. Entrar a "Sesión de prueba". | Se ven nombre, sectores, viajes y reservas de la última carga, y el banner "Sin conexión: mostrando datos guardados (guardados a las HH:MM)", que TalkBack anuncia | Sí lo hace | Prueba manual de Sara en su teléfono | Aprobado |

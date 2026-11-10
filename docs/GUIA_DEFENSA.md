@@ -280,9 +280,46 @@ Flujo del tema (Etapa 1): Ajustes llama a `setPreference('theme', 'dark')` → T
 13. **Cambiar el debounce.** En hooks/useTripSearch.ts cambiar `FILTER_DEBOUNCE_MS` de 300 a 800 y ver en el teléfono que la búsqueda tarda más en dispararse.
 14. **Agregar un dato a la tarjeta.** En components/trips/TripCard.tsx agregar una `Line` en `TripDetails` y el mismo dato en `tripAccessibilityLabel`, para que TalkBack también lo lea.
 
-### Mis archivos y los del otro (actualizado en la Etapa 5)
+### Mis archivos y los del otro (actualizado en la Etapa 6)
 
 | Persona | Mis archivos | Archivos del otro que debo dominar |
 | --- | --- | --- |
-| Sara | E0, E1, E3 y E5 | E2 (migraciones 0001 y 0002) y E4: app/_layout.tsx (guardia de sesión), app/(auth)/register/, app/profile.tsx, lib/validators.ts |
-| Samuel | E2 y E4 | E5: components/trips/TripCard.tsx, TripList.tsx, hooks/useTripSearch.ts, app/trip/[id]/reserve.tsx, app/(tabs)/reservas.tsx |
+| Sara | E0, E1, E3 y E5 | E2, E4 y E6: app/(tabs)/creados.tsx, app/trip/create.tsx, app/requests.tsx, components/trips/CreatedTripCard.tsx, RequestCard.tsx, supabase/migrations/0007_proteger_updates_rls.sql |
+| Samuel | E2, E4 y E6: app/(tabs)/creados.tsx, app/(tabs)/curso.tsx (conductor), app/trip/create.tsx, app/requests.tsx, components/trips/CreatedTripCard.tsx, RequestCard.tsx, supabase/migrations/0007_proteger_updates_rls.sql, __tests__/screens/driver.test.tsx | E3 y E5: components/trips/TripCard.tsx, TripList.tsx, hooks/useTripSearch.ts, app/trip/[id]/reserve.tsx, app/(tabs)/reservas.tsx, SelectField.tsx |
+
+---
+
+## Flujo de conductor (Etapa 6 — Samuel)
+
+### Mapa de archivos nuevos y modificados
+
+| Ruta | Qué hace | Autor (etapa) |
+| --- | --- | --- |
+| supabase/migrations/0007_proteger_updates_rls.sql | Cierra brechas de UPDATE directo en `viajes` y `reservas`, y trigger de protección en `profiles.modo_actual` para forzar RPCs atómicas (D-53). | Samuel (E6) |
+| lib/validators.ts (actualizado) | Nuevos validadores puros: `validateDate`, `validateTime`, `validateFutureDeparture`, `validateTripCupos`, `validatePrice`. | Samuel (E6) |
+| components/trips/CreatedTripCard.tsx | Tarjeta de viaje creado para el conductor con resumen accesible (S-04), botón "Iniciar viaje" condicionado a reservas (R8), y "Cancelar viaje" / "Finalizar viaje" con `ConfirmDialog` (T-06). | Samuel (E6) |
+| components/trips/RequestCard.tsx | Tarjeta de solicitud de reserva para el conductor con datos del pasajero, punto de recogida y acciones "Aceptar reserva" y "Rechazar reserva" con indicador de carga. | Samuel (E6) |
+| app/(tabs)/index.tsx (actualizado) | Inicio de conductor (pantalla 17): tarjeta "Crea un viaje" con botón "+", tarjeta "Viajes Pendientes" con contador de solicitudes y "Ver más", y caja de vehículo activo. | Samuel (E6) |
+| app/trip/create.tsx | Pantalla 18 ("Crea tu viaje"): mapa para punto de partida (T-07), campos con validación en línea (V-05), resumen de errores con anuncio auditivo (S-07), y diálogo modal de confirmación exitosa con botón "¡Listo!". | Samuel (E6) |
+| app/requests.tsx | Pantalla de solicitudes de reserva para el conductor con `InnerTabs` (Pendientes, Aceptadas, Rechazadas) y acciones de aceptación y rechazo con retroalimentación háptica y anuncios. | Samuel (E6) |
+| app/(tabs)/creados.tsx | Pantalla 19 ("Viajes creados"): lista de viajes del conductor, iniciar viaje con validación, cancelar viaje con confirmación destructiva y enlace a solicitudes. | Samuel (E6) |
+| app/(tabs)/curso.tsx (actualizado) | Pantalla 14 adaptada para conductor: lista de viajes en curso propios con acción "Finalizar viaje" mediante confirmación modal. | Samuel (E6) |
+| __tests__/screens/driver.test.tsx | 7 pruebas automáticas de integración de todas las pantallas y flujos del conductor. | Samuel (E6) |
+
+### Preguntas probables — Flujo de conductor
+
+52. **¿Por qué se revocaron las políticas de UPDATE directo en `viajes` y `reservas`?**
+    Para impedir que un cliente autenticado modifique arbitrariamente el estado de un viaje o reserva mediante llamadas directas a PostgREST sin pasar por las RPCs transaccionales (`aceptar_reserva`, `rechazar_reserva`, `cancelar_reserva`, `iniciar_viaje`, etc.). Al revocar el UPDATE directo, Supabase garantiza que los bloqueos de fila (`FOR UPDATE`), el recuento atómico de cupos, el cierre automático al llegar a 0 y las notificaciones se ejecuten en una única transacción de base de datos protegida (R6, R8, D-53).
+53. **¿Cómo se asegura que un viaje solo se inicie si tiene al menos una reserva aceptada?**
+    Doble protección: en la base de datos, la RPC `iniciar_viaje` verifica que exista al menos una reserva con `estado = 'aceptada'` asociada al viaje (R8) o lanza la excepción `sin_pasajeros`. En la interfaz, el botón "Iniciar viaje" de `CreatedTripCard` se deshabilita (`disabled={!hasAcceptedReservations}`) y expone la pista `accessibilityHint="Requiere al menos una reserva aceptada para iniciar"` para guiar al usuario antes de pulsar.
+54. **¿Cómo funciona la validación accesible en la pantalla "Crea tu viaje"?**
+    Cumple con el criterio V-05 y §6.7: no muestra un aviso genérico, sino un error de texto específico debajo de cada campo con error (`TextField` con `error`), y genera un resumen accesible arriba del botón que lista verbalmente los campos faltantes ("Revisa los campos con error: Punto de partida, Fecha de salida..."). Este resumen se anuncia al lector de pantalla mediante `useAnnounce` sin desplazar abruptamente el foco (S-07).
+55. **¿Qué retroalimentación recibe el conductor al aceptar o rechazar solicitudes?**
+    Retroalimentación multimodal (T-04): auditiva mediante `useAnnounce('Reserva aceptada')`, háptica mediante `useHaptics` (vibración de confirmación en éxito o advertencia en rechazo), visual con el estado de carga (`busy`) en el botón accionado y actualización en tiempo real de la lista sin recargas bruscas.
+
+### Ejercicios de ajuste en vivo (Etapa 6)
+
+15. **Modificar el límite máximo de cupos al crear viaje.**
+    En `app/trip/create.tsx` o en `lib/validators.ts`, ajustar la validación de cupos permitidos según la capacidad máxima del carro y ejecutar `npm test -- __tests__/lib/validators.test.ts`.
+16. **Probar la protección de inicio de viaje.**
+    En `components/trips/CreatedTripCard.tsx`, modificar la condición `disabled={!hasAcceptedReservations}` y verificar con `npm test -- __tests__/screens/driver.test.tsx` que la prueba TC-14 / R8 detecta el comportamiento esperado.

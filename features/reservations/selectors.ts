@@ -39,3 +39,13 @@ export const selectPendingRequests = createSelector(
       .map((id) => entities[id])
       .filter((item) => item !== undefined && item.estado === 'pendiente'),
 );
+
+/** Todas las solicitudes recibidas en viajes del conductor. */
+export const selectAllRequests = createSelector(
+  [(state: RootState) => state.reservations.requestIds, selectReservationEntities],
+  (ids, entities) => ids.map((id) => entities[id]).filter((item) => item !== undefined),
+);
+
+/** Fábrica de selector de solicitudes por estado (para filtrar en pantalla de solicitudes). */
+export const makeSelectRequestsByEstado = (estado: EstadoReserva) =>
+  createSelector([selectAllRequests], (items) => items.filter((item) => item.estado === estado));

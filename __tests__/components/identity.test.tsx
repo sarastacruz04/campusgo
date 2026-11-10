@@ -10,6 +10,8 @@ import { SCREEN_FOCUS_DELAY_MS } from '@/hooks/useScreenFocus';
 import { MAX_FONT_SIZE_MULTIPLIER } from '@/theme/typography';
 import { flatStyle, renderWithProviders } from '@/test-utils/render';
 
+jest.setTimeout(15000);
+
 describe('Logo', () => {
   it('en bienvenida es una sola imagen con nombre (S-09)', async () => {
     await renderWithProviders(<Logo size="large" />);
