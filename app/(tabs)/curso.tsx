@@ -13,7 +13,7 @@ import { ScreenLayout } from '@/components/ui/ScreenLayout';
 import { StatusBanner } from '@/components/ui/StatusBanner';
 import { selectRatingAverages } from '@/features/ratings/selectors';
 import {
-  selectAllRequests,
+  selectRequestCountsByTrip,
   selectMyReservationsState,
   selectMyTripsInCourse,
 } from '@/features/reservations/selectors';
@@ -59,7 +59,7 @@ export default function CursoTab() {
   // Datos para conductor
   const driverTripsInProgress = useAppSelector(selectMyTripsInProgress);
   const createdTripsState = useAppSelector(selectCreatedState);
-  const requests = useAppSelector(selectAllRequests);
+  const requestCounts = useAppSelector(selectRequestCountsByTrip);
 
   // Estados de mutación del conductor
   const [finishModalTripId, setFinishModalTripId] = useState<string | null>(null);
@@ -117,23 +117,19 @@ export default function CursoTab() {
         );
       }
 
-      const trip = item.data;
-      const tripRequests = requests.filter((r) => r.viaje_id === trip.id);
-      const pendingCount = tripRequests.filter((r) => r.estado === 'pendiente').length;
-      const acceptedCount = tripRequests.filter((r) => r.estado === 'aceptada').length;
-
+      const counts = requestCounts[item.data.id];
       return (
         <CreatedTripCard
-          trip={trip}
-          pendingRequestsCount={pendingCount}
-          acceptedReservationsCount={acceptedCount}
-          onFinishTrip={(id) => setFinishModalTripId(id)}
+          trip={item.data}
+          pendingRequestsCount={counts?.pendientes ?? 0}
+          acceptedReservationsCount={counts?.aceptadas ?? 0}
+          onFinishTrip={setFinishModalTripId}
           onOpenChat={openChat}
           loadingAction={isFinishing ? 'finish' : null}
         />
       );
     },
-    [averages, isFinishing, requests],
+    [averages, isFinishing, requestCounts],
   );
 
   return (

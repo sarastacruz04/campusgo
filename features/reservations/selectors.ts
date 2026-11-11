@@ -46,6 +46,23 @@ export const selectAllRequests = createSelector(
   (ids, entities) => ids.map((id) => entities[id]).filter((item) => item !== undefined),
 );
 
+export type RequestCounts = { pendientes: number; aceptadas: number };
+
+/**
+ * Cuántas solicitudes pendientes y aceptadas tiene cada viaje, por id. Se calcula
+ * una sola vez por cambio de solicitudes (y no con un filter por tarjeta en cada
+ * render), así las listas de viajes del conductor siguen fluidas con 200 viajes.
+ */
+export const selectRequestCountsByTrip = createSelector([selectAllRequests], (items) => {
+  const counts: Record<string, RequestCounts> = {};
+  for (const item of items) {
+    const entry = (counts[item.viaje_id] ??= { pendientes: 0, aceptadas: 0 });
+    if (item.estado === 'pendiente') entry.pendientes += 1;
+    if (item.estado === 'aceptada') entry.aceptadas += 1;
+  }
+  return counts;
+});
+
 /** Fábrica de selector de solicitudes por estado (para filtrar en pantalla de solicitudes). */
 export const makeSelectRequestsByEstado = (estado: EstadoReserva) =>
   createSelector([selectAllRequests], (items) => items.filter((item) => item.estado === estado));
