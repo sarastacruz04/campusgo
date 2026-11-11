@@ -2,11 +2,13 @@ import { fireEvent, screen } from '@testing-library/react-native';
 import { router } from 'expo-router';
 
 import ProfileScreen from '@/app/profile';
+import * as notificationService from '@/services/notificationService';
 import * as profileService from '@/services/profileService';
+import * as ratingService from '@/services/ratingService';
 import * as vehicleService from '@/services/vehicleService';
 import { initialRequest } from '@/store/types';
 import { makeStore } from '@/store/store';
-import { makeProfile, makeVehicle } from '@/test-utils/factories';
+import { makeNotification, makeProfile, makeVehicle } from '@/test-utils/factories';
 import { renderWithProviders } from '@/test-utils/render';
 
 jest.mock('expo-router', () => ({
@@ -31,6 +33,14 @@ jest.mock('@/services/vehicleService', () => ({
   deleteVehicle: jest.fn(),
 }));
 
+jest.mock('@/services/ratingService', () => ({
+  getAverages: jest.fn(async () => []),
+}));
+
+jest.mock('@/services/notificationService', () => ({
+  listNotifications: jest.fn(async () => []),
+}));
+
 jest.mock('@/db/cache', () => ({
   loadWithCache: jest.fn(async ({ fetcher }) => ({
     data: await fetcher(),
@@ -48,6 +58,8 @@ jest.mock('@/hooks/useScreenFocus', () => ({
 describe('ProfileScreen (Pantalla 15)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(ratingService.getAverages).mockResolvedValue([]);
+    jest.mocked(notificationService.listNotifications).mockResolvedValue([]);
   });
 
   it('renderiza la información del perfil en la pestaña Pasajero', async () => {
@@ -263,5 +275,55 @@ describe('ProfileScreen (Pantalla 15)', () => {
     expect(screen.getByText('¿Deseas cerrar sesión?')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Sí, cerrar sesión' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'No, volver' })).toBeTruthy();
+  });
+
+  it('muestra el promedio de calificación y el acceso a Notificaciones con contador', async () => {
+    const profile = makeProfile({ id: 'u-notif' });
+    jest.mocked(profileService.getProfile).mockResolvedValue(profile);
+    jest.mocked(vehicleService.getMyVehicle).mockResolvedValue(null);
+    jest
+      .mocked(ratingService.getAverages)
+      .mockResolvedValue([{ usuario_id: 'u-notif', promedio: 4.8, total: 5 }]);
+    jest
+      .mocked(notificationService.listNotifications)
+      .mockResolvedValue([
+        makeNotification({ id: 'n1', leida: false }),
+        makeNotification({ id: 'n2', leida: false }),
+        makeNotification({ id: 'n3', leida: true }),
+      ]);
+
+    const store = makeStore({
+      auth: {
+        userId: profile.id,
+        email: profile.email,
+        pendingVerificationEmail: null,
+        initialized: true,
+        status: 'succeeded',
+        error: null,
+      },
+      profile: {
+        data: profile,
+        load: { status: 'succeeded', error: null },
+        save: initialRequest,
+        fromCache: false,
+        cachedAt: null,
+      },
+      vehicle: {
+        data: null,
+        load: { status: 'succeeded', error: null },
+        save: initialRequest,
+      },
+    });
+
+    await renderWithProviders(<ProfileScreen />, {}, store);
+
+    expect(await screen.findByText('Calificación: 4,8 de 5 (5)')).toBeTruthy();
+    const notifBtn = await screen.findByRole('button', {
+      name: 'Notificaciones, 2 sin leer',
+    });
+    expect(notifBtn).toBeTruthy();
+
+    await fireEvent.press(notifBtn);
+    expect(router.push).toHaveBeenCalledWith('/notifications');
   });
 });
