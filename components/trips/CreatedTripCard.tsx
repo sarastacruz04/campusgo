@@ -29,6 +29,8 @@ export type CreatedTripCardProps = {
   onFinishTrip?: (tripId: string) => void;
   onViewRequests?: (tripId: string) => void;
   onRateTrip?: (tripId: string) => void;
+  /** Si se pasa, muestra "Abrir chat" cuando hay pasajeros aceptados (R10, Etapa 7). */
+  onOpenChat?: (tripId: string) => void;
   loadingAction?: 'start' | 'cancel' | 'finish' | null;
 };
 
@@ -46,6 +48,7 @@ export const CreatedTripCard = memo(function CreatedTripCard({
   onFinishTrip,
   onViewRequests,
   onRateTrip,
+  onOpenChat,
   loadingAction = null,
 }: CreatedTripCardProps) {
   const { colors, borders } = useTheme();
@@ -58,6 +61,8 @@ export const CreatedTripCard = memo(function CreatedTripCard({
   const canStart = estado === 'abierto' || estado === 'lleno';
   const hasAcceptedReservations = acceptedReservationsCount > 0;
   const isInProgress = estado === 'en_curso';
+  // Sin pasajeros aceptados no hay con quién hablar; cancelado, ya no se escribe (R10).
+  const canChat = Boolean(onOpenChat) && hasAcceptedReservations && estado !== 'cancelado';
 
   const accessibleSummary = [
     `Viaje hacia ${sector}`,
@@ -273,6 +278,22 @@ export const CreatedTripCard = memo(function CreatedTripCard({
             variant="primary"
             accessibilityLabel={`Calificar pasajeros del viaje a ${sector}`}
             onPress={() => onRateTrip(trip.id)}
+          />
+        </View>
+      ) : null}
+
+      {canChat && onOpenChat ? (
+        <View
+          style={[
+            styles.actionsContainer,
+            { borderTopColor: colors.border, borderTopWidth: borders.thin },
+          ]}
+        >
+          <Button
+            label="Abrir chat"
+            variant="secondary"
+            accessibilityLabel={`Abrir chat del viaje a ${sector}`}
+            onPress={() => onOpenChat(trip.id)}
           />
         </View>
       ) : null}

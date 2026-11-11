@@ -136,7 +136,7 @@ describe('NotificationsScreen (Bandeja E7)', () => {
     expect(await screen.findByText('No tienes notificaciones')).toBeTruthy();
   });
 
-  it('navega según tipo y maneja mensaje_nuevo sin romper si no hay pantalla de chat', async () => {
+  it('navega según tipo incluyendo navegación directa al chat en mensaje_nuevo', async () => {
     jest.mocked(notificationService.listNotifications).mockResolvedValue([
       makeNotification({
         id: 'n-req',
@@ -167,6 +167,6 @@ describe('NotificationsScreen (Bandeja E7)', () => {
     await waitFor(() => {
       expect(notificationService.markAsRead).toHaveBeenCalledWith('n-msg');
     });
-    expect(router.push).not.toHaveBeenCalled();
+    expect(router.push).toHaveBeenCalledWith('/trip/v1/chat');
   });
 });

@@ -36,11 +36,15 @@ Se ejecutan con `npm test` (jest-expo y Testing Library).
 | __tests__/screens/profile.test.tsx | Perfil en Pasajero/Carro, edición, eliminación de vehículo, cierre de sesión, promedio propio y acceso a Notificaciones con contador. | E4, E7 | Aprobado |
 | __tests__/components/trips.test.tsx | TripCard como un solo foco con etiqueta compuesta, ReservationCard (papelera aparte, viaje oculto por RLS), filtros, lista de sectores modal y pestañas internas. | E5 | Aprobado |
 | __tests__/hooks/passenger-hooks.test.tsx | Debounce, punto del mapa con dirección, respuesta vieja ignorada, sin permiso y dirección solo escrita. | E5 | Aprobado |
+| __tests__/screens/chat.test.tsx | Chat del viaje: estado vacío, botón de enviar de 48 dp deshabilitado sin texto, lista invertida con cada mensaje como un solo foco, límite y contador de 500, envío con anuncio, anuncio del mensaje nuevo de otra persona por Realtime (y no del historial), ajeno sin acceso, viaje cancelado solo lectura, cleanup de la suscripción y botón "Abrir chat" de ReservationCard. | E7 | Aprobado |
+| __tests__/features/domains.test.ts (chat) | Acceso denegado sin cargar mensajes, nombres de autores, orden del más nuevo al más antiguo, respuesta vieja ignorada y nombres sin pedir dos veces. | E3, E7 | Aprobado |
 | __tests__/screens/passenger.test.tsx | Inicio (búsqueda, filtro con debounce, error y Reintentar), reserva (validación, mapa, solo texto, éxito, duplicada), reservas por estado, cancelación con confirmación y viajes en curso. | E5 | Aprobado |
 
-Última ejecución: 2026-11-10, `npm test` con 30 archivos y 214 de 214 pruebas aprobadas, ejecutado por Antigravity en Windows (Node 24.18.0). Los servicios se simulan solo dentro de las pruebas.
+Última ejecución (Etapa 7 integrada): 2026-11-11, `npm test` con 31 archivos y 228 de 228 pruebas aprobadas tras fusionar `origin/master` (`e7-chat`) y `e7-calificaciones-notificaciones` en Windows. Los servicios se simulan solo dentro de las pruebas.
 
-Pendientes por etapa: chat (E7 - Sara), auditoría completa en dispositivo (E8) y verificación en Supabase de pruebas SQL de RLS (`supabase/tests/rls.sql`).
+Ejecución previa de chat (`e7-chat`): 2026-11-10, `npm test` con 27 archivos y 210 de 210 pruebas aprobadas, ejecutado por Claude Code en WSL (Node 22).
+
+Pendientes por etapa: verificación en dispositivo de calificaciones/notificaciones (`TC-15`, `V7-11..V7-15`) y chat cancelado (`V7-10`), pruebas del conductor (`TC-10..TC-14`), auditoría completa en dispositivo (E8) y ejecución en Supabase de `supabase/tests/rls.sql`.
 
 ## 2. Casos funcionales
 
@@ -61,7 +65,7 @@ Pendientes por etapa: chat (E7 - Sara), auditoría completa en dispositivo (E8) 
 | TC-13 | Rechazar reserva | 1. En Solicitudes pendientes, presionar "Rechazar" en una reserva. 2. Verificar que se mueva a la pestaña "Rechazadas". | La reserva desaparece de pendientes y pasa a la pestaña Rechazadas; se actualiza en tiempo real. | — | Protocolo listo para Samuel en su teléfono | Pendiente |
 | TC-14 | Iniciar y finalizar viaje | 1. En "Viajes creados", cuando haya al menos 1 reserva aceptada, presionar "Iniciar viaje". 2. Confirmar inicio. 3. En la pestaña "En curso", presionar "Finalizar viaje" y confirmar. | Paso 1: el viaje pasa a estado 'en_curso'. Paso 3: el viaje pasa a estado 'finalizado' y las reservas asociadas a 'completada'. | — | Protocolo listo para Samuel en su teléfono | Pendiente |
 | TC-15 | Calificar viaje | 1. Con un viaje en estado `finalizado` y reserva `aceptada`, abrir "Calificar viaje" (desde Reservas > Aceptados, Viajes creados o la notificación de viaje finalizado). 2. Elegir estrellas (`1` a `5`) y escribir un comentario opcional (≤ 280 caracteres). 3. Tocar "Enviar calificación". 4. Reabrir el mismo viaje para verificar el estado ya calificado. | Paso 3: confirmación auditiva/háptica/visual y actualización del promedio en perfil y tarjetas. Paso 4: muestra la calificación enviada sin permitir duplicado (R9). | — | Protocolo listo para Samuel en su teléfono | Pendiente |
-| TC-16 | Chat en tiempo real | Por definir (E7) | — | — | — | Pendiente |
+| TC-16 | Chat en tiempo real | Con dos teléfonos (o un teléfono y un emulador): el conductor y un pasajero con reserva aceptada. 1. Ambos abren "Abrir chat" del mismo viaje. 2. El pasajero escribe "Hola" y toca "Enviar mensaje". 3. El conductor responde. | Paso 2: el mensaje aparece abajo en el teléfono del pasajero (con "Tú") y, sin recargar, en el del conductor con el nombre del pasajero. Paso 3: igual en sentido contrario | Sí sucede: los mensajes llegan sin recargar en los dos sentidos | Prueba manual de Sara en su teléfono (2026-11-10) | Aprobado |
 | TC-17 | Sin conexión, con caché y banner | 1. En "Sesión de prueba", con sesión iniciada y red, tocar "Recargar datos". 2. Activar el modo avión. 3. Cerrar la app por completo y abrirla de nuevo. 4. Entrar a "Sesión de prueba". | Se ven nombre, sectores, viajes y reservas de la última carga, y el banner "Sin conexión: mostrando datos guardados (guardados a las HH:MM)", que TalkBack anuncia | Sí lo hace | Prueba manual de Sara en su teléfono | Aprobado |
 | TC-18 | Error de red y "Reintentar" | 1. Cerrar sesión. 2. Activar el modo avión. 3. Escribir correo y contraseña y tocar "Iniciar Sesión". 4. Quitar el modo avión y tocar "Reintentar". | Paso 3: mensaje "Sin conexión a internet. Revisa tu red e intenta de nuevo." con botón "Reintentar". Paso 4: la sesión se inicia | Sí lo hace | Prueba manual de Sara en su teléfono | Aprobado |
 | TC-19 | Cambio a modo conductor sin carro bloqueado | Por definir (E4) | — | — | — | Pendiente |
@@ -84,14 +88,35 @@ Lo que la Etapa 5 exige además de los casos TC. Mientras no exista la pantalla 
 | V5-06 | TalkBack en la tarjeta de viaje | Con TalkBack, recorrer las tarjetas de Inicio. | Cada tarjeta se lee como una sola frase; el "+" no es un foco aparte | Sí lo hace | Prueba manual de Sara en su teléfono con TalkBack | Aprobado |
 | V5-07 | TalkBack en la papelera | Con TalkBack, recorrer una reserva pendiente. | Los datos son un foco y la papelera otro, con el nombre "Cancelar reserva de …" | Sí lo hace | Prueba manual de Sara en su teléfono con TalkBack | Aprobado |
 
-## 4. Verificaciones en vivo de la Etapa 7 (calificaciones y notificaciones)
+## 4. Verificaciones en vivo de la Etapa 7 (chat)
+
+Se necesitan tres cuentas: el conductor (A), un pasajero con la reserva ACEPTADA en un viaje de A que no esté cancelado (B) y una cuenta ajena a ese viaje (C).
+
+| ID | Descripción | Pasos | Resultado esperado | Resultado real | Evidencia | Estado |
+| --- | --- | --- | --- | --- | --- | --- |
+| V7-01 | Entradas al chat | B: Reservas > Aceptados y Curso. A: Creados y Curso. | Cada tarjeta del viaje tiene "Abrir chat" y abre la pantalla "Chat del viaje" con el sector y la hora de salida | Sí sucede | Prueba manual de Sara en su teléfono (2026-11-10) | Aprobado |
+| V7-02 | Estado vacío | Abrir el chat de un viaje sin mensajes. | Se ve "Todavía no hay mensajes" y el botón de enviar está deshabilitado | Sí sucede | Prueba manual de Sara en su teléfono (2026-11-10) | Aprobado |
+| V7-03 | Mensajes en vivo | Es TC-16. | Los mensajes llegan sin recargar en ambos teléfonos | Sí sucede (ver TC-16) | Prueba manual de Sara en su teléfono (2026-11-10) | Aprobado |
+| V7-04 | TalkBack en la lista | Con TalkBack en B, recorrer los mensajes. | Cada mensaje es un solo foco: "Miguel Ordóñez, 3:15 p. m.: Hola" o "Tú, …". Anotar en qué orden los recorre (del más nuevo al más antiguo o al revés) | Según Sara: "a medida que llegan nuevos, los va leyendo tal cual" | Prueba manual de Sara en su teléfono (2026-11-10) | Aprobado |
+| V7-05 | Anuncio del mensaje nuevo | Con TalkBack en B y el foco en el campo, A envía un mensaje. | TalkBack dice "Mensaje nuevo de [nombre de A]: [texto]" sin mover el foco | Sí lo lee | Prueba manual de Sara en su teléfono (2026-11-10) | Aprobado |
+| V7-06 | Límite de 500 | Pegar en el campo un texto de más de 500 caracteres. | El campo se queda en 500, el contador dice "500 de 500 caracteres" y TalkBack anuncia el límite | Sí sucede | Prueba manual de Sara en su teléfono (2026-11-10) | Aprobado |
+| V7-07 | Botón de 48 dp | Accessibility Scanner sobre la pantalla del chat. | Sin avisos de tamaño en "Enviar mensaje" | Sin avisos de tamaño | Prueba manual de Sara en su teléfono (2026-11-10) | Aprobado |
+| V7-08 | Ajeno sin acceso (app) | C no tiene botón para entrar. Para probarlo, abrir desde la terminal de Expo la ruta del chat: con el id del viaje, en el teléfono de C escribir en el navegador `exp://<IP>:8081/--/trip/<id_viaje>/chat`. | "No tienes acceso a este chat…" y no aparece el campo de escribir | Sí sucede | Prueba manual de Sara en su teléfono (2026-11-10) | Aprobado |
+| V7-09 | RLS del chat (base de datos) | En el SQL Editor, poner los tres correos en supabase/tests/chat_rls.sql y ejecutarlo completo. | Error a propósito que empieza con "RESULTADO CHAT RLS: 6 de 6 correctas" | Sí sucede: 6 de 6 correctas | Prueba manual de Sara en su teléfono (2026-11-10) | Aprobado |
+| V7-10 | Viaje cancelado | A cancela el viaje (Creados > Cancelar viaje) con el chat abierto en B. | B ve "Este viaje fue cancelado: puedes leer los mensajes, pero ya no enviar nuevos." y no puede enviar | — | — | Pendiente |
+
+V7-10 (viaje cancelado) queda pendiente: no se ejecutó.
+
+Hallazgo para Samuel (pantalla 19, no es del chat): en Creados los viajes se ordenan por salida del más lejano al más cercano, así que con los 200 viajes de supabase/dev_seed_viajes.sql los de hoy quedan al final y el conductor no encontraba "Abrir chat". Propuesta: mostrar primero los próximos (orden ascendente desde ahora) y los pasados al final, o separarlos.
+
+## 5. Verificaciones en vivo de la Etapa 7 (calificaciones y notificaciones)
 
 Protocolo listo para ejecutar en teléfono Android con Expo Go tras aplicar `0008_calificaciones_rls_pares.sql` en Supabase.
 
 | ID | Descripción | Pasos | Resultado esperado | Resultado real | Evidencia | Estado |
 | --- | --- | --- | --- | --- | --- | --- |
-| V7-01 | Notificación en tiempo real y contador | Con sesión activa del pasajero en Perfil o dentro de la app, el conductor acepta su reserva o finaliza el viaje. | Llega el evento Realtime, TalkBack/useAnnounce lee `"Notificación: …"` y en Perfil el botón muestra `"Notificaciones (N sin leer)"`. | — | Protocolo listo para Samuel en su teléfono | Pendiente |
-| V7-02 | Bandeja y "Marcar todas como leídas" | Abrir Perfil > Notificaciones con al menos 2 notificaciones sin leer. Tocar una de viaje finalizado y luego regresar para usar "Marcar todas como leídas". | La tarjeta tocada pasa a `Leída` y abre `/trip/[id]/rate`; "Marcar todas como leídas" deja el contador en 0 con anuncio auditivo. | — | Protocolo listo para Samuel en su teléfono | Pendiente |
-| V7-03 | Promedios reales en tarjetas y Perfil | Tras calificar al conductor o pasajero en TC-15, revisar el promedio en Perfil y en tarjetas de Inicio/Reservas. | El promedio coincide con `promedio_calificaciones` en formato colombiano (ej. `4,5 de 5 (2)`). | — | Protocolo listo para Samuel en su teléfono | Pendiente |
-| V7-04 | Protección R9 en viaje no finalizado / duplicado | Intentar abrir `/trip/[id]/rate` sobre un viaje `en_curso` y repetir calificación sobre el mismo par en Supabase RLS (`RC-03..RC-05`). | En la app bloquea el formulario con banner informativo; en Supabase RLS rechaza auto-calificación y pares pasajero-pasajero (`0008`). | — | Protocolo listo para Samuel | Pendiente |
-| V7-05 | TalkBack sobre `StarRating` | Activar TalkBack en "Calificar viaje" y recorrer las cinco estrellas. | Cada botón se oye como `"N de 5 estrellas"` con estado seleccionado coherente y área táctil mínima de 48 dp. | — | Protocolo listo para Samuel con TalkBack | Pendiente |
+| V7-11 | Notificación en tiempo real y navegación | Con sesión activa del pasajero en Perfil o dentro de la app, el conductor acepta su reserva, envía un mensaje o finaliza el viaje. | Llega el evento Realtime, TalkBack/useAnnounce lee `"Notificación: …"` y en Perfil el botón muestra `"Notificaciones (N sin leer)"`; al tocar `mensaje_nuevo` abre `/trip/[id]/chat`. | — | Protocolo listo para Samuel en su teléfono | Pendiente |
+| V7-12 | Bandeja y "Marcar todas como leídas" | Abrir Perfil > Notificaciones con al menos 2 notificaciones sin leer. Tocar una de viaje finalizado y luego regresar para usar "Marcar todas como leídas". | La tarjeta tocada pasa a `Leída` y abre `/trip/[id]/rate`; "Marcar todas como leídas" deja el contador en 0 con anuncio auditivo. | — | Protocolo listo para Samuel en su teléfono | Pendiente |
+| V7-13 | Promedios reales en tarjetas y Perfil | Tras calificar al conductor o pasajero en TC-15, revisar el promedio en Perfil y en tarjetas de Inicio/Reservas. | El promedio coincide con `promedio_calificaciones` en formato colombiano (ej. `4,5 de 5 (2)`). | — | Protocolo listo para Samuel en su teléfono | Pendiente |
+| V7-14 | Protección R9 en viaje no finalizado / duplicado | Intentar abrir `/trip/[id]/rate` sobre un viaje `en_curso` y repetir calificación sobre el mismo par en Supabase RLS (`RC-03..RC-05`). | En la app bloquea el formulario con banner informativo; en Supabase RLS rechaza auto-calificación y pares pasajero-pasajero (`0008`). | — | Protocolo listo para Samuel | Pendiente |
+| V7-15 | TalkBack sobre `StarRating` | Activar TalkBack en "Calificar viaje" y recorrer las cinco estrellas. | Cada botón se oye como `"N de 5 estrellas"` con estado seleccionado coherente y área táctil mínima de 48 dp. | — | Protocolo listo para Samuel con TalkBack | Pendiente |

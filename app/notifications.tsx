@@ -52,8 +52,7 @@ function destinationForNotification(notification: Notificacion): string | null {
     case 'viaje_iniciado':
       return '/(tabs)/curso';
     case 'mensaje_nuevo':
-      // La navegación directa al chat se integra cuando se fusione el módulo de chat.
-      return null;
+      return tripId ? `/trip/${tripId}/chat` : null;
     default:
       return null;
   }

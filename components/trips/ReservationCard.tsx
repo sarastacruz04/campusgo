@@ -24,6 +24,8 @@ type ReservationCardProps = TripRatingProps & {
   onPressCancel?: (reservationId: string, button: RefObject<HostInstance | null>) => void;
   /** Si se pasa en una reserva aceptada de un viaje finalizado, muestra "Calificar viaje" (R9). */
   onPressRate?: (viajeId: string) => void;
+  /** Si se pasa, muestra "Abrir chat" (solo reservas aceptadas, R10). Recibe el id del viaje. */
+  onPressChat?: (viajeId: string) => void;
 };
 
 /**
@@ -37,6 +39,7 @@ export const ReservationCard = memo(function ReservationCard({
   ratingTotal,
   onPressCancel,
   onPressRate,
+  onPressChat,
 }: ReservationCardProps) {
   const { colors, borders } = useTheme();
   const cancelRef = useRef<HostInstance>(null);
@@ -82,7 +85,6 @@ export const ReservationCard = memo(function ReservationCard({
           />
         </View>
       ) : null}
-
       {onPressRate &&
       viaje &&
       reservation.estado === 'aceptada' &&
@@ -101,6 +103,17 @@ export const ReservationCard = memo(function ReservationCard({
           />
         </View>
       ) : null}
+
+      {onPressChat && viaje ? (
+        <View style={styles.chat}>
+          <Button
+            label="Abrir chat"
+            variant="secondary"
+            accessibilityLabel={`Abrir chat del viaje a ${sector}`}
+            onPress={() => onPressChat(viaje.id)}
+          />
+        </View>
+      ) : null}
     </View>
   );
 });
@@ -111,6 +124,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   pickup: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
+  },
+  chat: {
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.lg,
   },

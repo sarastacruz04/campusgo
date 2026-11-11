@@ -46,6 +46,8 @@ const EMPTY_TEXT: Record<TabKey, string> = {
 
 const keyExtractor = (item: ReservationItem) => item.id;
 
+const openChat = (tripId: string) => router.push(`/trip/${tripId}/chat`);
+
 type CancelTarget = { id: string; button: RefObject<HostInstance | null> };
 
 /** "Viajes reservados" (pantalla 13): reservas por estado y cancelación con confirmación. */
@@ -97,6 +99,8 @@ export default function ReservasTab() {
           onPressRate={
             item.estado === 'aceptada' && item.viaje?.estado === 'finalizado' ? openRate : undefined
           }
+          // El chat es solo para reservas aceptadas (R10).
+          onPressChat={item.estado === 'aceptada' ? openChat : undefined}
         />
       );
     },

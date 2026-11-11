@@ -280,12 +280,12 @@ Flujo del tema (Etapa 1): Ajustes llama a `setPreference('theme', 'dark')` → T
 13. **Cambiar el debounce.** En hooks/useTripSearch.ts cambiar `FILTER_DEBOUNCE_MS` de 300 a 800 y ver en el teléfono que la búsqueda tarda más en dispararse.
 14. **Agregar un dato a la tarjeta.** En components/trips/TripCard.tsx agregar una `Line` en `TripDetails` y el mismo dato en `tripAccessibilityLabel`, para que TalkBack también lo lea.
 
-### Mis archivos y los del otro (actualizado en la Etapa 6)
+### Mis archivos y los del otro (actualizado en la Etapa 7)
 
 | Persona | Mis archivos | Archivos del otro que debo dominar |
 | --- | --- | --- |
-| Sara | E0, E1, E3 y E5 | E2, E4, E6 y E7 (calificaciones/notificaciones): app/(tabs)/creados.tsx, app/trip/create.tsx, app/requests.tsx, components/trips/CreatedTripCard.tsx, RequestCard.tsx, supabase/migrations/0007 y 0008, app/notifications.tsx, app/trip/[id]/rate.tsx, components/ratings/StarRating.tsx, components/notifications/NotificationItemCard.tsx |
-| Samuel | E2, E4, E6 y E7 (calificaciones y notificaciones): app/(tabs)/creados.tsx, app/(tabs)/curso.tsx (conductor), app/trip/create.tsx, app/requests.tsx, components/trips/CreatedTripCard.tsx, RequestCard.tsx, supabase/migrations/0007 y 0008, components/ratings/StarRating.tsx, components/notifications/NotificationItemCard.tsx, app/notifications.tsx, app/trip/[id]/rate.tsx | E3 y E5: components/trips/TripCard.tsx, TripList.tsx, hooks/useTripSearch.ts, app/trip/[id]/reserve.tsx, app/(tabs)/reservas.tsx, SelectField.tsx, features/notifications/*, hooks/useRealtime.ts |
+| Sara | E0, E1, E3, E5 y E7 (chat): app/trip/[id]/chat.tsx, components/chat/MessageBubble.tsx, features/chat, services/chatService.ts, supabase/tests/chat_rls.sql | E2, E4, E6 y E7 (calificaciones y notificaciones): app/(tabs)/creados.tsx, app/trip/create.tsx, app/requests.tsx, components/trips/CreatedTripCard.tsx, RequestCard.tsx, supabase/migrations/0007 y 0008, app/notifications.tsx, app/trip/[id]/rate.tsx, components/ratings/StarRating.tsx, components/notifications/NotificationItemCard.tsx |
+| Samuel | E2, E4, E6 y E7 (calificaciones y notificaciones): app/(tabs)/creados.tsx, app/(tabs)/curso.tsx (conductor), app/trip/create.tsx, app/requests.tsx, components/trips/CreatedTripCard.tsx, RequestCard.tsx, supabase/migrations/0007 y 0008, __tests__/screens/driver.test.tsx, components/ratings/StarRating.tsx, components/notifications/NotificationItemCard.tsx, app/notifications.tsx, app/trip/[id]/rate.tsx | E3, E5 y E7 (chat): app/trip/[id]/chat.tsx, components/chat/MessageBubble.tsx, features/chat/thunks.ts, services/chatService.ts, components/trips/TripCard.tsx, TripList.tsx, hooks/useTripSearch.ts, app/trip/[id]/reserve.tsx, app/(tabs)/reservas.tsx, SelectField.tsx, features/notifications/*, hooks/useRealtime.ts |
 
 ---
 
@@ -326,33 +326,67 @@ Flujo del tema (Etapa 1): Ajustes llama a `setPreference('theme', 'dark')` → T
 
 ---
 
+## Chat del viaje (Etapa 7 — Sara)
+
+### Mapa de archivos nuevos y modificados
+
+| Ruta | Qué hace | Autor (etapa) |
+| --- | --- | --- |
+| app/trip/[id]/chat.tsx | Pantalla del chat: lista invertida, campo con límite y contador de 500, botón de enviar de 48 dp, estados de carga, vacío, error, sin acceso y viaje cancelado, Realtime y anuncios. | Sara (E7) |
+| components/chat/MessageBubble.tsx | Un mensaje: un solo foco con "autor, hora: texto"; lo propio va a la derecha, en azul y con "Tú". | Sara (E7) |
+| features/chat/thunks.ts | `fetchMessages` comprueba el acceso y trae mensajes y nombres; `fetchAuthorNames` con `condition`; `sendMessage` valida 1 a 500. | Sara (E3 y E7) |
+| features/chat/slice.ts y selectors.ts | Mensajes en un entity adapter ordenado por fecha, nombres de autores, `loadRequestId` contra respuestas viejas y selector del más nuevo al más antiguo. | Sara (E3 y E7) |
+| services/chatService.ts | `isParticipant`, `listMessages` con el nombre del autor, `getAuthorNames`, `sendMessage` y `subscribeToMessages`. | Sara (E3 y E7) |
+| supabase/tests/chat_rls.sql | Prueba de RLS del chat en una transacción que se deshace sola. | Sara (E7) |
+| ReservationCard, CreatedTripCard, reservas, curso y creados | Botón "Abrir chat" (props opcionales). | Sara (E7) sobre archivos de E5 y E6 |
+
+### Preguntas probables — Chat
+
+56. **¿Cómo llega un mensaje nuevo a la pantalla?**
+    `useRealtimeMessages(id)` se suscribe a los INSERT de `mensajes` con el filtro `viaje_id=eq.<id>`. Cada evento hace `dispatch(messageReceived(mensaje))`, el reducer hace `upsertOne` y el selector memoizado devuelve la lista nueva. El cleanup del `useEffect` cierra el canal al salir.
+57. **¿Por qué el mensaje propio no sale dos veces?**
+    Llega por la respuesta del insert y por Realtime, pero con el mismo id. El entity adapter usa `upsertOne`: si el id ya existe, lo reemplaza en vez de agregar otro.
+58. **¿Cómo se garantiza que un ajeno no lea el chat?**
+    En la base: la política SELECT de `mensajes` usa `es_participante_del_viaje(viaje_id, auth.uid())`, y Realtime respeta RLS. En la app: `fetchMessages` llama antes a esa misma función y muestra "No tienes acceso". Lo prueba supabase/tests/chat_rls.sql (CH-04 y CH-05).
+59. **¿Por qué la lista es invertida?**
+    En un chat lo nuevo va abajo, junto al campo. Con `inverted` la FlatList dibuja el primer elemento abajo, así que los datos van del más nuevo al más antiguo (`makeSelectMessagesNewestFirst`). El estado vacío se dibuja fuera porque dentro de una lista invertida saldría al revés.
+60. **¿Qué oye una persona con TalkBack cuando llega un mensaje?**
+    Un efecto compara el id del mensaje más nuevo con el último visto. Si cambió y el autor no es quien usa la app, `useAnnounce` dice "Mensaje nuevo de X: texto" sin mover el foco (S-07). Lo que ya había al abrir no se anuncia.
+
+### Ejercicios de ajuste en vivo (Etapa 7 — chat)
+
+17. **Cambiar el límite del mensaje.** Cambiar `MAX_MESSAGE_LENGTH` en services/chatService.ts y el texto de `mensajeInvalido` en services/errors.ts. Ojo: la base también tiene un CHECK de 500 en `mensajes.contenido` (migración 0001), así que subirlo exige una migración de Samuel.
+18. **Cambiar el anuncio del mensaje nuevo.** En app/trip/[id]/chat.tsx cambiar el texto del anuncio "Mensaje nuevo de …" y correr `npx jest __tests__/screens/chat.test.tsx` para ver qué prueba hay que ajustar.
+
+---
+
 ## Calificaciones y notificaciones (Etapa 7 — Samuel)
 
 ### Mapa de archivos nuevos y modificados
 
 | Ruta | Qué hace | Autor (etapa) |
 | --- | --- | --- |
-| supabase/migrations/0008_calificaciones_rls_pares.sql | Endurece el `INSERT` en `calificaciones` para exigir `autor_id <> destinatario_id` y pares conductor ↔ pasajero con reserva aceptada en viaje `finalizado` (R9, D-56). | Samuel (E7) |
+| supabase/migrations/0008_calificaciones_rls_pares.sql | Endurece el `INSERT` en `calificaciones` para exigir `autor_id <> destinatario_id` y pares conductor ↔ pasajero con reserva aceptada en viaje `finalizado` (R9, D-61). | Samuel (E7) |
 | services/ratingService.ts, features/ratings/* y lib/validators.ts | Carga contexto del viaje para calificar (`getTripRatingContext`, `fetchTripRatingContext`), valida estrellas `1..5` y comentario ≤ 280 chars y actualiza promedios y estado local al enviar. | Samuel (E7) |
 | features/reservations/thunks.ts (actualizado) | Despacha `fetchRatingAverages` para los conductores al cargar reservas con red, completando promedios en `ReservationCard`. | Samuel (E7) |
 | components/ratings/StarRating.tsx | Selector de 5 estrellas accesibles (`N de 5 estrellas`, `accessibilityState.selected`, área mínima `TOUCH_MIN`, envoltorio flexible y contraste por borde/relleno/ícono). | Samuel (E7) |
 | components/notifications/NotificationItemCard.tsx | Tarjeta accesible con foco único por notificación y distinción de leída/no leída sin depender solo del color (etiqueta "Nueva", ícono y borde grueso). | Samuel (E7) |
-| app/notifications.tsx | Bandeja cronológica de notificaciones con contador de no leídas, "Marcar todas como leídas" con anuncio auditivo y navegación contextual segura (D-58). | Samuel (E7) |
-| app/trip/[id]/rate.tsx | Pantalla unificada de calificación (R9) para pasajero o conductor con `RadioGroup` cuando hay múltiples pasajeros aceptados (D-57). | Samuel (E7) |
-| app/_layout.tsx, app/profile.tsx, app/(tabs)/reservas.tsx, app/(tabs)/creados.tsx, CreatedTripCard.tsx, ReservationCard.tsx | Carga inicial de notificaciones, promedio en perfil, botón a Notificaciones con contador y disparadores de calificación en viajes finalizados. | Samuel (E7) |
+| app/notifications.tsx | Bandeja cronológica de notificaciones con contador de no leídas, "Marcar todas como leídas" con anuncio auditivo y navegación contextual incluyendo `/trip/[id]/chat` para `mensaje_nuevo` (D-63). | Samuel (E7) |
+| app/trip/[id]/rate.tsx | Pantalla unificada de calificación (R9) para pasajero o conductor con `RadioGroup` cuando hay múltiples pasajeros aceptados (D-62). | Samuel (E7) |
+| app/_layout.tsx, app/profile.tsx, app/(tabs)/reservas.tsx, app/(tabs)/creados.tsx, CreatedTripCard.tsx, ReservationCard.tsx | Carga inicial de notificaciones, promedio en perfil, botón a Notificaciones con contador y disparadores de calificación en viajes finalizados (conviviendo con "Abrir chat"). | Samuel (E7) |
 
 ### Preguntas probables — Calificaciones y notificaciones
 
-56. **¿Por qué no bastaba `es_participante_del_viaje` en la política INSERT de `calificaciones`?**
-    Porque esa función solo confirma que el usuario participa en el viaje, pero no impedía que alguien intentara calificarse a sí mismo o que un pasajero calificara a otro pasajero. La migración `0008` combina `autor_id <> destinatario_id` con `es_conductor_del_viaje` y `tiene_reserva_aceptada` (`SECURITY DEFINER` de `0005`) para garantizar pares estrictos conductor ↔ pasajero sin recursión RLS (D-56).
-57. **¿Cómo cumple `StarRating` con accesibilidad visual, motriz y para TalkBack?**
+61. **¿Por qué no bastaba `es_participante_del_viaje` en la política INSERT de `calificaciones`?**
+    Porque esa función solo confirma que el usuario participa en el viaje, pero no impedía que alguien intentara calificarse a sí mismo o que un pasajero calificara a otro pasajero. La migración `0008` combina `autor_id <> destinatario_id` con `es_conductor_del_viaje` y `tiene_reserva_aceptada` (`SECURITY DEFINER` de `0005`) para garantizar pares estrictos conductor ↔ pasajero sin recursión RLS (D-61).
+62. **¿Cómo cumple `StarRating` con accesibilidad visual, motriz y para TalkBack?**
     Cada estrella es un `Pressable` independiente con `accessibilityRole="button"`, etiqueta `"N de 5 estrellas"` y `accessibilityState={{ selected: star <= value, disabled }}`; mantiene `minWidth` y `minHeight >= TOUCH_MIN`, usa `flexWrap: 'wrap'` para no salirse en pantallas angostas al escalar texto (V-06), y combina ícono lleno/contorno, texto numérico y tokens contrastados (V-05).
-58. **¿Por qué el acceso a Notificaciones se colocó en `Mi Perfil` y no en el `AppHeader`?**
-    Por fidelidad con el Figma (§6.7 #15) y porque `identity.test.tsx` valida el orden de foco exacto del encabezado interno (`Volver`, `Perfil`, `Ajustes`). Cargar notificaciones al autenticar en `app/_layout.tsx` junto con `useRealtimeNotifications` mantiene actualizado `selectUnreadCount` para mostrarlo en el botón de Perfil (D-58).
-59. **¿Cómo evita duplicados la UI al calificar un viaje finalizado?**
+63. **¿Por qué el acceso a Notificaciones se colocó en `Mi Perfil` y no en el `AppHeader`?**
+    Por fidelidad con el Figma (§6.7 #15) y porque `identity.test.tsx` valida el orden de foco exacto del encabezado interno (`Volver`, `Perfil`, `Ajustes`). Cargar notificaciones al autenticar en `app/_layout.tsx` junto con `useRealtimeNotifications` mantiene actualizado `selectUnreadCount` para mostrarlo en el botón de Perfil (D-63).
+64. **¿Cómo evita duplicados la UI al calificar un viaje finalizado?**
     `getTripRatingContext` consulta previamente las calificaciones del `autor_id` en ese `viaje_id`. Si un destinatario ya tiene calificación, `rate.tsx` muestra el puntaje y comentario enviado en lugar del formulario; además, en PostgreSQL la restricción `UNIQUE (viaje_id, autor_id, destinatario_id)` rechaza duplicados y `submitRating` traduce el error `duplicado`.
 
-### Ejercicios de ajuste en vivo (Etapa 7)
+### Ejercicios de ajuste en vivo (Etapa 7 — calificaciones y notificaciones)
 
-17. **Cambiar el límite del comentario en calificaciones.** En `lib/validators.ts`, cambiar `MAX_RATING_COMMENT_LENGTH` (por ejemplo de `280` a `200`) y verificar en `__tests__/lib/validators.test.ts` y `__tests__/features/ratings-notifications.test.ts`.
-18. **Probar el umbral de un viaje no finalizado en calificaciones.** En `app/trip/[id]/rate.tsx`, cambiar temporalmente la comprobación `context.trip.estado !== 'finalizado'` y confirmar que `__tests__/screens/ratings.test.tsx` detecta la violación a la regla R9.
+19. **Cambiar el límite del comentario en calificaciones.** En `lib/validators.ts`, cambiar `MAX_RATING_COMMENT_LENGTH` (por ejemplo de `280` a `200`) y verificar en `__tests__/lib/validators.test.ts` y `__tests__/features/ratings-notifications.test.ts`.
+20. **Probar el umbral de un viaje no finalizado en calificaciones.** En `app/trip/[id]/rate.tsx`, cambiar temporalmente la comprobación `context.trip.estado !== 'finalizado'` y confirmar que `__tests__/screens/ratings.test.tsx` detecta la violación a la regla R9.
