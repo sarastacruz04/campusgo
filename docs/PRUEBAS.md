@@ -29,13 +29,18 @@ Se ejecutan con `npm test` (jest-expo y Testing Library).
 | __tests__/lib/format.test.ts | Hora, fecha de salida, pesos, cupos y calificación en formato de Colombia. | E3, E5 | Aprobado |
 | __tests__/lib/validators.test.ts | Validadores puros: fecha DD/MM/AAAA, hora HH:MM, salida futura con margen de 5 min, cupos según vehículo y precio. | E4, E6 | Aprobado |
 | __tests__/screens/driver.test.tsx | Inicio del conductor (pantalla 17), crear viaje con errores y éxito (pantalla 18), viajes creados (pantalla 19), solicitudes (aceptar/rechazar) y en curso (pantalla 14). | E6 | Aprobado |
+| __tests__/components/StarRating.test.tsx | 5 botones accesibles (`N de 5 estrellas`), `accessibilityState.selected`, área táctil `TOUCH_MIN` y manejo de error/deshabilitado. | E7 | Aprobado |
+| __tests__/features/ratings-notifications.test.ts | Contexto de calificación (`fetchTripRatingContext`), reglas R9 en `submitRating`, promedios en `fetchMyReservations` y marcado de notificaciones. | E7 | Aprobado |
+| __tests__/screens/notifications.test.tsx | Bandeja de notificaciones: contador sin leer, "Marcar todas como leídas", navegación contextual segura, vacío, error y Reintentar. | E7 | Aprobado |
+| __tests__/screens/ratings.test.tsx | Flujo de calificación en viaje finalizado para pasajero y conductor (`RadioGroup`), bloqueo de no finalizados (R9) y disparadores en tarjetas. | E7 | Aprobado |
+| __tests__/screens/profile.test.tsx | Perfil en Pasajero/Carro, edición, eliminación de vehículo, cierre de sesión, promedio propio y acceso a Notificaciones con contador. | E4, E7 | Aprobado |
 | __tests__/components/trips.test.tsx | TripCard como un solo foco con etiqueta compuesta, ReservationCard (papelera aparte, viaje oculto por RLS), filtros, lista de sectores modal y pestañas internas. | E5 | Aprobado |
 | __tests__/hooks/passenger-hooks.test.tsx | Debounce, punto del mapa con dirección, respuesta vieja ignorada, sin permiso y dirección solo escrita. | E5 | Aprobado |
 | __tests__/screens/passenger.test.tsx | Inicio (búsqueda, filtro con debounce, error y Reintentar), reserva (validación, mapa, solo texto, éxito, duplicada), reservas por estado, cancelación con confirmación y viajes en curso. | E5 | Aprobado |
 
-Última ejecución: 2026-11-09, `npm test` con 26 archivos y 196 de 196 pruebas aprobadas, ejecutado por Antigravity en Windows (Node 24.18.0). Los servicios se simulan solo dentro de las pruebas.
+Última ejecución: 2026-11-10, `npm test` con 30 archivos y 214 de 214 pruebas aprobadas, ejecutado por Antigravity en Windows (Node 24.18.0). Los servicios se simulan solo dentro de las pruebas.
 
-Pendientes por etapa: calificaciones, notificaciones y chat (E7), y verificación en Supabase de pruebas SQL de RLS (supabase/tests/rls.sql).
+Pendientes por etapa: chat (E7 - Sara), auditoría completa en dispositivo (E8) y verificación en Supabase de pruebas SQL de RLS (`supabase/tests/rls.sql`).
 
 ## 2. Casos funcionales
 
@@ -55,7 +60,7 @@ Pendientes por etapa: calificaciones, notificaciones y chat (E7), y verificació
 | TC-12 | Aceptar reservas hasta llenar los cupos (cierre automático) | 1. En modo conductor, entrar a Solicitudes pendientes. 2. Aceptar solicitudes sucesivas hasta agotar los cupos disponibles. | Al aceptar la última solicitud que agote cupos, el viaje pasa a estado 'lleno' y deja de mostrarse en la búsqueda de pasajeros. | — | Protocolo listo para Samuel en su teléfono | Pendiente |
 | TC-13 | Rechazar reserva | 1. En Solicitudes pendientes, presionar "Rechazar" en una reserva. 2. Verificar que se mueva a la pestaña "Rechazadas". | La reserva desaparece de pendientes y pasa a la pestaña Rechazadas; se actualiza en tiempo real. | — | Protocolo listo para Samuel en su teléfono | Pendiente |
 | TC-14 | Iniciar y finalizar viaje | 1. En "Viajes creados", cuando haya al menos 1 reserva aceptada, presionar "Iniciar viaje". 2. Confirmar inicio. 3. En la pestaña "En curso", presionar "Finalizar viaje" y confirmar. | Paso 1: el viaje pasa a estado 'en_curso'. Paso 3: el viaje pasa a estado 'finalizado' y las reservas asociadas a 'completada'. | — | Protocolo listo para Samuel en su teléfono | Pendiente |
-| TC-15 | Calificar viaje | Por definir (E7) | — | — | — | Pendiente |
+| TC-15 | Calificar viaje | 1. Con un viaje en estado `finalizado` y reserva `aceptada`, abrir "Calificar viaje" (desde Reservas > Aceptados, Viajes creados o la notificación de viaje finalizado). 2. Elegir estrellas (`1` a `5`) y escribir un comentario opcional (≤ 280 caracteres). 3. Tocar "Enviar calificación". 4. Reabrir el mismo viaje para verificar el estado ya calificado. | Paso 3: confirmación auditiva/háptica/visual y actualización del promedio en perfil y tarjetas. Paso 4: muestra la calificación enviada sin permitir duplicado (R9). | — | Protocolo listo para Samuel en su teléfono | Pendiente |
 | TC-16 | Chat en tiempo real | Por definir (E7) | — | — | — | Pendiente |
 | TC-17 | Sin conexión, con caché y banner | 1. En "Sesión de prueba", con sesión iniciada y red, tocar "Recargar datos". 2. Activar el modo avión. 3. Cerrar la app por completo y abrirla de nuevo. 4. Entrar a "Sesión de prueba". | Se ven nombre, sectores, viajes y reservas de la última carga, y el banner "Sin conexión: mostrando datos guardados (guardados a las HH:MM)", que TalkBack anuncia | Sí lo hace | Prueba manual de Sara en su teléfono | Aprobado |
 | TC-18 | Error de red y "Reintentar" | 1. Cerrar sesión. 2. Activar el modo avión. 3. Escribir correo y contraseña y tocar "Iniciar Sesión". 4. Quitar el modo avión y tocar "Reintentar". | Paso 3: mensaje "Sin conexión a internet. Revisa tu red e intenta de nuevo." con botón "Reintentar". Paso 4: la sesión se inicia | Sí lo hace | Prueba manual de Sara en su teléfono | Aprobado |
@@ -78,3 +83,15 @@ Lo que la Etapa 5 exige además de los casos TC. Mientras no exista la pantalla 
 | V5-05 | Reservar solo escribiendo | Reservar un viaje sin tocar el mapa, escribiendo la dirección. | La reserva se crea y aparece en Pendientes | Sí sucede | Prueba manual de Sara en su teléfono | Aprobado |
 | V5-06 | TalkBack en la tarjeta de viaje | Con TalkBack, recorrer las tarjetas de Inicio. | Cada tarjeta se lee como una sola frase; el "+" no es un foco aparte | Sí lo hace | Prueba manual de Sara en su teléfono con TalkBack | Aprobado |
 | V5-07 | TalkBack en la papelera | Con TalkBack, recorrer una reserva pendiente. | Los datos son un foco y la papelera otro, con el nombre "Cancelar reserva de …" | Sí lo hace | Prueba manual de Sara en su teléfono con TalkBack | Aprobado |
+
+## 4. Verificaciones en vivo de la Etapa 7 (calificaciones y notificaciones)
+
+Protocolo listo para ejecutar en teléfono Android con Expo Go tras aplicar `0008_calificaciones_rls_pares.sql` en Supabase.
+
+| ID | Descripción | Pasos | Resultado esperado | Resultado real | Evidencia | Estado |
+| --- | --- | --- | --- | --- | --- | --- |
+| V7-01 | Notificación en tiempo real y contador | Con sesión activa del pasajero en Perfil o dentro de la app, el conductor acepta su reserva o finaliza el viaje. | Llega el evento Realtime, TalkBack/useAnnounce lee `"Notificación: …"` y en Perfil el botón muestra `"Notificaciones (N sin leer)"`. | — | Protocolo listo para Samuel en su teléfono | Pendiente |
+| V7-02 | Bandeja y "Marcar todas como leídas" | Abrir Perfil > Notificaciones con al menos 2 notificaciones sin leer. Tocar una de viaje finalizado y luego regresar para usar "Marcar todas como leídas". | La tarjeta tocada pasa a `Leída` y abre `/trip/[id]/rate`; "Marcar todas como leídas" deja el contador en 0 con anuncio auditivo. | — | Protocolo listo para Samuel en su teléfono | Pendiente |
+| V7-03 | Promedios reales en tarjetas y Perfil | Tras calificar al conductor o pasajero en TC-15, revisar el promedio en Perfil y en tarjetas de Inicio/Reservas. | El promedio coincide con `promedio_calificaciones` en formato colombiano (ej. `4,5 de 5 (2)`). | — | Protocolo listo para Samuel en su teléfono | Pendiente |
+| V7-04 | Protección R9 en viaje no finalizado / duplicado | Intentar abrir `/trip/[id]/rate` sobre un viaje `en_curso` y repetir calificación sobre el mismo par en Supabase RLS (`RC-03..RC-05`). | En la app bloquea el formulario con banner informativo; en Supabase RLS rechaza auto-calificación y pares pasajero-pasajero (`0008`). | — | Protocolo listo para Samuel | Pendiente |
+| V7-05 | TalkBack sobre `StarRating` | Activar TalkBack en "Calificar viaje" y recorrer las cinco estrellas. | Cada botón se oye como `"N de 5 estrellas"` con estado seleccionado coherente y área táctil mínima de 48 dp. | — | Protocolo listo para Samuel con TalkBack | Pendiente |

@@ -148,7 +148,7 @@ Cada ID queda con archivo exacto, prueba y resultado en docs/MATRIZ_ACCESIBILIDA
 - [x] React Native con Expo SDK 58, que abre en Expo Go → §3, E0 (evidencia: proyecto en SDK 58, bundle de Android compilado con `expo export` y Sara confirmó el 2026-11-06 que la app abre en Expo Go en su teléfono)
 - [x] Navegación con Expo Router → §3, §4 (evidencia: app/_layout.tsx con guardia de sesión, app/index.tsx, app/(auth)/login.tsx, app/(auth)/register/*, app/(tabs)/* y app/profile.tsx)
 - [x] Estado global con Redux Toolkit → §3, E3 (evidencia: store/store.ts con 9 slices en features/ y pruebas en __tests__/features/, 2026-11-07)
-- [ ] Backend y persistencia en Supabase (Auth, Postgres, Realtime, Storage, RLS) → §3, §5, E2, E6 (evidencia parcial: migraciones 0001, 0002 y 0007 listas con tests en supabase/tests/rls.sql; Samuel debe aplicarlas en su proyecto y confirmar)
+- [ ] Backend y persistencia en Supabase (Auth, Postgres, Realtime, Storage, RLS) → §3, §5, E2, E6, E7 (evidencia parcial: migraciones 0001 a 0008 listas con tests en supabase/tests/rls.sql; Samuel debe aplicar 0008 en su proyecto y confirmar)
 - [x] Caché sin conexión con SQLite → §3, E3 (evidencia: db/cache.ts, __tests__/db/cache.test.ts y TC-17 aprobado en el teléfono)
 - [x] Sesión guardada en almacenamiento seguro → §3, E3 (evidencia: services/secureSessionStorage.ts y TC-22 aprobado en el teléfono)
 - [x] Mapas y ubicación sin claves de Google ni servicios de pago → §3, §6 (evidencia: components/maps/MapPicker.tsx, lib/location.ts y TC-07 aprobado en el teléfono)

@@ -284,8 +284,8 @@ Flujo del tema (Etapa 1): Ajustes llama a `setPreference('theme', 'dark')` → T
 
 | Persona | Mis archivos | Archivos del otro que debo dominar |
 | --- | --- | --- |
-| Sara | E0, E1, E3 y E5 | E2, E4 y E6: app/(tabs)/creados.tsx, app/trip/create.tsx, app/requests.tsx, components/trips/CreatedTripCard.tsx, RequestCard.tsx, supabase/migrations/0007_proteger_updates_rls.sql |
-| Samuel | E2, E4 y E6: app/(tabs)/creados.tsx, app/(tabs)/curso.tsx (conductor), app/trip/create.tsx, app/requests.tsx, components/trips/CreatedTripCard.tsx, RequestCard.tsx, supabase/migrations/0007_proteger_updates_rls.sql, __tests__/screens/driver.test.tsx | E3 y E5: components/trips/TripCard.tsx, TripList.tsx, hooks/useTripSearch.ts, app/trip/[id]/reserve.tsx, app/(tabs)/reservas.tsx, SelectField.tsx |
+| Sara | E0, E1, E3 y E5 | E2, E4, E6 y E7 (calificaciones/notificaciones): app/(tabs)/creados.tsx, app/trip/create.tsx, app/requests.tsx, components/trips/CreatedTripCard.tsx, RequestCard.tsx, supabase/migrations/0007 y 0008, app/notifications.tsx, app/trip/[id]/rate.tsx, components/ratings/StarRating.tsx, components/notifications/NotificationItemCard.tsx |
+| Samuel | E2, E4, E6 y E7 (calificaciones y notificaciones): app/(tabs)/creados.tsx, app/(tabs)/curso.tsx (conductor), app/trip/create.tsx, app/requests.tsx, components/trips/CreatedTripCard.tsx, RequestCard.tsx, supabase/migrations/0007 y 0008, components/ratings/StarRating.tsx, components/notifications/NotificationItemCard.tsx, app/notifications.tsx, app/trip/[id]/rate.tsx | E3 y E5: components/trips/TripCard.tsx, TripList.tsx, hooks/useTripSearch.ts, app/trip/[id]/reserve.tsx, app/(tabs)/reservas.tsx, SelectField.tsx, features/notifications/*, hooks/useRealtime.ts |
 
 ---
 
@@ -323,3 +323,36 @@ Flujo del tema (Etapa 1): Ajustes llama a `setPreference('theme', 'dark')` → T
     En `app/trip/create.tsx` o en `lib/validators.ts`, ajustar la validación de cupos permitidos según la capacidad máxima del carro y ejecutar `npm test -- __tests__/lib/validators.test.ts`.
 16. **Probar la protección de inicio de viaje.**
     En `components/trips/CreatedTripCard.tsx`, modificar la condición `disabled={!hasAcceptedReservations}` y verificar con `npm test -- __tests__/screens/driver.test.tsx` que la prueba TC-14 / R8 detecta el comportamiento esperado.
+
+---
+
+## Calificaciones y notificaciones (Etapa 7 — Samuel)
+
+### Mapa de archivos nuevos y modificados
+
+| Ruta | Qué hace | Autor (etapa) |
+| --- | --- | --- |
+| supabase/migrations/0008_calificaciones_rls_pares.sql | Endurece el `INSERT` en `calificaciones` para exigir `autor_id <> destinatario_id` y pares conductor ↔ pasajero con reserva aceptada en viaje `finalizado` (R9, D-56). | Samuel (E7) |
+| services/ratingService.ts, features/ratings/* y lib/validators.ts | Carga contexto del viaje para calificar (`getTripRatingContext`, `fetchTripRatingContext`), valida estrellas `1..5` y comentario ≤ 280 chars y actualiza promedios y estado local al enviar. | Samuel (E7) |
+| features/reservations/thunks.ts (actualizado) | Despacha `fetchRatingAverages` para los conductores al cargar reservas con red, completando promedios en `ReservationCard`. | Samuel (E7) |
+| components/ratings/StarRating.tsx | Selector de 5 estrellas accesibles (`N de 5 estrellas`, `accessibilityState.selected`, área mínima `TOUCH_MIN`, envoltorio flexible y contraste por borde/relleno/ícono). | Samuel (E7) |
+| components/notifications/NotificationItemCard.tsx | Tarjeta accesible con foco único por notificación y distinción de leída/no leída sin depender solo del color (etiqueta "Nueva", ícono y borde grueso). | Samuel (E7) |
+| app/notifications.tsx | Bandeja cronológica de notificaciones con contador de no leídas, "Marcar todas como leídas" con anuncio auditivo y navegación contextual segura (D-58). | Samuel (E7) |
+| app/trip/[id]/rate.tsx | Pantalla unificada de calificación (R9) para pasajero o conductor con `RadioGroup` cuando hay múltiples pasajeros aceptados (D-57). | Samuel (E7) |
+| app/_layout.tsx, app/profile.tsx, app/(tabs)/reservas.tsx, app/(tabs)/creados.tsx, CreatedTripCard.tsx, ReservationCard.tsx | Carga inicial de notificaciones, promedio en perfil, botón a Notificaciones con contador y disparadores de calificación en viajes finalizados. | Samuel (E7) |
+
+### Preguntas probables — Calificaciones y notificaciones
+
+56. **¿Por qué no bastaba `es_participante_del_viaje` en la política INSERT de `calificaciones`?**
+    Porque esa función solo confirma que el usuario participa en el viaje, pero no impedía que alguien intentara calificarse a sí mismo o que un pasajero calificara a otro pasajero. La migración `0008` combina `autor_id <> destinatario_id` con `es_conductor_del_viaje` y `tiene_reserva_aceptada` (`SECURITY DEFINER` de `0005`) para garantizar pares estrictos conductor ↔ pasajero sin recursión RLS (D-56).
+57. **¿Cómo cumple `StarRating` con accesibilidad visual, motriz y para TalkBack?**
+    Cada estrella es un `Pressable` independiente con `accessibilityRole="button"`, etiqueta `"N de 5 estrellas"` y `accessibilityState={{ selected: star <= value, disabled }}`; mantiene `minWidth` y `minHeight >= TOUCH_MIN`, usa `flexWrap: 'wrap'` para no salirse en pantallas angostas al escalar texto (V-06), y combina ícono lleno/contorno, texto numérico y tokens contrastados (V-05).
+58. **¿Por qué el acceso a Notificaciones se colocó en `Mi Perfil` y no en el `AppHeader`?**
+    Por fidelidad con el Figma (§6.7 #15) y porque `identity.test.tsx` valida el orden de foco exacto del encabezado interno (`Volver`, `Perfil`, `Ajustes`). Cargar notificaciones al autenticar en `app/_layout.tsx` junto con `useRealtimeNotifications` mantiene actualizado `selectUnreadCount` para mostrarlo en el botón de Perfil (D-58).
+59. **¿Cómo evita duplicados la UI al calificar un viaje finalizado?**
+    `getTripRatingContext` consulta previamente las calificaciones del `autor_id` en ese `viaje_id`. Si un destinatario ya tiene calificación, `rate.tsx` muestra el puntaje y comentario enviado en lugar del formulario; además, en PostgreSQL la restricción `UNIQUE (viaje_id, autor_id, destinatario_id)` rechaza duplicados y `submitRating` traduce el error `duplicado`.
+
+### Ejercicios de ajuste en vivo (Etapa 7)
+
+17. **Cambiar el límite del comentario en calificaciones.** En `lib/validators.ts`, cambiar `MAX_RATING_COMMENT_LENGTH` (por ejemplo de `280` a `200`) y verificar en `__tests__/lib/validators.test.ts` y `__tests__/features/ratings-notifications.test.ts`.
+18. **Probar el umbral de un viaje no finalizado en calificaciones.** En `app/trip/[id]/rate.tsx`, cambiar temporalmente la comprobación `context.trip.estado !== 'finalizado'` y confirmar que `__tests__/screens/ratings.test.tsx` detecta la violación a la regla R9.
