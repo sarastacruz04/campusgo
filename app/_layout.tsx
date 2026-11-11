@@ -12,6 +12,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
 
 import { selectAuthInitialized, selectUserId } from '@/features/auth/selectors';
+import { fetchNotifications } from '@/features/notifications/thunks';
 import { selectProfile } from '@/features/profile/selectors';
 import { fetchMyProfile } from '@/features/profile/thunks';
 import { fetchMyVehicle } from '@/features/vehicle/thunks';
@@ -52,11 +53,12 @@ function RootNavigator() {
   useRealtimeTripsAndReservations(userId !== null);
   useRealtimeNotifications(userId);
 
-  // Carga perfil y vehículo cuando hay un usuario autenticado
+  // Carga perfil, vehículo y notificaciones cuando hay un usuario autenticado
   useEffect(() => {
     if (userId) {
       dispatch(fetchMyProfile());
       dispatch(fetchMyVehicle());
+      dispatch(fetchNotifications());
     }
   }, [userId, dispatch]);
 
@@ -77,11 +79,12 @@ function RootNavigator() {
     const inTabsGroup = segment0 === '(tabs)';
     const inProfile = segment0 === 'profile';
     const inTrip = segment0 === 'trip';
+    const inNotifications = segment0 === 'notifications';
     const isRoot = !segment0 || segment0 === 'index';
 
     if (!userId) {
       // Sin sesión: redirige al inicio si intenta acceder a rutas privadas
-      if (inTabsGroup || inProfile || inTrip) {
+      if (inTabsGroup || inProfile || inTrip || inNotifications) {
         router.replace('/');
       }
     } else {
@@ -89,7 +92,7 @@ function RootNavigator() {
       if (profile) {
         if (!profile.registro_completo) {
           // Registro incompleto: retoma el paso de foto/carro
-          if (isRoot || inTabsGroup || segment1 === 'login') {
+          if (isRoot || inTabsGroup || inNotifications || segment1 === 'login') {
             router.replace('/(auth)/register/photo');
           }
         } else {
