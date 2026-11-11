@@ -28,6 +28,7 @@ export type CreatedTripCardProps = {
   onCancelTrip?: (tripId: string) => void;
   onFinishTrip?: (tripId: string) => void;
   onViewRequests?: (tripId: string) => void;
+  onRateTrip?: (tripId: string) => void;
   /** Si se pasa, muestra "Abrir chat" cuando hay pasajeros aceptados (R10, Etapa 7). */
   onOpenChat?: (tripId: string) => void;
   loadingAction?: 'start' | 'cancel' | 'finish' | null;
@@ -46,6 +47,7 @@ export const CreatedTripCard = memo(function CreatedTripCard({
   onCancelTrip,
   onFinishTrip,
   onViewRequests,
+  onRateTrip,
   onOpenChat,
   loadingAction = null,
 }: CreatedTripCardProps) {
@@ -259,6 +261,23 @@ export const CreatedTripCard = memo(function CreatedTripCard({
             loading={loadingAction === 'finish'}
             accessibilityLabel={`Finalizar viaje a ${sector}`}
             onPress={() => onFinishTrip(trip.id)}
+          />
+        </View>
+      ) : null}
+
+      {/* Acción para viaje finalizado (calificar pasajeros aceptados, R9) */}
+      {estado === 'finalizado' && hasAcceptedReservations && onRateTrip ? (
+        <View
+          style={[
+            styles.actionsContainer,
+            { borderTopColor: colors.border, borderTopWidth: borders.thin },
+          ]}
+        >
+          <Button
+            label="Calificar pasajeros"
+            variant="primary"
+            accessibilityLabel={`Calificar pasajeros del viaje a ${sector}`}
+            onPress={() => onRateTrip(trip.id)}
           />
         </View>
       ) : null}

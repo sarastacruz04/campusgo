@@ -1,4 +1,5 @@
 import {
+  MAX_RATING_COMMENT_LENGTH,
   validateCapacidad,
   validateDate,
   validateEmail,
@@ -8,6 +9,8 @@ import {
   validatePhone,
   validatePlaca,
   validatePrice,
+  validateRatingComment,
+  validateRatingStars,
   validateRequired,
   validateTime,
   validateTripCupos,
@@ -172,6 +175,22 @@ describe('lib/validators', () => {
       expect(validatePrice(5000)).toBeNull();
       expect(validatePrice(0)).toBeNull();
       expect(validatePrice(-100)).toMatch(/no puede ser negativo/i);
+    });
+  });
+
+  describe('validateRatingStars y validateRatingComment', () => {
+    it('acepta entre 1 y 5 estrellas y rechaza fuera de rango', () => {
+      expect(validateRatingStars(1)).toBeNull();
+      expect(validateRatingStars(5)).toBeNull();
+      expect(validateRatingStars(0)).toMatch(/entre 1 y 5/i);
+      expect(validateRatingStars(6)).toMatch(/entre 1 y 5/i);
+      expect(validateRatingStars(3.5)).toMatch(/entre 1 y 5/i);
+    });
+
+    it('acepta hasta 280 caracteres y rechaza exceder el límite', () => {
+      expect(validateRatingComment('')).toBeNull();
+      expect(validateRatingComment('a'.repeat(MAX_RATING_COMMENT_LENGTH))).toBeNull();
+      expect(validateRatingComment('a'.repeat(MAX_RATING_COMMENT_LENGTH + 1))).toMatch(/280/i);
     });
   });
 });

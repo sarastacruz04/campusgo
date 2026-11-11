@@ -283,7 +283,7 @@ Los thunks (`features/*/thunks.ts`) llaman a los servicios, atrapan el error y l
 | Servicio | Funciones |
 |----------|-----------|
 | `storageService` | `uploadImage({ bucket, userId, fileName, uri, contentType })` devuelve la ruta `{userId}/{fileName}`; `getSignedUrl(bucket, path, segundos)`; `removeFile(bucket, path)`. Buckets: `avatars`, `vehiculos`, `soat`. |
-| `ratingService` | `submitRating({ viajeId, autorId, destinatarioId, estrellas, comentario })`; `getAverages(userIds)` sobre la vista `promedio_calificaciones`. |
+| `ratingService` | `submitRating({ viajeId, autorId, destinatarioId, estrellas, comentario })`; `getAverages(userIds)` sobre la vista `promedio_calificaciones`; `getTripRatingContext(viajeId, currentUserId)` (carga viaje, destinatarios elegibles según rol y calificaciones previas del autor). |
 | `notificationService` | `listNotifications(userId)` (50 más recientes); `markAsRead(id)`; `markAllAsRead(userId)`; `subscribeToNotifications(userId, onInsert)`. |
 | `chatService` | `isParticipant(viajeId, userId)` llama a la función `es_participante_del_viaje` y devuelve boolean; `listMessages(viajeId)` devuelve `{ messages, authorNames }` (mensajes del más antiguo al más nuevo y el nombre de cada autor, con `autor:profiles(nombre, apellido)`); `getAuthorNames(ids)` para autores que llegan por Realtime; `sendMessage(viajeId, autorId, contenido)` (máximo 500 caracteres); `subscribeToMessages(viajeId, onInsert)`. El thunk `fetchMessages` falla con `chat_sin_acceso` si `isParticipant` es false (D-56). |
 
@@ -309,6 +309,7 @@ Los thunks (`features/*/thunks.ts`) llaman a los servicios, atrapan el error y l
 | `0005_rls_sin_recursion.sql` | Recursión infinita (42P17) entre las políticas de `viajes` y `reservas`; ahora usan `tiene_reserva_aceptada` y `es_conductor_del_viaje` (`SECURITY DEFINER`) (D-41). |
 | `0006_viajes_llenos_visibles.sql` | Los viajes `lleno` con salida futura se pueden leer, para que Realtime avise cuando un viaje se llena (D-48). La búsqueda sigue trayendo solo `abierto`. |
 | `0007_proteger_updates_rls.sql` | Resuelve los hallazgos 1, 2 y 3: elimina la política de UPDATE directa en `reservas` y `viajes` (todo cambio de estado pasa por las RPCs SECURITY DEFINER), y protege `profiles.modo_actual` con trigger para forzar el paso por `cambiar_modo` (R3, E6). |
+| `0008_calificaciones_rls_pares.sql` | Restringe el `INSERT` en `calificaciones` a pares conductor ↔ pasajero con reserva aceptada en viajes `finalizado`, impidiendo auto-calificaciones y calificaciones entre pasajeros (R9, E7). |
 
 Funciones nuevas (no se llaman desde la app; las usan las políticas):
 

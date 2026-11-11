@@ -163,4 +163,27 @@
 -- ESPERADO: error de excepción 'sin_permiso' (debe usar la función cambiar_modo que valida vehículo R3)
 -- UPDATE public.profiles SET modo_actual = 'conductor' WHERE id = '<usuario_b>';
 
+-- =============================================================================
+-- BLOQUE 9: Calificaciones por pares conductor-pasajero (Migración 0008, E7)
+-- =============================================================================
+
+-- RC-03: usuario_a NO puede auto-calificarse aunque el viaje esté finalizado
+-- ESPERADO: error de política (autor_id <> destinatario_id)
+-- SET LOCAL "request.jwt.claims" TO '{"sub": "<usuario_a>"}';
+-- INSERT INTO public.calificaciones (viaje_id, autor_id, destinatario_id, estrellas)
+-- VALUES ('<id_viaje>', '<usuario_a>', '<usuario_a>', 5);
+
+-- RC-04: pasajero con reserva aceptada (usuario_b) NO puede calificar a otro pasajero (usuario_d)
+-- ESPERADO: error de política (solo puede calificar al conductor del viaje)
+-- SET LOCAL "request.jwt.claims" TO '{"sub": "<usuario_b>"}';
+-- INSERT INTO public.calificaciones (viaje_id, autor_id, destinatario_id, estrellas)
+-- VALUES ('<id_viaje>', '<usuario_b>', '<usuario_d>', 4);
+
+-- RC-05: en viaje finalizado, usuario_a (conductor) SÍ califica a usuario_b (reserva aceptada) una sola vez
+-- ESPERADO: primer INSERT exitoso; segundo INSERT falla por UNIQUE (viaje_id, autor_id, destinatario_id)
+-- SET LOCAL "request.jwt.claims" TO '{"sub": "<usuario_a>"}';
+-- INSERT INTO public.calificaciones (viaje_id, autor_id, destinatario_id, estrellas, comentario)
+-- VALUES ('<id_viaje>', '<usuario_a>', '<usuario_b>', 5, 'Excelente pasajero');
+
+
 

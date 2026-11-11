@@ -22,6 +22,8 @@ type ReservationCardProps = TripRatingProps & {
   reservation: ReservationItem;
   /** Si se pasa, muestra la papelera. Recibe la referencia para devolverle el foco. */
   onPressCancel?: (reservationId: string, button: RefObject<HostInstance | null>) => void;
+  /** Si se pasa en una reserva aceptada de un viaje finalizado, muestra "Calificar viaje" (R9). */
+  onPressRate?: (viajeId: string) => void;
   /** Si se pasa, muestra "Abrir chat" (solo reservas aceptadas, R10). Recibe el id del viaje. */
   onPressChat?: (viajeId: string) => void;
 };
@@ -36,9 +38,10 @@ export const ReservationCard = memo(function ReservationCard({
   ratingAverage,
   ratingTotal,
   onPressCancel,
+  onPressRate,
   onPressChat,
 }: ReservationCardProps) {
-  const { colors } = useTheme();
+  const { colors, borders } = useTheme();
   const cancelRef = useRef<HostInstance>(null);
   const { viaje } = reservation;
   const pickup = `Recogida: ${reservation.punto_recogida_texto}`;
@@ -82,6 +85,25 @@ export const ReservationCard = memo(function ReservationCard({
           />
         </View>
       ) : null}
+      {onPressRate &&
+      viaje &&
+      reservation.estado === 'aceptada' &&
+      viaje.estado === 'finalizado' ? (
+        <View
+          style={[
+            styles.rateContainer,
+            { borderTopColor: colors.border, borderTopWidth: borders.thin },
+          ]}
+        >
+          <Button
+            label="Calificar viaje"
+            variant="primary"
+            accessibilityLabel={`Calificar viaje a ${sector}`}
+            onPress={() => onPressRate(viaje.id)}
+          />
+        </View>
+      ) : null}
+
       {onPressChat && viaje ? (
         <View style={styles.chat}>
           <Button
@@ -113,5 +135,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: spacing.sm,
     right: spacing.md,
+  },
+  rateContainer: {
+    padding: spacing.md,
   },
 });
