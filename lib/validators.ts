@@ -238,3 +238,25 @@ export function validatePrice(price: string | number): string | null {
   }
   return null;
 }
+
+export const MAX_RATING_COMMENT_LENGTH = 280;
+
+/**
+ * Valida la puntuación de estrellas para calificar un viaje (R9: entero entre 1 y 5).
+ */
+export function validateRatingStars(stars: number): string | null {
+  if (!Number.isInteger(stars) || stars < 1 || stars > 5) {
+    return 'Selecciona una calificación entre 1 y 5 estrellas.';
+  }
+  return null;
+}
+
+/**
+ * Valida el comentario opcional de una calificación (R9: máximo 280 caracteres).
+ */
+export function validateRatingComment(comment: string): string | null {
+  if (comment.trim().length > MAX_RATING_COMMENT_LENGTH) {
+    return `El comentario no puede superar ${MAX_RATING_COMMENT_LENGTH} caracteres.`;
+  }
+  return null;
+}

@@ -80,6 +80,10 @@ export default function ReservasTab() {
     [],
   );
 
+  const openRate = useCallback((viajeId: string) => {
+    router.push(`/trip/${viajeId}/rate`);
+  }, []);
+
   const renderItem = useCallback<ListRenderItem<ReservationItem>>(
     ({ item }) => {
       const rating = item.viaje ? averages[item.viaje.conductor_id] : undefined;
@@ -90,10 +94,13 @@ export default function ReservasTab() {
           ratingTotal={rating?.total ?? 0}
           // Una reserva rechazada ya no se puede cancelar (R7).
           onPressCancel={item.estado === 'rechazada' ? undefined : requestCancel}
+          onPressRate={
+            item.estado === 'aceptada' && item.viaje?.estado === 'finalizado' ? openRate : undefined
+          }
         />
       );
     },
-    [averages, requestCancel],
+    [averages, requestCancel, openRate],
   );
 
   const confirmCancel = async () => {

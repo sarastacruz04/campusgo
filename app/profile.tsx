@@ -12,11 +12,16 @@ import { ScreenTitle } from '@/components/ui/ScreenTitle';
 import { SegmentedToggle } from '@/components/ui/SegmentedToggle';
 import { TextField } from '@/components/ui/TextField';
 import { signOut } from '@/features/auth/thunks';
+import { selectUnreadCount } from '@/features/notifications/selectors';
+import { fetchNotifications } from '@/features/notifications/thunks';
 import { selectProfile } from '@/features/profile/selectors';
 import { changeMode, fetchMyProfile, updateMyProfile } from '@/features/profile/thunks';
+import { selectRatingAverages } from '@/features/ratings/selectors';
+import { fetchRatingAverages } from '@/features/ratings/thunks';
 import { selectVehicle } from '@/features/vehicle/selectors';
 import { fetchMyVehicle, removeVehicle } from '@/features/vehicle/thunks';
 import { useAnnounce } from '@/hooks/useAnnounce';
+import { formatRating } from '@/lib/format';
 import { validatePhone, validateRequired } from '@/lib/validators';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { radius, spacing } from '@/theme/layout';
@@ -27,6 +32,9 @@ export default function ProfileScreen() {
   const dispatch = useAppDispatch();
   const profile = useAppSelector(selectProfile);
   const vehicle = useAppSelector(selectVehicle);
+  const unreadCount = useAppSelector(selectUnreadCount);
+  const averages = useAppSelector(selectRatingAverages);
+  const myRating = profile ? (averages[profile.id] ?? null) : null;
   const announce = useAnnounce();
 
   // Tab interno del perfil: 'pasajero' (datos personales) o 'carro' (datos del vehículo)
@@ -53,7 +61,14 @@ export default function ProfileScreen() {
   useEffect(() => {
     dispatch(fetchMyProfile());
     dispatch(fetchMyVehicle());
+    dispatch(fetchNotifications());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (profile?.id) {
+      dispatch(fetchRatingAverages([profile.id]));
+    }
+  }, [dispatch, profile?.id]);
 
   const openEditModal = () => {
     if (profile) {
@@ -183,6 +198,14 @@ export default function ProfileScreen() {
               <AppText variant="secondary" color="onBrandMuted">
                 Modo actual: {profile?.modo_actual === 'conductor' ? 'Conductor' : 'Pasajero'}
               </AppText>
+              <View style={styles.ratingRow}>
+                <Icon name="star" size={16} color={colors.onPrimary} />
+                <AppText variant="secondary" color="onPrimary">
+                  {myRating && myRating.total > 0
+                    ? `Calificación: ${formatRating(myRating.promedio)} de 5 (${myRating.total})`
+                    : 'Sin calificaciones'}
+                </AppText>
+              </View>
             </View>
             <IconButton
               icon="pencil"
@@ -253,6 +276,17 @@ export default function ProfileScreen() {
               onPress={() =>
                 handleModeToggle(profile?.modo_actual === 'conductor' ? 'pasajero' : 'conductor')
               }
+            />
+
+            <Button
+              label={
+                unreadCount > 0 ? `Notificaciones (${unreadCount} sin leer)` : 'Notificaciones'
+              }
+              variant="secondary"
+              accessibilityLabel={
+                unreadCount > 0 ? `Notificaciones, ${unreadCount} sin leer` : 'Notificaciones'
+              }
+              onPress={() => router.push('/notifications')}
             />
 
             <Button
@@ -496,6 +530,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginTop: spacing.xs,
   },
   noVehicleContainer: {
     alignItems: 'center',

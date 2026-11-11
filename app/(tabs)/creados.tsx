@@ -111,6 +111,7 @@ export default function CreadosTab() {
           onStartTrip={handleStartTrip}
           onCancelTrip={(id) => setCancelModalTripId(id)}
           onViewRequests={() => router.push('/requests')}
+          onRateTrip={(id) => router.push(`/trip/${id}/rate`)}
           loadingAction={isTripLoading}
         />
       );

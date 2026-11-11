@@ -9,3 +9,5 @@ export const selectRatingFor = (state: RootState, userId: string): RatingAverage
   state.ratings.averages[userId] ?? null;
 
 export const selectRatingSubmit = (state: RootState) => state.ratings.submit;
+
+export const selectTripRatingContext = (state: RootState) => state.ratings.tripContext;
