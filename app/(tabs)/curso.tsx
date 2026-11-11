@@ -35,9 +35,11 @@ type CursoItem =
 
 const keyExtractor = (item: CursoItem) => item.data.id;
 
+const openChat = (tripId: string) => router.push(`/trip/${tripId}/chat`);
+
 /**
  * "Viajes en curso" (pantalla 14).
- * - Pasajero: ve sus reservas aceptadas de viajes iniciados (con acceso al chat en Etapa 7).
+ * - Pasajero: ve sus reservas aceptadas de viajes iniciados, con acceso al chat.
  * - Conductor: ve sus viajes en curso con el botón "Finalizar viaje" (confirmación modal).
  */
 export default function CursoTab() {
@@ -110,6 +112,7 @@ export default function CursoTab() {
             reservation={item.data}
             ratingAverage={rating?.promedio ?? null}
             ratingTotal={rating?.total ?? 0}
+            onPressChat={openChat}
           />
         );
       }
@@ -125,6 +128,7 @@ export default function CursoTab() {
           pendingRequestsCount={pendingCount}
           acceptedReservationsCount={acceptedCount}
           onFinishTrip={(id) => setFinishModalTripId(id)}
+          onOpenChat={openChat}
           loadingAction={isFinishing ? 'finish' : null}
         />
       );

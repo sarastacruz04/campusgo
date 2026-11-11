@@ -31,11 +31,15 @@ Se ejecutan con `npm test` (jest-expo y Testing Library).
 | __tests__/screens/driver.test.tsx | Inicio del conductor (pantalla 17), crear viaje con errores y éxito (pantalla 18), viajes creados (pantalla 19), solicitudes (aceptar/rechazar) y en curso (pantalla 14). | E6 | Aprobado |
 | __tests__/components/trips.test.tsx | TripCard como un solo foco con etiqueta compuesta, ReservationCard (papelera aparte, viaje oculto por RLS), filtros, lista de sectores modal y pestañas internas. | E5 | Aprobado |
 | __tests__/hooks/passenger-hooks.test.tsx | Debounce, punto del mapa con dirección, respuesta vieja ignorada, sin permiso y dirección solo escrita. | E5 | Aprobado |
+| __tests__/screens/chat.test.tsx | Chat del viaje: estado vacío, botón de enviar de 48 dp deshabilitado sin texto, lista invertida con cada mensaje como un solo foco, límite y contador de 500, envío con anuncio, anuncio del mensaje nuevo de otra persona por Realtime (y no del historial), ajeno sin acceso, viaje cancelado solo lectura, cleanup de la suscripción y botón "Abrir chat" de ReservationCard. | E7 | Aprobado |
+| __tests__/features/domains.test.ts (chat) | Acceso denegado sin cargar mensajes, nombres de autores, orden del más nuevo al más antiguo, respuesta vieja ignorada y nombres sin pedir dos veces. | E3, E7 | Aprobado |
 | __tests__/screens/passenger.test.tsx | Inicio (búsqueda, filtro con debounce, error y Reintentar), reserva (validación, mapa, solo texto, éxito, duplicada), reservas por estado, cancelación con confirmación y viajes en curso. | E5 | Aprobado |
 
 Última ejecución: 2026-11-09, `npm test` con 26 archivos y 196 de 196 pruebas aprobadas, ejecutado por Antigravity en Windows (Node 24.18.0). Los servicios se simulan solo dentro de las pruebas.
 
-Pendientes por etapa: calificaciones, notificaciones y chat (E7), y verificación en Supabase de pruebas SQL de RLS (supabase/tests/rls.sql).
+Ejecución de la Etapa 7 (chat): 2026-11-10, rama e7-chat, `npm test` con 27 archivos y 210 de 210 pruebas aprobadas, ejecutado por Claude Code en WSL (Node 22).
+
+Pendientes por etapa: calificaciones y notificaciones (E7, Samuel), y verificación en Supabase de pruebas SQL de RLS (supabase/tests/rls.sql).
 
 ## 2. Casos funcionales
 
@@ -56,7 +60,7 @@ Pendientes por etapa: calificaciones, notificaciones y chat (E7), y verificació
 | TC-13 | Rechazar reserva | 1. En Solicitudes pendientes, presionar "Rechazar" en una reserva. 2. Verificar que se mueva a la pestaña "Rechazadas". | La reserva desaparece de pendientes y pasa a la pestaña Rechazadas; se actualiza en tiempo real. | — | Protocolo listo para Samuel en su teléfono | Pendiente |
 | TC-14 | Iniciar y finalizar viaje | 1. En "Viajes creados", cuando haya al menos 1 reserva aceptada, presionar "Iniciar viaje". 2. Confirmar inicio. 3. En la pestaña "En curso", presionar "Finalizar viaje" y confirmar. | Paso 1: el viaje pasa a estado 'en_curso'. Paso 3: el viaje pasa a estado 'finalizado' y las reservas asociadas a 'completada'. | — | Protocolo listo para Samuel en su teléfono | Pendiente |
 | TC-15 | Calificar viaje | Por definir (E7) | — | — | — | Pendiente |
-| TC-16 | Chat en tiempo real | Por definir (E7) | — | — | — | Pendiente |
+| TC-16 | Chat en tiempo real | Con dos teléfonos (o un teléfono y un emulador): el conductor y un pasajero con reserva aceptada. 1. Ambos abren "Abrir chat" del mismo viaje. 2. El pasajero escribe "Hola" y toca "Enviar mensaje". 3. El conductor responde. | Paso 2: el mensaje aparece abajo en el teléfono del pasajero (con "Tú") y, sin recargar, en el del conductor con el nombre del pasajero. Paso 3: igual en sentido contrario | Sí sucede: los mensajes llegan sin recargar en los dos sentidos | Prueba manual de Sara en su teléfono (2026-11-10) | Aprobado |
 | TC-17 | Sin conexión, con caché y banner | 1. En "Sesión de prueba", con sesión iniciada y red, tocar "Recargar datos". 2. Activar el modo avión. 3. Cerrar la app por completo y abrirla de nuevo. 4. Entrar a "Sesión de prueba". | Se ven nombre, sectores, viajes y reservas de la última carga, y el banner "Sin conexión: mostrando datos guardados (guardados a las HH:MM)", que TalkBack anuncia | Sí lo hace | Prueba manual de Sara en su teléfono | Aprobado |
 | TC-18 | Error de red y "Reintentar" | 1. Cerrar sesión. 2. Activar el modo avión. 3. Escribir correo y contraseña y tocar "Iniciar Sesión". 4. Quitar el modo avión y tocar "Reintentar". | Paso 3: mensaje "Sin conexión a internet. Revisa tu red e intenta de nuevo." con botón "Reintentar". Paso 4: la sesión se inicia | Sí lo hace | Prueba manual de Sara en su teléfono | Aprobado |
 | TC-19 | Cambio a modo conductor sin carro bloqueado | Por definir (E4) | — | — | — | Pendiente |
@@ -78,3 +82,24 @@ Lo que la Etapa 5 exige además de los casos TC. Mientras no exista la pantalla 
 | V5-05 | Reservar solo escribiendo | Reservar un viaje sin tocar el mapa, escribiendo la dirección. | La reserva se crea y aparece en Pendientes | Sí sucede | Prueba manual de Sara en su teléfono | Aprobado |
 | V5-06 | TalkBack en la tarjeta de viaje | Con TalkBack, recorrer las tarjetas de Inicio. | Cada tarjeta se lee como una sola frase; el "+" no es un foco aparte | Sí lo hace | Prueba manual de Sara en su teléfono con TalkBack | Aprobado |
 | V5-07 | TalkBack en la papelera | Con TalkBack, recorrer una reserva pendiente. | Los datos son un foco y la papelera otro, con el nombre "Cancelar reserva de …" | Sí lo hace | Prueba manual de Sara en su teléfono con TalkBack | Aprobado |
+
+## 4. Verificaciones en vivo de la Etapa 7 (chat)
+
+Se necesitan tres cuentas: el conductor (A), un pasajero con la reserva ACEPTADA en un viaje de A que no esté cancelado (B) y una cuenta ajena a ese viaje (C).
+
+| ID | Descripción | Pasos | Resultado esperado | Resultado real | Evidencia | Estado |
+| --- | --- | --- | --- | --- | --- | --- |
+| V7-01 | Entradas al chat | B: Reservas > Aceptados y Curso. A: Creados y Curso. | Cada tarjeta del viaje tiene "Abrir chat" y abre la pantalla "Chat del viaje" con el sector y la hora de salida | Sí sucede | Prueba manual de Sara en su teléfono (2026-11-10) | Aprobado |
+| V7-02 | Estado vacío | Abrir el chat de un viaje sin mensajes. | Se ve "Todavía no hay mensajes" y el botón de enviar está deshabilitado | Sí sucede | Prueba manual de Sara en su teléfono (2026-11-10) | Aprobado |
+| V7-03 | Mensajes en vivo | Es TC-16. | Los mensajes llegan sin recargar en ambos teléfonos | Sí sucede (ver TC-16) | Prueba manual de Sara en su teléfono (2026-11-10) | Aprobado |
+| V7-04 | TalkBack en la lista | Con TalkBack en B, recorrer los mensajes. | Cada mensaje es un solo foco: "Miguel Ordóñez, 3:15 p. m.: Hola" o "Tú, …". Anotar en qué orden los recorre (del más nuevo al más antiguo o al revés) | Según Sara: "a medida que llegan nuevos, los va leyendo tal cual" | Prueba manual de Sara en su teléfono (2026-11-10) | Aprobado |
+| V7-05 | Anuncio del mensaje nuevo | Con TalkBack en B y el foco en el campo, A envía un mensaje. | TalkBack dice "Mensaje nuevo de [nombre de A]: [texto]" sin mover el foco | Sí lo lee | Prueba manual de Sara en su teléfono (2026-11-10) | Aprobado |
+| V7-06 | Límite de 500 | Pegar en el campo un texto de más de 500 caracteres. | El campo se queda en 500, el contador dice "500 de 500 caracteres" y TalkBack anuncia el límite | Sí sucede | Prueba manual de Sara en su teléfono (2026-11-10) | Aprobado |
+| V7-07 | Botón de 48 dp | Accessibility Scanner sobre la pantalla del chat. | Sin avisos de tamaño en "Enviar mensaje" | Sin avisos de tamaño | Prueba manual de Sara en su teléfono (2026-11-10) | Aprobado |
+| V7-08 | Ajeno sin acceso (app) | C no tiene botón para entrar. Para probarlo, abrir desde la terminal de Expo la ruta del chat: con el id del viaje, en el teléfono de C escribir en el navegador `exp://<IP>:8081/--/trip/<id_viaje>/chat`. | "No tienes acceso a este chat…" y no aparece el campo de escribir | Sí sucede | Prueba manual de Sara en su teléfono (2026-11-10) | Aprobado |
+| V7-09 | RLS del chat (base de datos) | En el SQL Editor, poner los tres correos en supabase/tests/chat_rls.sql y ejecutarlo completo. | Error a propósito que empieza con "RESULTADO CHAT RLS: 6 de 6 correctas" | Sí sucede: 6 de 6 correctas | Prueba manual de Sara en su teléfono (2026-11-10) | Aprobado |
+| V7-10 | Viaje cancelado | A cancela el viaje (Creados > Cancelar viaje) con el chat abierto en B. | B ve "Este viaje fue cancelado: puedes leer los mensajes, pero ya no enviar nuevos." y no puede enviar | — | — | Pendiente |
+
+V7-10 (viaje cancelado) queda pendiente: no se ejecutó.
+
+Hallazgo para Samuel (pantalla 19, no es del chat): en Creados los viajes se ordenan por salida del más lejano al más cercano, así que con los 200 viajes de supabase/dev_seed_viajes.sql los de hoy quedan al final y el conductor no encontraba "Abrir chat". Propuesta: mostrar primero los próximos (orden ascendente desde ahora) y los pasados al final, o separarlos.

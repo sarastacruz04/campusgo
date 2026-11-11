@@ -69,6 +69,12 @@ export const ERRORS = {
     code: 'mensaje_invalido',
     message: 'El mensaje debe tener entre 1 y 500 caracteres.',
   },
+  // Lo devuelve el chat cuando quien lo abre no es el conductor ni un pasajero aceptado (R10).
+  chatSinAcceso: {
+    code: 'chat_sin_acceso',
+    message:
+      'No tienes acceso a este chat. Solo pueden usarlo el conductor y los pasajeros con reserva aceptada.',
+  },
   desconocido: { code: 'desconocido', message: 'Ocurrió un error inesperado. Intenta de nuevo.' },
 } satisfies Record<string, AppError>;
 

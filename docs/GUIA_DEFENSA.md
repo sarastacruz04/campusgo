@@ -280,12 +280,12 @@ Flujo del tema (Etapa 1): Ajustes llama a `setPreference('theme', 'dark')` → T
 13. **Cambiar el debounce.** En hooks/useTripSearch.ts cambiar `FILTER_DEBOUNCE_MS` de 300 a 800 y ver en el teléfono que la búsqueda tarda más en dispararse.
 14. **Agregar un dato a la tarjeta.** En components/trips/TripCard.tsx agregar una `Line` en `TripDetails` y el mismo dato en `tripAccessibilityLabel`, para que TalkBack también lo lea.
 
-### Mis archivos y los del otro (actualizado en la Etapa 6)
+### Mis archivos y los del otro (actualizado en la Etapa 7)
 
 | Persona | Mis archivos | Archivos del otro que debo dominar |
 | --- | --- | --- |
-| Sara | E0, E1, E3 y E5 | E2, E4 y E6: app/(tabs)/creados.tsx, app/trip/create.tsx, app/requests.tsx, components/trips/CreatedTripCard.tsx, RequestCard.tsx, supabase/migrations/0007_proteger_updates_rls.sql |
-| Samuel | E2, E4 y E6: app/(tabs)/creados.tsx, app/(tabs)/curso.tsx (conductor), app/trip/create.tsx, app/requests.tsx, components/trips/CreatedTripCard.tsx, RequestCard.tsx, supabase/migrations/0007_proteger_updates_rls.sql, __tests__/screens/driver.test.tsx | E3 y E5: components/trips/TripCard.tsx, TripList.tsx, hooks/useTripSearch.ts, app/trip/[id]/reserve.tsx, app/(tabs)/reservas.tsx, SelectField.tsx |
+| Sara | E0, E1, E3, E5 y E7 (chat): app/trip/[id]/chat.tsx, components/chat/MessageBubble.tsx, features/chat, services/chatService.ts, supabase/tests/chat_rls.sql | E2, E4, E6 y E7 (calificaciones y notificaciones): app/(tabs)/creados.tsx, app/trip/create.tsx, app/requests.tsx, components/trips/CreatedTripCard.tsx, RequestCard.tsx, supabase/migrations/0007_proteger_updates_rls.sql |
+| Samuel | E2, E4 y E6: app/(tabs)/creados.tsx, app/(tabs)/curso.tsx (conductor), app/trip/create.tsx, app/requests.tsx, components/trips/CreatedTripCard.tsx, RequestCard.tsx, supabase/migrations/0007_proteger_updates_rls.sql, __tests__/screens/driver.test.tsx | E3, E5 y E7 (chat): app/trip/[id]/chat.tsx, features/chat/thunks.ts, components/trips/TripCard.tsx, TripList.tsx, hooks/useTripSearch.ts, app/trip/[id]/reserve.tsx, app/(tabs)/reservas.tsx, SelectField.tsx |
 
 ---
 
@@ -323,3 +323,37 @@ Flujo del tema (Etapa 1): Ajustes llama a `setPreference('theme', 'dark')` → T
     En `app/trip/create.tsx` o en `lib/validators.ts`, ajustar la validación de cupos permitidos según la capacidad máxima del carro y ejecutar `npm test -- __tests__/lib/validators.test.ts`.
 16. **Probar la protección de inicio de viaje.**
     En `components/trips/CreatedTripCard.tsx`, modificar la condición `disabled={!hasAcceptedReservations}` y verificar con `npm test -- __tests__/screens/driver.test.tsx` que la prueba TC-14 / R8 detecta el comportamiento esperado.
+
+---
+
+## Chat del viaje (Etapa 7 — Sara)
+
+### Mapa de archivos nuevos y modificados
+
+| Ruta | Qué hace | Autor (etapa) |
+| --- | --- | --- |
+| app/trip/[id]/chat.tsx | Pantalla del chat: lista invertida, campo con límite y contador de 500, botón de enviar de 48 dp, estados de carga, vacío, error, sin acceso y viaje cancelado, Realtime y anuncios. | Sara (E7) |
+| components/chat/MessageBubble.tsx | Un mensaje: un solo foco con "autor, hora: texto"; lo propio va a la derecha, en azul y con "Tú". | Sara (E7) |
+| features/chat/thunks.ts | `fetchMessages` comprueba el acceso y trae mensajes y nombres; `fetchAuthorNames` con `condition`; `sendMessage` valida 1 a 500. | Sara (E3 y E7) |
+| features/chat/slice.ts y selectors.ts | Mensajes en un entity adapter ordenado por fecha, nombres de autores, `loadRequestId` contra respuestas viejas y selector del más nuevo al más antiguo. | Sara (E3 y E7) |
+| services/chatService.ts | `isParticipant`, `listMessages` con el nombre del autor, `getAuthorNames`, `sendMessage` y `subscribeToMessages`. | Sara (E3 y E7) |
+| supabase/tests/chat_rls.sql | Prueba de RLS del chat en una transacción que se deshace sola. | Sara (E7) |
+| ReservationCard, CreatedTripCard, reservas, curso y creados | Botón "Abrir chat" (props opcionales). | Sara (E7) sobre archivos de E5 y E6 |
+
+### Preguntas probables — Chat
+
+56. **¿Cómo llega un mensaje nuevo a la pantalla?**
+    `useRealtimeMessages(id)` se suscribe a los INSERT de `mensajes` con el filtro `viaje_id=eq.<id>`. Cada evento hace `dispatch(messageReceived(mensaje))`, el reducer hace `upsertOne` y el selector memoizado devuelve la lista nueva. El cleanup del `useEffect` cierra el canal al salir.
+57. **¿Por qué el mensaje propio no sale dos veces?**
+    Llega por la respuesta del insert y por Realtime, pero con el mismo id. El entity adapter usa `upsertOne`: si el id ya existe, lo reemplaza en vez de agregar otro.
+58. **¿Cómo se garantiza que un ajeno no lea el chat?**
+    En la base: la política SELECT de `mensajes` usa `es_participante_del_viaje(viaje_id, auth.uid())`, y Realtime respeta RLS. En la app: `fetchMessages` llama antes a esa misma función y muestra "No tienes acceso". Lo prueba supabase/tests/chat_rls.sql (CH-04 y CH-05).
+59. **¿Por qué la lista es invertida?**
+    En un chat lo nuevo va abajo, junto al campo. Con `inverted` la FlatList dibuja el primer elemento abajo, así que los datos van del más nuevo al más antiguo (`makeSelectMessagesNewestFirst`). El estado vacío se dibuja fuera porque dentro de una lista invertida saldría al revés.
+60. **¿Qué oye una persona con TalkBack cuando llega un mensaje?**
+    Un efecto compara el id del mensaje más nuevo con el último visto. Si cambió y el autor no es quien usa la app, `useAnnounce` dice "Mensaje nuevo de X: texto" sin mover el foco (S-07). Lo que ya había al abrir no se anuncia.
+
+### Ejercicios de ajuste en vivo (Etapa 7)
+
+17. **Cambiar el límite del mensaje.** Cambiar `MAX_MESSAGE_LENGTH` en services/chatService.ts y el texto de `mensajeInvalido` en services/errors.ts. Ojo: la base también tiene un CHECK de 500 en `mensajes.contenido` (migración 0001), así que subirlo exige una migración de Samuel.
+18. **Cambiar el anuncio del mensaje nuevo.** En app/trip/[id]/chat.tsx cambiar el texto del anuncio "Mensaje nuevo de …" y correr `npx jest __tests__/screens/chat.test.tsx` para ver qué prueba hay que ajustar.
