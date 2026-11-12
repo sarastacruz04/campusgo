@@ -39,7 +39,10 @@
 --   RP-02 X inserta un perfil directamente: rechazado
 --   RP-03 X actualiza su teléfono: permitido
 --   RP-04 X actualiza el teléfono de C: rechazado
---   RP-05 (nuevo) X lee teléfono, correo o ID universitario de otras cuentas: 0 fila(s)
+--   RP-05 (nuevo) X lee teléfono, correo o ID universitario de otras cuentas: sin acceso
+--   RP-06 (nuevo) X lee su propio perfil completo con mi_perfil: 1 fila(s)
+--   RP-07 (nuevo) X cambia su correo directamente: rechazado
+--   RP-08 (nuevo) anon pide un perfil con mi_perfil: rechazado
 --   RU-03 X se pone modo conductor sin la RPC: rechazado
 --   Vehículos
 --   RH-01 (nuevo) C registra su carro: permitido
@@ -47,6 +50,7 @@
 --   RH-03 (nuevo) X modifica el carro de C: rechazado
 --   RH-04 (nuevo) X elimina el carro de C: rechazado
 --   RH-05 (nuevo) X registra un carro a nombre de C: rechazado
+--   RH-06 (nuevo) Q registra su propio carro: permitido
 --   Viajes y modo
 --   RV-01 X solo ve viajes abiertos o llenos con salida futura: 0 fila(s) de otro tipo
 --   RV-02 C ve sus dos viajes en cualquier estado: 2 fila(s)
@@ -58,6 +62,10 @@
 --   RV-08 (nuevo) C cambia a modo conductor con carro: permitido
 --   RV-09 (nuevo) X inicia o cancela T1: rechazado (2 líneas)
 --   RV-10 (nuevo) C cancela T2: permitido
+--   RV-11 (nuevo, R4) C crea un viaje con salida en el pasado: rechazado
+--   RV-12 (nuevo, R4) C crea un viaje con más cupos que la capacidad: rechazado
+--   RV-13 (nuevo, R4) C crea un viaje con el carro de Q: rechazado
+--   RV-14 (nuevo, R4) C crea un viaje que ya empieza finalizado: rechazado
 --   RU-02 C cambia estado y cupos de T1 sin la RPC: rechazado
 --   Reservas
 --   RR-01 P lee sus reservas: 2 fila(s)
@@ -80,6 +88,8 @@
 --   RN-04 (nuevo) X marca como leída una notificación de C: rechazado
 --   RN-05 (nuevo) C lee sus dos solicitudes nuevas de T1: 2 fila(s)
 --   RN-06 (nuevo) X lee notificaciones de otras personas: 0 fila(s)
+--   RN-07 (nuevo) P cambia el título de su propia notificación: rechazado
+--   RN-08 (nuevo) P marca como leídas sus notificaciones: permitido
 --   Chat
 --   RM-01 X lee mensajes de cualquier viaje: 0 fila(s)
 --   RM-02 P (aceptada) escribe en T1: permitido
@@ -106,17 +116,18 @@
 --   RS-04 (nuevo) X sube un archivo a la carpeta de C: rechazado
 --   RS-05 (nuevo) X sube un archivo a su carpeta: permitido
 --
--- En total son 82 líneas; con las políticas correctas el resumen dice
--- "RESULTADO RLS: 82 de 82 correctas.".
+-- En total son 92 líneas; con las migraciones 0001 a 0009 el resumen dice
+-- "RESULTADO RLS: 92 de 92 correctas.".
 --
 -- Las pruebas que dicen "rechazado" se deshacen aunque la base las permita, para
 -- que un fallo no contamine las pruebas siguientes.
 --
 -- VALIDACIÓN LOCAL (2026-11-11, Sara con Claude): ejecutado en PostgreSQL 17 en
 -- Docker con las migraciones 0001 a 0008, seed.sql y una imitación mínima de los
--- esquemas auth y storage de Supabase (no está en el repositorio). Resultado:
--- 79 de 82. Fallan RP-05, RU-03 y RR-11 (hallazgos de TC-23 en docs/PRUEBAS.md).
--- Falta ejecutarlo en el proyecto real de Supabase.
+-- esquemas auth y storage de Supabase (no está en el repositorio). Con las 82
+-- pruebas originales y sin la 0009: 79 de 82 (fallaban RP-05, RU-03 y RR-11).
+-- Con las 92 pruebas: 82 de 92 sin la 0009 y 92 de 92 con ella.
+-- Falta ejecutarlo en el proyecto real de Supabase (TC-23 en docs/PRUEBAS.md).
 -- =============================================================================
 
 BEGIN;
@@ -132,7 +143,7 @@ SELECT set_config('rls.x', gen_random_uuid()::text, true);
 DO $$
 DECLARE
   v_ids    TEXT[];
-  v_placa  TEXT;
+  v_placas TEXT[];
   v_sector BIGINT;
   v_suf    TEXT := substr(md5(random()::text), 1, 8);
 BEGIN
@@ -147,12 +158,15 @@ BEGIN
     WHERE NOT EXISTS (SELECT 1 FROM public.profiles WHERE id_universidad = (9900000000 + n)::TEXT)
     ORDER BY n LIMIT 4
   ) s;
-  SELECT 'ZRL' || lpad(n::TEXT, 3, '0') INTO v_placa FROM generate_series(0, 999) n
-  WHERE NOT EXISTS (SELECT 1 FROM public.vehiculos WHERE placa = 'ZRL' || lpad(n::TEXT, 3, '0'))
-  ORDER BY n LIMIT 1;
+  SELECT array_agg(p) INTO v_placas FROM (
+    SELECT 'ZRL' || lpad(n::TEXT, 3, '0') AS p FROM generate_series(0, 999) n
+    WHERE NOT EXISTS (SELECT 1 FROM public.vehiculos WHERE placa = 'ZRL' || lpad(n::TEXT, 3, '0'))
+    ORDER BY n LIMIT 2
+  ) s;
 
   PERFORM set_config('rls.sector', v_sector::TEXT, true);
-  PERFORM set_config('rls.placa', v_placa, true);
+  PERFORM set_config('rls.placa', v_placas[1], true);
+  PERFORM set_config('rls.placa_q', v_placas[2], true);
 
   -- El trigger handle_new_user (R2) crea cada perfil a partir de raw_user_meta_data.
   INSERT INTO auth.users (id, aud, role, email, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
@@ -340,6 +354,8 @@ BEGIN
 END $$;
 SELECT pg_temp.probar('RA-02 anon reserva un viaje', 'rechazado',
   $q$SELECT public.crear_reserva(current_setting('rls.t1')::UUID, 'x', 4.86, -74.03)$q$);
+SELECT pg_temp.probar('RP-08 anon pide un perfil con mi_perfil', 'rechazado',
+  $q$SELECT * FROM public.mi_perfil()$q$);
 
 -- -----------------------------------------------------------------------------
 -- P y Q reservan
@@ -363,6 +379,10 @@ SET LOCAL ROLE authenticated;
 
 SELECT set_config('rls.r_q', pg_temp.paso('RR-04 Q reserva T1',
   $q$SELECT public.crear_reserva(current_setting('rls.t1')::UUID, 'Punto Q', 4.86, -74.03)$q$), true);
+-- Q también tiene carro: sirve para probar que C no puede usar un carro ajeno (RV-13).
+SELECT pg_temp.paso('RH-06 Q registra su propio carro',
+  $q$INSERT INTO public.vehiculos (propietario_id, placa, capacidad, marca, modelo)
+     VALUES (auth.uid(), current_setting('rls.placa_q'), 2, 'Prueba', 'RLS') RETURNING id$q$);
 
 -- -----------------------------------------------------------------------------
 -- C acepta a P en T1 y T2 (T2 queda lleno)
@@ -389,6 +409,32 @@ SELECT pg_temp.probar('RU-02 C cambia estado y cupos de T1 sin la RPC', 'rechaza
   $q$UPDATE public.viajes SET estado = 'finalizado', cupos_disponibles = 0
      WHERE id = current_setting('rls.t1')::UUID$q$);
 
+-- R4 en la base (migración 0009). Cada intento cambia una sola cosa de un viaje válido.
+SELECT pg_temp.probar('RV-11 C crea un viaje con salida en el pasado', 'rechazado',
+  $q$INSERT INTO public.viajes (conductor_id, vehiculo_id, sector_id, origen_texto, origen_lat, origen_lng,
+       destino_texto, destino_lat, destino_lng, salida_at, cupos_totales, cupos_disponibles)
+     SELECT auth.uid(), v.id, current_setting('rls.sector')::BIGINT, 'x', 0, 0, 'x', 0, 0,
+       NOW() - INTERVAL '1 hour', 1, 1
+     FROM public.vehiculos v WHERE v.propietario_id = auth.uid()$q$);
+SELECT pg_temp.probar('RV-12 C crea un viaje con más cupos que la capacidad (4)', 'rechazado',
+  $q$INSERT INTO public.viajes (conductor_id, vehiculo_id, sector_id, origen_texto, origen_lat, origen_lng,
+       destino_texto, destino_lat, destino_lng, salida_at, cupos_totales, cupos_disponibles)
+     SELECT auth.uid(), v.id, current_setting('rls.sector')::BIGINT, 'x', 0, 0, 'x', 0, 0,
+       NOW() + INTERVAL '1 day', 5, 5
+     FROM public.vehiculos v WHERE v.propietario_id = auth.uid()$q$);
+SELECT pg_temp.probar('RV-13 C crea un viaje con el carro de Q', 'rechazado',
+  $q$INSERT INTO public.viajes (conductor_id, vehiculo_id, sector_id, origen_texto, origen_lat, origen_lng,
+       destino_texto, destino_lat, destino_lng, salida_at, cupos_totales, cupos_disponibles)
+     SELECT auth.uid(), v.id, current_setting('rls.sector')::BIGINT, 'x', 0, 0, 'x', 0, 0,
+       NOW() + INTERVAL '1 day', 1, 1
+     FROM public.vehiculos v WHERE v.propietario_id = current_setting('rls.q')::UUID$q$);
+SELECT pg_temp.probar('RV-14 C crea un viaje que ya empieza finalizado', 'rechazado',
+  $q$INSERT INTO public.viajes (conductor_id, vehiculo_id, sector_id, origen_texto, origen_lat, origen_lng,
+       destino_texto, destino_lat, destino_lng, salida_at, cupos_totales, cupos_disponibles, estado)
+     SELECT auth.uid(), v.id, current_setting('rls.sector')::BIGINT, 'x', 0, 0, 'x', 0, 0,
+       NOW() + INTERVAL '1 day', 1, 1, 'finalizado'
+     FROM public.vehiculos v WHERE v.propietario_id = auth.uid()$q$);
+
 -- -----------------------------------------------------------------------------
 -- X: cuenta ajena, sin carro y sin reservas
 -- -----------------------------------------------------------------------------
@@ -401,9 +447,15 @@ SET LOCAL ROLE authenticated;
 SELECT pg_temp.contar('RP-01 X lee nombre de C y P', 2,
   $q$SELECT count(nombre) FROM public.profiles
      WHERE id IN (current_setting('rls.c')::UUID, current_setting('rls.p')::UUID)$q$);
-SELECT pg_temp.contar('RP-05 X lee teléfono, correo o ID universitario de otras cuentas', 0,
+-- "sin acceso" = 0 filas o sin permiso sobre esas columnas (migración 0009).
+SELECT pg_temp.sin_acceso('RP-05 X lee teléfono, correo o ID universitario de otras cuentas',
   $q$SELECT count(*) FROM public.profiles
      WHERE id <> auth.uid() AND (telefono IS NOT NULL OR email IS NOT NULL OR id_universidad IS NOT NULL)$q$);
+SELECT pg_temp.contar('RP-06 X lee su propio perfil completo con mi_perfil', 1,
+  $q$SELECT count(*) FROM public.mi_perfil()
+     WHERE id = auth.uid() AND telefono IS NOT NULL AND email IS NOT NULL AND id_universidad IS NOT NULL$q$);
+SELECT pg_temp.probar('RP-07 X cambia su correo directamente', 'rechazado',
+  $q$UPDATE public.profiles SET email = 'otro.correo@unisabana.edu.co' WHERE id = auth.uid()$q$);
 SELECT pg_temp.probar('RP-02 X inserta un perfil directamente', 'rechazado',
   $q$INSERT INTO public.profiles (id, nombre, apellido, email)
      VALUES (gen_random_uuid(), 'Intruso', 'X', 'intruso@unisabana.edu.co')$q$);
@@ -488,6 +540,10 @@ SELECT pg_temp.contar('RN-01 P lee las notificaciones de C', 0,
 SELECT pg_temp.probar('RN-03 P inserta una notificación', 'rechazado',
   $q$INSERT INTO public.notificaciones (usuario_id, tipo, titulo, cuerpo)
      VALUES (current_setting('rls.c')::UUID, 'test', 'Test', 'cuerpo')$q$);
+SELECT pg_temp.probar('RN-07 P cambia el título de su propia notificación', 'rechazado',
+  $q$UPDATE public.notificaciones SET titulo = 'cambiado' WHERE usuario_id = auth.uid()$q$);
+SELECT pg_temp.probar('RN-08 P marca como leídas sus notificaciones', 'permitido',
+  $q$UPDATE public.notificaciones SET leida = TRUE WHERE usuario_id = auth.uid()$q$);
 
 -- -----------------------------------------------------------------------------
 -- Q (pendiente): no entra al chat ni ve reservas ajenas

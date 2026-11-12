@@ -12,11 +12,19 @@ Convención: los errores devueltos por las RPC son objetos `{ code: string; mess
 
 | Operación | Quién | Columnas de entrada | Resultado | Errores |
 |-----------|-------|---------------------|-----------|---------|
-| SELECT    | Cualquier autenticado | — | Todas las columnas de la fila propia o ajena | — |
-| UPDATE    | El dueño (`id = auth.uid()`) | `nombre`, `apellido`, `id_universidad`, `telefono`, `avatar_path`, `registro_completo` | Fila actualizada | `RLS_violation` si intenta editar ajeno |
+| SELECT    | Cualquier autenticado | — | Desde la migración 0009, solo `id`, `nombre`, `apellido`, `avatar_path` y `modo_actual` de cualquier fila. `select('*')` falla | `42501` (sin permiso) si pide otra columna |
+| UPDATE    | El dueño (`id = auth.uid()`) | Solo `nombre`, `apellido`, `id_universidad`, `telefono`, `avatar_path`, `registro_completo` (0009) | Sin filas devueltas; el servicio vuelve a leer con `mi_perfil` | 0 filas si intenta editar ajeno; `42501` si toca `email` o `modo_actual` |
+| INSERT    | Prohibido por RLS | — | — | `RLS_violation` |
 
 Desde la migración 0004, `id_universidad` y `telefono` pueden ser `NULL` mientras `registro_completo = false` (perfil creado sin datos, por ejemplo desde el panel de Supabase). Un valor presente debe tener 10 dígitos (D-40).
-| INSERT    | Prohibido por RLS | — | — | `RLS_violation` |
+
+### `mi_perfil() → SETOF profiles` (migración 0009)
+
+| Quién | Entrada | Salida | Errores |
+|-------|---------|--------|---------|
+| Autenticado (anon no puede ejecutarla) | — | La fila completa del perfil de quien tiene la sesión (`auth.uid()`), con correo, teléfono e ID; 0 filas si no hay perfil | `PGRST116` con `.single()` si no hay fila |
+
+Es `SECURITY DEFINER` con `search_path` fijo y siempre filtra por `auth.uid()`: no hay forma de pedir el perfil de otra persona (D-64).
 
 ### `sectores`
 
@@ -238,8 +246,8 @@ Los thunks (`features/*/thunks.ts`) llaman a los servicios, atrapan el error y l
 
 | Función | Entrada | Salida | Errores |
 |---------|---------|--------|---------|
-| `getProfile(userId)` | id | `Profile` | `no_encontrado` |
-| `updateProfile(userId, changes)` | `nombre`, `apellido`, `telefono`, `avatar_path`, `registro_completo` | `Profile` | `datos_invalidos` (teléfono que no tiene 10 dígitos) |
+| `getProfile(userId)` | id (debe coincidir con la sesión) | `Profile` (RPC `mi_perfil`, migración 0009) | `no_encontrado`, `sin_sesion` si la sesión es de otra cuenta |
+| `updateProfile(userId, changes)` | `nombre`, `apellido`, `id_universidad`, `telefono`, `avatar_path`, `registro_completo` | `Profile` (UPDATE sin `select`, luego `mi_perfil`) | `datos_invalidos` (teléfono que no tiene 10 dígitos), `duplicado` (ID ya registrado) |
 | `changeMode(modo)` | `'pasajero'` o `'conductor'` (RPC `cambiar_modo`) | `void` | `sin_vehiculo`, `modo_invalido` |
 
 ### `vehicleService`
@@ -326,3 +334,20 @@ Detectados originalmente en la Etapa 3 y resueltos en la migración `0007_proteg
 2. **Protección en `profiles.modo_actual` (RESUELTO):** Trigger `trg_proteger_modo_actual_perfil` impide que un usuario autenticado modifique `modo_actual` directamente, forzando la validación de vehículo en `cambiar_modo` (R3).
 3. **Protección en `viajes` (RESUELTO):** Se eliminó la política de UPDATE directa en PostgREST. Todo avance de estado (`iniciar_viaje`, `finalizar_viaje`, `cancelar_viaje`) se ejecuta por sus respectivas RPCs con validación estricta de reglas de negocio.
 4. **`types/database.ts`:** Se mantiene tipado y consistente con las uniones de estado de los dominios (D-32).
+
+## Hallazgos de RLS resueltos en la Etapa 8 (Sara, migración 0009)
+
+`supabase/tests/rls.sql` dio 79 de 82 con las migraciones 0001 a 0008 (PostgreSQL local, 2026-11-11). La migración `0009_cerrar_huecos_rls.sql` los corrige; con ella el script da 92 de 92 en local.
+
+1. **Datos privados del perfil (RP-05):** los demás usuarios solo leen `id`, `nombre`, `apellido`, `avatar_path` y `modo_actual`; el perfil propio completo sale de `mi_perfil()` (D-64).
+2. **`modo_actual` (RU-03):** el trigger de 0007 nunca se disparaba porque era `SECURITY DEFINER` y comparaba `current_user`. Pasa a `SECURITY INVOKER`; además, `modo_actual` ya no se puede editar por columna (D-65). Corrige la afirmación del punto 2 de la sección anterior.
+3. **Reservas (RR-11):** sin política de INSERT. Solo `crear_reserva` crea reservas, así que no se puede insertar una reserva "aceptada" ni reservar un viaje lleno (D-65).
+4. **Notificaciones:** el destinatario solo puede cambiar `leida`.
+5. **Viajes (R4):** el trigger `trg_validar_viaje_nuevo` rechaza un INSERT con estos códigos (llegan como `P0001` y `services/errors.ts` los traduce) (D-66):
+
+| Código | Cuándo |
+|--------|--------|
+| `vehiculo_ajeno` | El carro no es de quien crea el viaje |
+| `salida_pasada` | `salida_at` no está en el futuro |
+| `cupos_excede_capacidad` | `cupos_totales` es mayor que la capacidad del carro |
+| `viaje_inicial_invalido` | El viaje no empieza en `abierto` o `cupos_disponibles` no es igual a `cupos_totales` |

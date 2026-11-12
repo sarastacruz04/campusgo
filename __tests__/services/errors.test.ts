@@ -9,6 +9,16 @@ describe('toAppError', () => {
     expect(toAppError({ code: 'P0001', message: 'sin_vehiculo' }).code).toBe('sin_vehiculo');
   });
 
+  it('traduce los rechazos del trigger que valida los viajes nuevos (R4, migración 0009)', () => {
+    expect(toAppError({ code: 'P0001', message: 'salida_pasada' })).toEqual({
+      code: 'salida_pasada',
+      message: 'La fecha y hora de salida deben estar en el futuro.',
+    });
+    for (const code of ['vehiculo_ajeno', 'cupos_excede_capacidad', 'viaje_inicial_invalido']) {
+      expect(toAppError({ code: 'P0001', message: code }).code).toBe(code);
+    }
+  });
+
   it('traduce los errores de Supabase Auth', () => {
     expect(
       toAppError({ code: 'invalid_credentials', message: 'Invalid login credentials' }),

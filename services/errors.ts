@@ -10,8 +10,8 @@ export type AppError = {
   message: string;
 };
 
-// Mensajes de los códigos que lanzan las funciones RPC con RAISE EXCEPTION
-// (supabase/migrations/0001_schema_inicial.sql y docs/API_CONTRATOS.md).
+// Mensajes de los códigos que lanzan las funciones RPC y los triggers con RAISE
+// EXCEPTION (supabase/migrations/0001 y 0009, y docs/API_CONTRATOS.md).
 const RPC_MESSAGES: Record<string, string> = {
   modo_invalido: 'El modo debe ser pasajero o conductor.',
   sin_vehiculo:
@@ -30,6 +30,12 @@ const RPC_MESSAGES: Record<string, string> = {
   sin_pasajeros: 'Debes tener al menos una reserva aceptada para iniciar el viaje.',
   viaje_no_en_curso: 'Solo se puede finalizar un viaje que esté en curso.',
   viaje_ya_cerrado: 'El viaje ya fue finalizado o cancelado.',
+  // Trigger fn_validar_viaje_nuevo (R4, migración 0009). La app ya valida lo mismo
+  // antes de enviar; estos mensajes solo salen si algo se salta esa validación.
+  vehiculo_ajeno: 'El viaje debe usar tu carro registrado.',
+  salida_pasada: 'La fecha y hora de salida deben estar en el futuro.',
+  cupos_excede_capacidad: 'Los cupos no pueden superar la capacidad de tu carro.',
+  viaje_inicial_invalido: 'Un viaje nuevo debe empezar abierto y con todos sus cupos disponibles.',
 };
 
 // Códigos de Supabase Auth (AuthApiError.code) que la app muestra con texto propio.

@@ -1,32 +1,50 @@
 -- =============================================================================
--- Semilla de desarrollo: viajes ficticios para pruebas de rendimiento (E5)
--- Autor: Samuel Borda
--- Fecha: 2026-11-06
+-- Semilla de desarrollo: viajes ficticios para pruebas (E5)
+-- Autor: Samuel Borda (2026-11-06)
+-- Ajuste: Sara Santacruz (2026-11-11): 10 viajes por defecto en vez de 200, la
+-- conductora se busca por correo y los cupos no pasan de la capacidad del carro
+-- (la migración 0009 lo exige en la base).
 --
--- SOLO para usar en entorno de desarrollo. NUNCA aplicar en producción.
--- Requiere que existan al menos un perfil conductor con vehículo en la BD.
--- Uso: 1) Crea un usuario conductor manualmente en Supabase.
---       2) Copia su UUID en la variable v_conductor_id de abajo.
---       3) Aplica este script en el SQL Editor de Supabase (dev).
+-- SOLO para desarrollo. NUNCA aplicar en producción.
+-- Uso:
+--   1. Cambia el correo de v_conductor_email por el de tu cuenta conductora
+--      (debe tener carro registrado).
+--   2. Deja v_cantidad en 10. Para medir el rendimiento con una lista larga
+--      (R-01 en docs/PRUEBAS.md) ponlo en 200 y, al terminar, vuelve a 10 viajes
+--      con supabase/dev_limpiar_viajes.sql.
+--   3. Ejecuta este archivo en el SQL Editor de Supabase.
+-- Los viajes quedan con origen "Sector de prueba N"; así los reconoce el script
+-- de limpieza.
 -- =============================================================================
 
 DO $$
 DECLARE
-  -- ⚠ Reemplaza con el UUID real del conductor de prueba
-  v_conductor_id UUID := '00000000-0000-0000-0000-000000000000';
-  v_vehiculo_id  UUID;
-  v_sector_id    BIGINT;
-  i              INTEGER;
-  v_salida       TIMESTAMPTZ;
+  v_conductor_email TEXT    := 'tu-conductora@unisabana.edu.co';
+  v_cantidad        INTEGER := 10;
+  v_conductor_id    UUID;
+  v_vehiculo_id     UUID;
+  v_capacidad       INTEGER;
+  v_cupos           INTEGER;
+  v_sector_id       BIGINT;
+  i                 INTEGER;
+  v_salida          TIMESTAMPTZ;
 BEGIN
+  SELECT id INTO v_conductor_id FROM public.profiles WHERE email = v_conductor_email;
+  IF v_conductor_id IS NULL THEN
+    RAISE EXCEPTION 'No existe un perfil con el correo %.', v_conductor_email;
+  END IF;
+
   -- Obtener el vehículo del conductor de prueba
-  SELECT id INTO v_vehiculo_id FROM public.vehiculos WHERE propietario_id = v_conductor_id;
+  SELECT id, capacidad INTO v_vehiculo_id, v_capacidad
+  FROM public.vehiculos WHERE propietario_id = v_conductor_id;
   IF v_vehiculo_id IS NULL THEN
     RAISE EXCEPTION 'El conductor de prueba no tiene vehículo registrado.';
   END IF;
+  -- Hasta 4 cupos, sin pasar la capacidad del carro (R4)
+  v_cupos := LEAST(4, v_capacidad);
 
-  -- Generar 200 viajes distribuidos en los 11 sectores
-  FOR i IN 1..200 LOOP
+  -- Viajes distribuidos en los 11 sectores
+  FOR i IN 1..v_cantidad LOOP
     -- Sector rotativo entre los disponibles
     SELECT id INTO v_sector_id FROM public.sectores ORDER BY id LIMIT 1 OFFSET ((i - 1) % 11);
     -- Salida entre 1 hora y 7 días en el futuro
@@ -49,13 +67,12 @@ BEGIN
       -74.0348,                   -- lng campus
       v_salida,
       CASE WHEN i % 3 = 0 THEN 0 ELSE (i % 5 + 1) * 1000 END,
-      4,
-      4,
+      v_cupos,
+      v_cupos,
       'abierto'
     );
   END LOOP;
 
-  RAISE NOTICE '200 viajes de prueba creados correctamente.';
+  RAISE NOTICE '% viajes de prueba creados correctamente.', v_cantidad;
 END;
 $$;
-

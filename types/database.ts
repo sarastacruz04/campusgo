@@ -374,6 +374,11 @@ export type Database = {
         Args: { p_viaje_id: string; p_user_id: string };
         Returns: boolean;
       };
+      // Perfil propio completo (migración 0009): devuelve 0 o 1 fila.
+      mi_perfil: {
+        Args: Record<string, never>;
+        Returns: Database['public']['Tables']['profiles']['Row'][];
+      };
     };
 
     Enums: Record<string, never>;
