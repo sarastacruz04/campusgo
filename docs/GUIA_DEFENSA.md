@@ -405,7 +405,10 @@ En la Etapa 8, Sara hizo con Claude Code tanto su parte como la que le tocaba a 
 | app/(tabs)/creados.tsx y curso.tsx | `renderItem` usa los conteos del selector y callbacks estables, para que `React.memo` de CreatedTripCard no se rompa. | Sara (E8) |
 | lib/imagePicker.ts | Reduce las fotos a 1280 px en el lado mayor y JPEG al 70 % con expo-image-manipulator antes de subirlas. | Sara (E8) |
 | __tests__/screens/auth-flows.test.tsx, __tests__/lib/imagePicker.test.ts, __tests__/features/list-performance.test.ts | Flujos de inicio de sesión con error y registro con validación; reducción de fotos; memo y estabilidad de selectores. | Sara (E8) |
-| supabase/tests/rls.sql | Script ejecutable de 82 comprobaciones de RLS con cuentas ficticias dentro de una transacción que se deshace (TC-23). Parte de la lista comentada de Samuel (E2). | Sara (E8) |
+| supabase/migrations/0009_cerrar_huecos_rls.sql | Corrige RP-05, RU-03 y RR-11, limita la edición de notificaciones a `leida` y valida R4 en la base con un trigger. | Sara (E8) |
+| services/profileService.ts | Lee el perfil propio con `mi_perfil` y guarda sin `select('*')`. | Sara (E8) |
+| supabase/dev_seed_viajes.sql y dev_limpiar_viajes.sql | 10 viajes de prueba por defecto y limpieza que deja 10 (no toca viajes de la app ni con reservas). | Samuel (E2), ajuste y limpieza de Sara (E8) |
+| supabase/tests/rls.sql | Script ejecutable de 92 comprobaciones de RLS con cuentas ficticias dentro de una transacción que se deshace (TC-23). Parte de la lista comentada de Samuel (E2). | Sara (E8) |
 | docs/PRUEBAS.md, docs/AUDITORIA_ACCESIBILIDAD.md, docs/AUDITORIA_REPOSITORIO.md | Protocolos de TC-01 a TC-23, F1 a F6, variantes y Profiler; auditoría de secretos y del README desde un clon limpio. | Sara (E8) |
 
 ### Preguntas probables — Pruebas, rendimiento y seguridad
@@ -418,7 +421,7 @@ En la Etapa 8, Sara hizo con Claude Code tanto su parte como la que le tocaba a 
     supabase/tests/rls.sql abre una transacción, crea cuatro cuentas ficticias en `auth.users` (el trigger `handle_new_user` crea sus perfiles) y actúa como cada una con `set_config('request.jwt.claims', …)` más `SET LOCAL ROLE authenticated`: así `auth.uid()` devuelve esa cuenta, igual que con la app. Cada intento queda en una tabla temporal y al final un `RAISE EXCEPTION` muestra el resumen y deshace todo. Se validó en un PostgreSQL local, sin dejar ninguna fila.
 68. **¿Por qué una prueba que "debe fallar" se deshace aunque la base la permita?**
     Si la base deja hacer algo indebido (por ejemplo, que alguien se ponga una reserva "aceptada"), esa fila cambiaría el resultado de las pruebas siguientes. `pg_temp.probar` ejecuta el intento dentro de un bloque con `EXCEPTION`, que PostgreSQL convierte en un savepoint, y siempre lo revierte. Solo registra si se permitió.
-69. **¿Qué encontró la prueba de RLS?** (validación local, falta en Supabase)
+69. **¿Qué encontró la prueba de RLS?** (validación local; los tres se corrigieron en la migración 0009, preguntas 73 a 75)
     Tres fallas en 82 comprobaciones. RP-05: la política de lectura de `profiles` es `USING (TRUE)`, así que cualquier cuenta lee el teléfono, el correo y el ID universitario de las demás, aunque la app solo use nombre y apellido. RU-03: el trigger de la migración 0007 compara `current_user = 'authenticated'`, pero es `SECURITY DEFINER`, y dentro de una función así `current_user` es su dueño, nunca `authenticated`. RR-11: la política de INSERT de `reservas` solo exige `pasajero_id = auth.uid()`, así que alguien puede insertar una reserva "aceptada" sin la RPC y entrar al chat.
 70. **¿Por qué el resumen de RLS sale como error y no como una consulta?**
     El SQL Editor muestra solo el resultado de la última sentencia, y la última tiene que deshacer todo. Un error dentro de la transacción la revierte por completo y su mensaje siempre se ve. Es el mismo patrón de chat_rls.sql.
@@ -427,7 +430,17 @@ En la Etapa 8, Sara hizo con Claude Code tanto su parte como la que le tocaba a 
 72. **¿Por qué TC-20 nunca se hace con la conductora principal?**
     `viajes.vehiculo_id` tiene `ON DELETE CASCADE`: eliminar el carro borra todos sus viajes y, en cascada, sus reservas, mensajes y calificaciones. Se usa la cuenta nueva de TC-01.
 
+73. **¿Cómo protegen el teléfono y el correo si la política de profiles deja ver todas las filas?** (D-64)
+    RLS decide qué **filas** se ven; los privilegios de PostgreSQL deciden qué **columnas**. La migración 0009 quita el `SELECT` de la tabla y lo devuelve solo sobre `id`, `nombre`, `apellido`, `avatar_path` y `modo_actual`. El perfil propio completo se lee con `mi_perfil()`, una función `SECURITY DEFINER` que siempre filtra por `auth.uid()`. Por eso `profileService.getProfile` ya no usa `select('*')`: con privilegios por columna, el `*` falla.
+74. **¿Por qué el trigger de modo_actual no funcionaba y cómo lo arreglaron?** (D-65)
+    Comparaba `current_user = 'authenticated'`, pero la función era `SECURITY DEFINER`: dentro de ella, `current_user` es el dueño de la función. Con `SECURITY INVOKER`, `current_user` es quien hace el UPDATE: desde la app es `authenticated` y se rechaza; dentro de `cambiar_modo` (que sí es `SECURITY DEFINER`) es el dueño y se permite. Además, `modo_actual` ya no tiene privilegio de UPDATE.
+75. **Si quitaron la política de INSERT de reservas, ¿cómo se crean las reservas?** (D-65)
+    Con la RPC `crear_reserva`, que es `SECURITY DEFINER`: corre como el dueño de la tabla, y RLS no aplica al dueño. Sin política, cualquier INSERT directo desde la app se rechaza. Así todas las reservas pasan por las validaciones de R5 y empiezan en "pendiente".
+76. **¿Qué valida la base al crear un viaje?** (D-66)
+    El trigger `trg_validar_viaje_nuevo` (BEFORE INSERT) exige que el carro sea de quien crea el viaje, que la salida sea futura, que los cupos no pasen de la capacidad y que el viaje empiece abierto con todos los cupos libres. La app valida lo mismo antes de enviar; la base lo repite porque la API se puede llamar sin la app.
+
 ### Ejercicios de ajuste en vivo (Etapa 8)
 
-21. **Agregar una comprobación a rls.sql.** Copiar una línea `pg_temp.contar(...)`, por ejemplo "Q lee las notificaciones de P: 0 fila(s)", pegarla en el bloque de Q y explicar por qué el resumen pasa de 82 a 83 líneas.
+21. **Agregar una comprobación a rls.sql.** Copiar una línea `pg_temp.contar(...)`, por ejemplo "Q lee las notificaciones de P: 0 fila(s)", pegarla en el bloque de Q y explicar por qué el resumen pasa de 92 a 93 líneas.
+23. **Dejar ver una columna más de los perfiles.** En una migración nueva, `GRANT SELECT (created_at) ON public.profiles TO authenticated;` y explicar por qué `telefono` nunca debería ir en esa lista (RP-05 en rls.sql fallaría).
 22. **Cambiar el tamaño máximo de las fotos.** En lib/imagePicker.ts, cambiar `MAX_IMAGE_SIDE` de 1280 a 1024 y correr `npm test`: imagePicker.test sigue pasando porque compara contra la constante, no contra un número fijo. Explicar el efecto en Storage (archivos más pequeños) y cómo se mediría en R-06.

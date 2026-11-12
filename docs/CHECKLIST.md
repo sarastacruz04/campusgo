@@ -42,7 +42,7 @@ Sección 3: Implementación y auditoría de accesibilidad móvil (consolidación
 
 Sección 4: Pruebas y validación
 - [ ] Casos de prueba ejecutados: caminos felices y errores de red o validación (TC-01 a TC-23) con resultado real → §10, E8
-- [ ] Pruebas automáticas ejecutadas (unitarias, componentes, contraste, RLS) → §10, E8 (evidencia parcial: 241 de 241 pruebas y 66 de 66 pares de contraste en docs/PRUEBAS.md, sección 1; supabase/tests/rls.sql validado solo en un PostgreSQL local con 79 de 82 y tres hallazgos (TC-23). Falta ejecutarlo en Supabase)
+- [ ] Pruebas automáticas ejecutadas (unitarias, componentes, contraste, RLS) → §10, E8 (evidencia parcial: 241 de 241 pruebas y 66 de 66 pares de contraste en docs/PRUEBAS.md, sección 1; supabase/tests/rls.sql validado solo en un PostgreSQL local: 79 de 82 con tres hallazgos, corregidos en la migración 0009, y luego 92 de 92 (TC-23). Falta aplicar 0009 y ejecutarlo en Supabase)
 - [ ] Auditoría de accesibilidad en dispositivo (TalkBack y Accessibility Scanner) con resultados reales → §10, E8, docs/AUDITORIA_ACCESIBILIDAD.md
 - [ ] Limitación declarada: iOS, VoiceOver y Accessibility Inspector no se probaron (solo Android) → §7.1, §11
 
