@@ -351,3 +351,7 @@ Detectados originalmente en la Etapa 3 y resueltos en la migración `0007_proteg
 | `salida_pasada` | `salida_at` no está en el futuro |
 | `cupos_excede_capacidad` | `cupos_totales` es mayor que la capacidad del carro |
 | `viaje_inicial_invalido` | El viaje no empieza en `abierto` o `cupos_disponibles` no es igual a `cupos_totales` |
+
+## Registro sin confirmación de correo (Etapa 8, D-68)
+
+`authService.signUp(input)` devuelve `SessionUser | null`. Con "Confirm email" apagado en Supabase, la respuesta de `auth.signUp` ya trae la sesión y la función devuelve la cuenta; el thunk la guarda en `auth` y la pantalla sigue a "Agrega tu foto". Con la confirmación encendida devuelve `null`, `auth.emailCodeRequired` queda en `true` y la app pide el código (`verifySignUpCode`). Errores: `correo_no_institucional` (antes de llamar al servidor), `user_already_exists`, `correo_no_enviado` (5xx al enviar el código, SMTP) y `sin_conexion`.

@@ -84,18 +84,18 @@ En cada flujo, TalkBack activo y tema Claro, salvo que la fila diga otra cosa. A
 | # | Acción | Qué debe anunciar TalkBack o qué debe pasar | IDs | Resultado real | Estado |
 | --- | --- | --- | --- | --- | --- |
 | F1-01 | Abrir la app sin sesión | "Te damos la bienvenida, encabezado". El logo se lee una sola vez: "CampusGo, by Sara y Samuel" | S-01, S-09, T-03 | — | Pendiente |
-| F1-02 | Pasar a "Registrarse" y activarlo | "Registrarse, botón"; al entrar, foco en "Registro, encabezado" y luego "Paso 1 de 7" | S-01, T-08 | — | Pendiente |
+| F1-02 | Pasar a "Registrarse" y activarlo | "Registrarse, botón"; al entrar, foco en "Registro, encabezado" y luego "Paso 1 de 6" | S-01, T-08 | — | Pendiente |
 | F1-03 | Recorrer el formulario | Cada campo dice su etiqueta visible ("Nombre", "Apellido", "ID de la Universidad", "Correo Electrónico", "Teléfono", "Contraseña") y su pista de formato ("10 dígitos"); el orden es el visual | S-05, V-02, T-03 | — | Pendiente |
 | F1-04 | Escribir 3 dígitos en el ID y pasar al siguiente campo | Se anuncia "ID de la Universidad: Debe tener exactamente 10 dígitos." sin mover el foco; se ven ícono, texto y borde de 2 px | S-05, S-07, V-05 | — | Pendiente |
 | F1-05 | En el teclado, tecla "Siguiente" | El foco pasa al campo siguiente | T-03 | — | Pendiente |
 | F1-06 | "Mostrar contraseña" | Cambia a "Ocultar contraseña" y el texto se ve; la contraseña se puede pegar | T-08 | — | Pendiente |
-| F1-07 | Registrarse con datos válidos | Botón con indicador y "Enviando"; luego "Verifica tu correo, encabezado", "Paso 2 de 7" | T-05, T-03, T-08 | — | Pendiente |
-| F1-08 | Código de 6 dígitos | El campo "Código de verificación" acepta pegar el código; "Reenviar código en N s" se anuncia como no disponible mientras cuenta | S-05, S-06, T-08 | — | Pendiente |
-| F1-09 | "Agrega tu foto" | "Foto de perfil, botón" con su pista; después de elegirla: "Foto de perfil, foto cargada"; "Paso 3 de 7" | S-09, S-02, V-04 | — | Pendiente |
+| F1-07 | Registrarse con datos válidos | Botón con indicador y "Enviando"; luego se anuncia "Cuenta creada. Ahora agrega tu foto." y el foco va a "Agrega tu foto, encabezado", "Paso 2 de 6" (sin código de correo, D-68) | T-05, T-03, T-08 | — | Pendiente |
+| F1-08 | Código de 6 dígitos | El campo "Código de verificación" acepta pegar el código; "Reenviar código en N s" se anuncia como no disponible mientras cuenta | S-05, S-06, T-08 | No aplica mientras "Confirm email" esté apagado (D-68): la pantalla del código no aparece. Cubierto por pruebas unitarias (auth-flows.test) | No aplica |
+| F1-09 | "Agrega tu foto" | "Foto de perfil, botón" con su pista; después de elegirla: "Foto de perfil, foto cargada"; "Paso 2 de 6" | S-09, S-02, V-04 | — | Pendiente |
 | F1-10 | "Anterior" y volver | Lo escrito y la foto se conservan | T-08 | — | Pendiente |
 | F1-11 | "¿Quieres Registrar un Carro?" | Grupo "¿Deseas registrar un carro ahora?" con dos "botón de opción" ("No, quiero ser pasajero" y "Sí, quiero registrar mi carro"); solo la elegida dice "marcado" | S-03, S-06, V-05 | — | Pendiente |
 | F1-12 | "¡Registra tu carro!" con placa "AB12" | Error de la placa anunciado sin mover el foco; "Cupos vehículo" abre teclado numérico | S-05, S-07 | — | Pendiente |
-| F1-13 | Fotos del carro y del SOAT | "Foto del vehículo" y "Foto del SOAT vigente" con estado "foto cargada"; "Paso 6 de 7" y "Paso 7 de 7" | S-09, T-08, V-04 | — | Pendiente |
+| F1-13 | Fotos del carro y del SOAT | "Foto del vehículo" y "Foto del SOAT vigente" con estado "foto cargada"; "Paso 5 de 6" y "Paso 6 de 6" | S-09, T-08, V-04 | — | Pendiente |
 | F1-14 | "¡Listo!" | Vibra, se anuncia el resultado y entra a Inicio con el foco en "¡Buen viaje …!, encabezado" | T-04, T-03 | — | Pendiente |
 
 #### F2. Inicio de sesión con error (cuenta P)
