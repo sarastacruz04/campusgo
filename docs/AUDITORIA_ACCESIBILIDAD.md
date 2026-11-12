@@ -160,14 +160,14 @@ En cada flujo, TalkBack activo y tema Claro, salvo que la fila diga otra cosa. A
 
 | # | Qué hacer | Qué debe pasar | IDs | Resultado real | Estado |
 | --- | --- | --- | --- | --- | --- |
-| VA-01 | Tema Oscuro (P-7) y recorrer Inicio, una tarjeta, Reserva tu viaje y Perfil | Todo legible; los campos y bordes se distinguen; el mapa y las fotos no quedan tapados | V-08, V-01 | — | Pendiente |
-| VA-02 | Tema Alto contraste en las mismas pantallas | Texto negro sobre blanco y bordes de 2 px en botones, campos y tarjetas | V-08, V-01 | — | Pendiente |
-| VA-03 | Tema "Sistema" con el modo oscuro del teléfono activo; cerrar y abrir la app | La app pasa sola a oscuro y la preferencia se conserva | V-08 | — | Pendiente |
-| VA-04 | "Eliminar animaciones" (P-8); abrir un diálogo y cambiar de pantalla | Los diálogos aparecen sin animación o con un fundido corto | V-09 | — | Pendiente |
-| VA-05 | Fuente y pantalla al máximo (P-5) y "Tamaño del texto: Extra grande" en Ajustes de accesibilidad; recorrer F3 | Ningún texto se corta ni se solapa; tildes, Ñ, ¿ y ¡ completas; la tarjeta crece en alto | V-06, V-07 | — | Pendiente |
-| VA-06 | Ajustes de accesibilidad > "Vibración" apagada y repetir F3-09 | No vibra, pero el mensaje se ve y se anuncia | T-04, V-08 | — | Pendiente |
-| VA-07 | Accessibility Scanner (P-4) en Inicio, Reserva tu viaje, Reservas, Crea tu viaje, Creados, Perfil, Notificaciones, Chat y Calificar viaje | Sin avisos de tamaño táctil, contraste ni etiquetas. Anotar cada aviso con su pantalla | T-01, T-02, V-01, V-04, S-02 | — | Pendiente |
-| VA-08 | Con "Mostrar toques" (P-6), tocar la lupa, la papelera y el lápiz por el borde | El toque cuenta aunque caiga un poco fuera del ícono (hitSlop) | T-02 | — | Pendiente |
+| VA-01 | Tema Oscuro (P-7) y recorrer Inicio, una tarjeta, Reserva tu viaje y Perfil | Todo legible; los campos y bordes se distinguen; el mapa y las fotos no quedan tapados | V-08, V-01 | Pasa (2026-11-12, ejecutó Sara) | Aprobado |
+| VA-02 | Tema Alto contraste en las mismas pantallas | Texto negro sobre blanco y bordes de 2 px en botones, campos y tarjetas | V-08, V-01 | Pasa (2026-11-12, ejecutó Sara) | Aprobado |
+| VA-03 | Tema "Sistema" con el modo oscuro del teléfono activo; cerrar y abrir la app | La app pasa sola a oscuro y la preferencia se conserva | V-08 | Pasa (2026-11-12, ejecutó Sara) | Aprobado |
+| VA-04 | "Eliminar animaciones" (P-8); abrir un diálogo y cambiar de pantalla | Los diálogos aparecen sin animación o con un fundido corto | V-09 | Pasa (2026-11-12, ejecutó Sara) | Aprobado |
+| VA-05 | Fuente y pantalla al máximo (P-5) y "Tamaño del texto: Extra grande" en Ajustes de accesibilidad; recorrer F3 | Ningún texto se corta ni se solapa; tildes, Ñ, ¿ y ¡ completas; la tarjeta crece en alto | V-06, V-07 | Pasa (2026-11-12, ejecutó Sara) | Aprobado |
+| VA-06 | Ajustes de accesibilidad > "Vibración" apagada y repetir F3-09 | No vibra, pero el mensaje se ve y se anuncia | T-04, V-08 | Pasa (2026-11-12, ejecutó Sara) | Aprobado |
+| VA-07 | Accessibility Scanner (P-4) en Inicio, Reserva tu viaje, Reservas, Crea tu viaje, Creados, Perfil, Notificaciones, Chat y Calificar viaje | Sin avisos de tamaño táctil, contraste ni etiquetas. Anotar cada aviso con su pantalla | T-01, T-02, V-01, V-04, S-02 | Pasa: Accessibility Scanner sin avisos en las pantallas indicadas (2026-11-12, ejecutó Sara) | Aprobado |
+| VA-08 | Con "Mostrar toques" (P-6), tocar la lupa, la papelera y el lápiz por el borde | El toque cuenta aunque caiga un poco fuera del ícono (hitSlop) | T-02 | Pasa (2026-11-12, ejecutó Sara) | Aprobado |
 
 ### 4. Resultado por compromiso de la matriz
 
@@ -175,41 +175,41 @@ Resume en dispositivo cada uno de los 26 IDs de docs/MATRIZ_ACCESIBILIDAD.md. Se
 
 | ID | Compromiso | Dónde se comprueba | Ejecutó | Fecha | Resultado real | Estado |
 | --- | --- | --- | --- | --- | --- | --- |
-| S-01 | Roles correctos (botón, encabezado, pestaña, opción) | F1-01, F1-02, F2-01, F3-02, F4-01 | — | — | — | Pendiente |
-| S-02 | Etiquetas en íconos sin texto; decorativos ocultos | F1-09, F3-01, F3-03, F4-01, F5-01, F6-04, VA-07 | — | — | — | Pendiente |
-| S-03 | Selector de modo como grupo de opciones con estado | F1-11, F3-01, F6-01, F6-03 | — | — | — | Pendiente |
-| S-04 | TripCard como un solo foco | F3-04, F4-06, F5-01 | — | — | — | Pendiente |
-| S-05 | Formularios con etiqueta, pista y error en texto | F1-03, F1-04, F1-08, F1-12, F3-08, F4-03, F4-04 | — | — | — | Pendiente |
-| S-06 | Estados selected, disabled, busy y checked | F1-08, F1-11, F2-06, F3-10, F6-03 | — | — | — | Pendiente |
-| S-07 | Mensajes dinámicos anunciados sin mover el foco | F1-04, F1-12, F2-03, F2-05, F3-03, F3-05, F4-03, F5-04, F5-06 | — | — | — | Pendiente |
-| S-08 | Diálogos modales: foco al título, Atrás y retorno del foco | F3-09, F4-05, F5-02, F5-03, F5-05, F6-01, F6-02 | — | — | — | Pendiente |
-| S-09 | Alternativas textuales: mapa, fotos y logo | F1-01, F1-09, F1-13, F3-01, F3-07, F4-02 | — | — | — | Pendiente |
-| V-01 | Contraste verificado en los tres temas | VA-01, VA-02, VA-07 | — | — | — | Pendiente |
-| V-02 | Placeholder legible y etiqueta visible persistente | F1-03 | — | — | — | Pendiente |
-| V-03 | Controles sobre azul legibles | F3-02 | — | — | — | Pendiente |
-| V-04 | Íconos de estado y de subida con 3:1 | F1-09, F1-13, VA-07 | — | — | — | Pendiente |
-| V-05 | No depender solo del color | F1-04, F1-11, F2-03, F3-10, F4-03 | — | — | — | Pendiente |
-| V-06 | Escalado de fuente al máximo sin cortes | VA-05 | — | — | — | Pendiente |
-| V-07 | lineHeight suficiente (tildes, Ñ, ¿, ¡) | VA-05 | — | — | — | Pendiente |
-| V-08 | Temas, tamaño de texto y vibración con persistencia | VA-01, VA-02, VA-03, VA-06 | — | — | — | Pendiente |
-| V-09 | Respeto a reducir movimiento | VA-04 | — | — | — | Pendiente |
-| T-01 | Áreas táctiles de 48 dp | VA-07 | — | — | — | Pendiente |
-| T-02 | hitSlop y separación de 8 dp | F3-03, F5-01, VA-07, VA-08 | — | — | — | Pendiente |
-| T-03 | Orden de foco, foco al título y "Siguiente" del teclado | F1-01, F1-02, F1-03, F1-05, F1-07, F1-14, F2-01, F2-04, F3-06, F4-02, F6-05 | — | — | — | Pendiente |
-| T-04 | Háptica + mensaje + anuncio; interruptor de vibración | F1-14, F2-03, F3-09, F4-05, F5-04, F5-06, VA-06 | — | — | — | Pendiente |
-| T-05 | Carga y errores de red con texto, busy y "Reintentar" | F1-07, F2-05, F2-06, F3-05 | — | — | — | Pendiente |
-| T-06 | Confirmaciones destructivas con foco en la opción segura | F5-02, F5-05, F6-01, F6-02, F6-04 | — | — | — | Pendiente |
-| T-07 | Sin gestos complejos; dirección escrita como alternativa al mapa | F3-07, F3-08, F4-04 | — | — | — | Pendiente |
-| T-08 | Registro por pasos, "Anterior" conserva, autocompletar y pegar | F1-02, F1-06, F1-07, F1-08, F1-10, F2-02 | — | — | — | Pendiente |
+| S-01 | Roles correctos (botón, encabezado, pestaña, opción) | F1-01, F1-02, F2-01, F3-02, F4-01 | Sara | 2026-11-12 | Aprobadas F1-01, F1-02, F2-01, F3-02, F4-01 | Aprobado |
+| S-02 | Etiquetas en íconos sin texto; decorativos ocultos | F1-09, F3-01, F3-03, F4-01, F5-01, F6-04, VA-07 | Sara | 2026-11-12 | Aprobadas F1-09, F3-01, F3-03, F4-01, F5-01, F6-04, VA-07 | Aprobado |
+| S-03 | Selector de modo como grupo de opciones con estado | F1-11, F3-01, F6-01, F6-03 | Sara | 2026-11-12 | Aprobadas F1-11, F3-01, F6-01, F6-03 | Aprobado |
+| S-04 | TripCard como un solo foco | F3-04, F4-06, F5-01 | Sara | 2026-11-12 | Aprobadas F3-04, F4-06, F5-01 | Aprobado |
+| S-05 | Formularios con etiqueta, pista y error en texto | F1-03, F1-04, F1-08, F1-12, F3-08, F4-03, F4-04 | Sara | 2026-11-12 | Aprobadas F1-03, F1-04, F1-12, F3-08, F4-03, F4-04; no aplica F1-08 (sin código de correo, D-68) | Aprobado |
+| S-06 | Estados selected, disabled, busy y checked | F1-08, F1-11, F2-06, F3-10, F6-03 | Sara | 2026-11-12 | Aprobadas F1-11, F2-06, F3-10, F6-03; no aplica F1-08 (sin código de correo, D-68) | Aprobado |
+| S-07 | Mensajes dinámicos anunciados sin mover el foco | F1-04, F1-12, F2-03, F2-05, F3-03, F3-05, F4-03, F5-04, F5-06 | Sara | 2026-11-12 | Aprobadas F1-04, F1-12, F2-03, F2-05, F3-03, F4-03, F5-04, F5-06; no ejecutada F3-05 (menos de 20 viajes; ver R-01) | Aprobado en lo ejecutado |
+| S-08 | Diálogos modales: foco al título, Atrás y retorno del foco | F3-09, F4-05, F5-02, F5-03, F5-05, F6-01, F6-02 | Sara | 2026-11-12 | Aprobadas F3-09, F4-05, F5-02, F5-03, F5-05, F6-01, F6-02 | Aprobado |
+| S-09 | Alternativas textuales: mapa, fotos y logo | F1-01, F1-09, F1-13, F3-01, F3-07, F4-02 | Sara | 2026-11-12 | Aprobadas F1-01, F1-09, F1-13, F3-01, F3-07, F4-02 | Aprobado |
+| V-01 | Contraste verificado en los tres temas | VA-01, VA-02, VA-07 | Sara | 2026-11-12 | Aprobadas VA-01, VA-02, VA-07 | Aprobado |
+| V-02 | Placeholder legible y etiqueta visible persistente | F1-03 | Sara | 2026-11-12 | Aprobadas F1-03 | Aprobado |
+| V-03 | Controles sobre azul legibles | F3-02 | Sara | 2026-11-12 | Aprobadas F3-02 | Aprobado |
+| V-04 | Íconos de estado y de subida con 3:1 | F1-09, F1-13, VA-07 | Sara | 2026-11-12 | Aprobadas F1-09, F1-13, VA-07 | Aprobado |
+| V-05 | No depender solo del color | F1-04, F1-11, F2-03, F3-10, F4-03 | Sara | 2026-11-12 | Aprobadas F1-04, F1-11, F2-03, F3-10, F4-03 | Aprobado |
+| V-06 | Escalado de fuente al máximo sin cortes | VA-05 | Sara | 2026-11-12 | Aprobadas VA-05 | Aprobado |
+| V-07 | lineHeight suficiente (tildes, Ñ, ¿, ¡) | VA-05 | Sara | 2026-11-12 | Aprobadas VA-05 | Aprobado |
+| V-08 | Temas, tamaño de texto y vibración con persistencia | VA-01, VA-02, VA-03, VA-06 | Sara | 2026-11-12 | Aprobadas VA-01, VA-02, VA-03, VA-06 | Aprobado |
+| V-09 | Respeto a reducir movimiento | VA-04 | Sara | 2026-11-12 | Aprobadas VA-04 | Aprobado |
+| T-01 | Áreas táctiles de 48 dp | VA-07 | Sara | 2026-11-12 | Aprobadas VA-07 | Aprobado |
+| T-02 | hitSlop y separación de 8 dp | F3-03, F5-01, VA-07, VA-08 | Sara | 2026-11-12 | Aprobadas F3-03, F5-01, VA-07, VA-08 | Aprobado |
+| T-03 | Orden de foco, foco al título y "Siguiente" del teclado | F1-01, F1-02, F1-03, F1-05, F1-07, F1-14, F2-01, F2-04, F3-06, F4-02, F6-05 | Sara | 2026-11-12 | Aprobadas F1-01, F1-02, F1-03, F1-05, F1-07, F1-14, F2-01, F2-04, F3-06, F4-02, F6-05 | Aprobado |
+| T-04 | Háptica + mensaje + anuncio; interruptor de vibración | F1-14, F2-03, F3-09, F4-05, F5-04, F5-06, VA-06 | Sara | 2026-11-12 | Aprobadas F1-14, F2-03, F3-09, F4-05, F5-04, F5-06, VA-06 | Aprobado |
+| T-05 | Carga y errores de red con texto, busy y "Reintentar" | F1-07, F2-05, F2-06, F3-05 | Sara | 2026-11-12 | Aprobadas F1-07, F2-05, F2-06; no ejecutada F3-05 (menos de 20 viajes; ver R-01) | Aprobado en lo ejecutado |
+| T-06 | Confirmaciones destructivas con foco en la opción segura | F5-02, F5-05, F6-01, F6-02, F6-04 | Sara | 2026-11-12 | Aprobadas F5-02, F5-05, F6-01, F6-02, F6-04 | Aprobado |
+| T-07 | Sin gestos complejos; dirección escrita como alternativa al mapa | F3-07, F3-08, F4-04 | Sara | 2026-11-12 | Aprobadas F3-07, F3-08, F4-04 | Aprobado |
+| T-08 | Registro por pasos, "Anterior" conserva, autocompletar y pegar | F1-02, F1-06, F1-07, F1-08, F1-10, F2-02 | Sara | 2026-11-12 | Aprobadas F1-02, F1-06, F1-07, F1-10, F2-02; no aplica F1-08 (sin código de correo, D-68) | Aprobado |
 
 ### 5. Resumen por flujo
 
 | Flujo | Dispositivo y versión de Android | Ejecutó | Fecha | Resultado | Estado |
 | --- | --- | --- | --- | --- | --- |
-| F1 | — | — | — | — | Pendiente |
-| F2 | — | — | — | — | Pendiente |
-| F3 | — | — | — | — | Pendiente |
-| F4 | — | — | — | — | Pendiente |
-| F5 | — | — | — | — | Pendiente |
-| F6 | — | — | — | — | Pendiente |
-| Variantes (VA-01 a VA-08) | — | — | — | — | Pendiente |
+| F1 | Samsung Galaxy A35 5G, Android 16 | Sara | 2026-11-12 | Registro completo con foto, carro y SOAT en 6 pasos: 13 filas aprobadas; F1-08 no aplica (sin código, D-68) | Aprobado |
+| F2 | Samsung Galaxy A35 5G, Android 16 | Sara | 2026-11-12 | 6 de 6 aprobadas | Aprobado |
+| F3 | Samsung Galaxy A35 5G, Android 16 | Sara | 2026-11-12 | 9 aprobadas; F3-05 no ejecutada (menos de 20 viajes). F3-03 pasó al repetirla con doble toque | Aprobado en lo ejecutado |
+| F4 | Samsung Galaxy A35 5G, Android 16 | Sara | 2026-11-12 | 6 de 6 aprobadas | Aprobado |
+| F5 | Samsung Galaxy A35 5G, Android 16 | Sara | 2026-11-12 | 6 de 6 aprobadas (eliminar carro con la cuenta nueva de TC-01) | Aprobado |
+| F6 | Samsung Galaxy A35 5G, Android 16 | Sara | 2026-11-12 | 5 de 5 aprobadas | Aprobado |
+| Variantes (VA-01 a VA-08) | Samsung Galaxy A35 5G, Android 16 | Sara | 2026-11-12 | 8 de 8 aprobadas; Accessibility Scanner sin avisos | Aprobado |
