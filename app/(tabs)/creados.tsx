@@ -12,7 +12,7 @@ import { Icon } from '@/components/ui/Icon';
 import { LoadingState } from '@/components/ui/LoadingState';
 import { ScreenLayout } from '@/components/ui/ScreenLayout';
 import { StatusBanner } from '@/components/ui/StatusBanner';
-import { selectAllRequests } from '@/features/reservations/selectors';
+import { selectRequestCountsByTrip } from '@/features/reservations/selectors';
 import { fetchRequestsForMyTrips } from '@/features/reservations/thunks';
 import { selectCreatedState, selectCreatedTrips } from '@/features/trips/selectors';
 import { changeTripState, fetchMyCreatedTrips } from '@/features/trips/thunks';
@@ -28,6 +28,11 @@ import type { TripListItem } from '@/types/domain';
 
 const keyExtractor = (item: TripListItem) => item.id;
 
+// Fuera del componente: son la misma función en cada render (callbacks estables).
+const openRequests = () => router.push('/requests');
+const openRate = (tripId: string) => router.push(`/trip/${tripId}/rate`);
+const openChat = (tripId: string) => router.push(`/trip/${tripId}/chat`);
+
 /**
  * Pestaña "Creados" (pantalla 19): lista de viajes publicados por el conductor,
  * con acciones para iniciar, cancelar y ver solicitudes asociadas.
@@ -42,7 +47,7 @@ export default function CreadosTab() {
 
   const trips = useAppSelector(selectCreatedTrips);
   const tripsState = useAppSelector(selectCreatedState);
-  const requests = useAppSelector(selectAllRequests);
+  const requestCounts = useAppSelector(selectRequestCountsByTrip);
 
   const [loadingTripAction, setLoadingTripAction] = useState<{
     tripId: string;
@@ -96,28 +101,28 @@ export default function CreadosTab() {
     }
   }, [cancelModalTripId, dispatch, haptics, announce]);
 
+  // Las props de la tarjeta son números y funciones estables, para que React.memo
+  // de CreatedTripCard no la vuelva a dibujar si su viaje no cambió (E8, rendimiento).
   const renderItem = useCallback<ListRenderItem<TripListItem>>(
     ({ item }) => {
-      const tripRequests = requests.filter((r) => r.viaje_id === item.id);
-      const pendingCount = tripRequests.filter((r) => r.estado === 'pendiente').length;
-      const acceptedCount = tripRequests.filter((r) => r.estado === 'aceptada').length;
+      const counts = requestCounts[item.id];
       const isTripLoading = loadingTripAction?.tripId === item.id ? loadingTripAction.action : null;
 
       return (
         <CreatedTripCard
           trip={item}
-          pendingRequestsCount={pendingCount}
-          acceptedReservationsCount={acceptedCount}
+          pendingRequestsCount={counts?.pendientes ?? 0}
+          acceptedReservationsCount={counts?.aceptadas ?? 0}
           onStartTrip={handleStartTrip}
-          onCancelTrip={(id) => setCancelModalTripId(id)}
-          onViewRequests={() => router.push('/requests')}
-          onRateTrip={(id) => router.push(`/trip/${id}/rate`)}
-          onOpenChat={(id) => router.push(`/trip/${id}/chat`)}
+          onCancelTrip={setCancelModalTripId}
+          onViewRequests={openRequests}
+          onRateTrip={openRate}
+          onOpenChat={openChat}
           loadingAction={isTripLoading}
         />
       );
     },
-    [handleStartTrip, loadingTripAction, requests],
+    [handleStartTrip, loadingTripAction, requestCounts],
   );
 
   const firstLoad = tripsState.status === 'loading' && trips.length === 0;
@@ -136,6 +141,10 @@ export default function CreadosTab() {
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         contentContainerStyle={styles.content}
+        // Mismos valores que la lista de Inicio: pocas tarjetas al abrir y ventana corta.
+        initialNumToRender={6}
+        maxToRenderPerBatch={8}
+        windowSize={7}
         ListHeaderComponent={
           <>
             <ConnectionBanner fromCache={tripsState.fromCache} cachedAt={tripsState.cachedAt} />

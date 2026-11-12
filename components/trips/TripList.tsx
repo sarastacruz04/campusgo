@@ -37,6 +37,11 @@ export function TripList() {
     router.push({ pathname: '/trip/[id]/reserve', params: { id: tripId } });
   }, []);
 
+  // Estable: la condición del thunk ya evita pedir otra página si está cargando o no hay más.
+  const loadMore = useCallback(() => {
+    dispatch(searchTrips({ reset: false }));
+  }, [dispatch]);
+
   const renderItem = useCallback<ListRenderItem<TripListItem>>(
     ({ item }) => {
       const rating = averages[item.conductor_id];
@@ -80,7 +85,7 @@ export function TripList() {
       maxToRenderPerBatch={8}
       windowSize={7}
       onEndReachedThreshold={0.5}
-      onEndReached={() => dispatch(searchTrips({ reset: false }))}
+      onEndReached={loadMore}
       refreshing={refreshing}
       onRefresh={reload}
       ListHeaderComponent={
