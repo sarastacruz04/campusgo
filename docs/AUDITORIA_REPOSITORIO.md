@@ -76,6 +76,10 @@ Con el README de `149bead`, alguien con un proyecto nuevo de Supabase instala y 
 
 Se agregó la sección "Preparar Supabase" con esos tres pasos, una línea con los nombres de las variables y los comandos de comprobación (`typecheck`, `lint`, `test`). El README completo (tabla de variables, arquitectura, capturas y resumen de accesibilidad) es de la Etapa 9.
 
+### 2.2 Segunda prueba con el README final (Etapa 9)
+
+El 2026-11-12, después de unir los PR #13 y #14, se volvió a clonar el repositorio (master en `cfa5f6c`) y se siguió el README completo: `npm install` correcto, `.env` no rastreado, `typecheck` y `lint` sin errores, 259 de 259 pruebas, los 66 pares de contraste cumplen, `npx expo-doctor` 20 de 20 y el bundle de Android se compiló (HTTP 200). Abrir la app en Expo Go desde ese clon no se probó; la app sí se usó en Expo Go durante todas las pruebas de la Etapa 8.
+
 ## 3. Limitaciones de esta auditoría
 
 - Sin gitleaks: la búsqueda cubre los patrones de la tabla 1.2 y los valores reales del `.env`, no todas las reglas de gitleaks.

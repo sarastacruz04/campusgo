@@ -76,7 +76,7 @@ Repositorio
 - [x] README.md: arquitectura del proyecto → §9, E9 (evidencia: README.md (Etapa 9))
 - [x] README.md: guía de ejecución → §9, E9 (evidencia: README.md (Etapa 9))
 - [x] README.md: resumen de las características de accesibilidad → §9, E9 (evidencia: README.md (Etapa 9))
-- [ ] README reproducible desde un clon limpio, comprobado → §13, E8 (evidencia parcial: docs/AUDITORIA_REPOSITORIO.md, sección 2: clon limpio con install, typecheck, lint, 241 pruebas, contraste y bundle de Android correctos; se agregó "Preparar Supabase" al README. Falta abrir la app en Expo Go desde un clon y repetirlo con el README de la Etapa 9)
+- [x] README reproducible desde un clon limpio, comprobado → §13, E8 (evidencia: docs/AUDITORIA_REPOSITORIO.md, sección 2.2: clon limpio de master en cfa5f6c el 2026-11-12 con install, typecheck, lint, 259 de 259 pruebas, contraste 66 de 66, expo-doctor 20 de 20 y bundle de Android compilado; abrir la app en Expo Go desde ese clon no se probó)
 
 ## C. Presentación y demo (10 %)
 
