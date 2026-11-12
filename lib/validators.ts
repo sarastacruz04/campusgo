@@ -132,14 +132,15 @@ export function validateVerificationCode(code: string): string | null {
 }
 
 /**
- * Valida formato de fecha DD/MM/AAAA.
+ * Valida formato de fecha DD/MM/AAAA. Acepta día y mes de un dígito (1/12/2026):
+ * es como la gente escribe la fecha y no cambia su significado (TC-10).
  */
 export function validateDate(dateStr: string): string | null {
   const trimmed = dateStr.trim();
   if (!trimmed) {
     return 'Por favor ingresa la fecha del viaje.';
   }
-  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(trimmed);
+  const match = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(trimmed);
   if (!match) {
     return 'La fecha debe tener el formato DD/MM/AAAA (ej: 15/11/2026).';
   }
@@ -157,14 +158,15 @@ export function validateDate(dateStr: string): string | null {
 }
 
 /**
- * Valida formato de hora HH:MM (24 horas).
+ * Valida formato de hora HH:MM (24 horas). Acepta la hora de un dígito ("6:00"),
+ * que la gente escribe así; los minutos sí van siempre con dos dígitos (TC-10).
  */
 export function validateTime(timeStr: string): string | null {
   const trimmed = timeStr.trim();
   if (!trimmed) {
     return 'Por favor ingresa la hora de salida.';
   }
-  const match = /^(\d{2}):(\d{2})$/.exec(trimmed);
+  const match = /^(\d{1,2}):(\d{2})$/.exec(trimmed);
   if (!match) {
     return 'La hora debe tener el formato HH:MM (ej: 07:30 o 14:15).';
   }

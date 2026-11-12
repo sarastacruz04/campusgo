@@ -208,6 +208,39 @@ describe('Crea tu viaje (pantalla 18)', () => {
     await fireEvent.press(readyBtn);
     expect(router.replace).toHaveBeenCalledWith('/(tabs)/creados');
   });
+
+  it('con una hora mal escrita, el error sale solo bajo la hora y no bajo la fecha (TC-10)', async () => {
+    await renderWithProviders(<CreateTripScreen />, {}, driverStore());
+
+    await fireEvent.changeText(screen.getByLabelText('Punto de partida'), 'Calle 127 # 15-03');
+    await fireEvent.changeText(screen.getByLabelText('Fecha de salida'), '20/12/2028');
+    await fireEvent.changeText(screen.getByLabelText('Hora de salida'), '6');
+    await fireEvent.changeText(screen.getByLabelText('Cupos disponibles'), '3');
+    await fireEvent.changeText(screen.getByLabelText('Valor por cupo (COP)'), '6000');
+    await fireEvent.press(screen.getByRole('button', { name: '¡Listo!' }));
+
+    expect(
+      await screen.findByText('Revisa los campos con error: Hora de salida.'),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getAllByText('La hora debe tener el formato HH:MM (ej: 07:30 o 14:15).'),
+    ).toHaveLength(1);
+    expect(trips.createTrip).not.toHaveBeenCalled();
+  });
+
+  it('acepta la hora de un dígito "6:00" y crea el viaje (TC-10)', async () => {
+    trips.createTrip.mockResolvedValue(testTrip);
+    await renderWithProviders(<CreateTripScreen />, {}, driverStore());
+
+    await fireEvent.changeText(screen.getByLabelText('Punto de partida'), 'Calle 127 # 15-03');
+    await fireEvent.changeText(screen.getByLabelText('Fecha de salida'), '20/12/2028');
+    await fireEvent.changeText(screen.getByLabelText('Hora de salida'), '6:00');
+    await fireEvent.changeText(screen.getByLabelText('Cupos disponibles'), '3');
+    await fireEvent.changeText(screen.getByLabelText('Valor por cupo (COP)'), '6000');
+    await fireEvent.press(screen.getByRole('button', { name: '¡Listo!' }));
+
+    await waitFor(() => expect(trips.createTrip).toHaveBeenCalled());
+  });
 });
 
 describe('Viajes creados (pantalla 19)', () => {
