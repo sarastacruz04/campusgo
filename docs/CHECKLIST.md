@@ -42,7 +42,7 @@ Sección 3: Implementación y auditoría de accesibilidad móvil (consolidación
 
 Sección 4: Pruebas y validación
 - [ ] Casos de prueba ejecutados: caminos felices y errores de red o validación (TC-01 a TC-23) con resultado real → §10, E8
-- [ ] Pruebas automáticas ejecutadas (unitarias, componentes, contraste, RLS) → §10, E8 (evidencia parcial: 241 de 241 pruebas y 66 de 66 pares de contraste en docs/PRUEBAS.md, sección 1; supabase/tests/rls.sql validado solo en un PostgreSQL local: 79 de 82 con tres hallazgos, corregidos en la migración 0009, y luego 92 de 92 (TC-23). Falta aplicar 0009 y ejecutarlo en Supabase)
+- [x] Pruebas automáticas ejecutadas (unitarias, componentes, contraste, RLS) → §10, E8 (evidencia: 246 de 246 pruebas y 66 de 66 pares de contraste en docs/PRUEBAS.md, sección 1; supabase/tests/rls.sql ejecutado por Sara en Supabase el 2026-11-11 con las migraciones 0001 a 0009: 92 de 92 (TC-23, paso 1). Antes, en local, había dado 79 de 82 con tres hallazgos corregidos en la 0009)
 - [ ] Auditoría de accesibilidad en dispositivo (TalkBack y Accessibility Scanner) con resultados reales → §10, E8, docs/AUDITORIA_ACCESIBILIDAD.md
 - [ ] Limitación declarada: iOS, VoiceOver y Accessibility Inspector no se probaron (solo Android) → §7.1, §11
 
@@ -148,7 +148,7 @@ Cada ID queda con archivo exacto, prueba y resultado en docs/MATRIZ_ACCESIBILIDA
 - [x] React Native con Expo SDK 58, que abre en Expo Go → §3, E0 (evidencia: proyecto en SDK 58, bundle de Android compilado con `expo export` y Sara confirmó el 2026-11-06 que la app abre en Expo Go en su teléfono)
 - [x] Navegación con Expo Router → §3, §4 (evidencia: app/_layout.tsx con guardia de sesión, app/index.tsx, app/(auth)/login.tsx, app/(auth)/register/*, app/(tabs)/* y app/profile.tsx)
 - [x] Estado global con Redux Toolkit → §3, E3 (evidencia: store/store.ts con 9 slices en features/ y pruebas en __tests__/features/, 2026-11-07)
-- [ ] Backend y persistencia en Supabase (Auth, Postgres, Realtime, Storage, RLS) → §3, §5, E2, E6, E7 (evidencia parcial: migraciones 0001 a 0008 listas con tests en supabase/tests/rls.sql; Samuel debe aplicar 0008 en su proyecto y confirmar)
+- [ ] Backend y persistencia en Supabase (Auth, Postgres, Realtime, Storage, RLS) → §3, §5, E2, E6, E7 (evidencia parcial: migraciones 0001 a 0009 aplicadas en el proyecto. La 0008 faltaba; la aplicó Sara el 2026-11-11. RLS verificado con supabase/tests/rls.sql: 92 de 92. Falta confirmar en el teléfono los flujos de la Parte 2 de la E8: TC-01 a TC-22)
 - [x] Caché sin conexión con SQLite → §3, E3 (evidencia: db/cache.ts, __tests__/db/cache.test.ts y TC-17 aprobado en el teléfono)
 - [x] Sesión guardada en almacenamiento seguro → §3, E3 (evidencia: services/secureSessionStorage.ts y TC-22 aprobado en el teléfono)
 - [x] Mapas y ubicación sin claves de Google ni servicios de pago → §3, §6 (evidencia: components/maps/MapPicker.tsx, lib/location.ts y TC-07 aprobado en el teléfono)
