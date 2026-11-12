@@ -390,3 +390,44 @@ Flujo del tema (Etapa 1): Ajustes llama a `setPreference('theme', 'dark')` → T
 
 19. **Cambiar el límite del comentario en calificaciones.** En `lib/validators.ts`, cambiar `MAX_RATING_COMMENT_LENGTH` (por ejemplo de `280` a `200`) y verificar en `__tests__/lib/validators.test.ts` y `__tests__/features/ratings-notifications.test.ts`.
 20. **Probar el umbral de un viaje no finalizado en calificaciones.** En `app/trip/[id]/rate.tsx`, cambiar temporalmente la comprobación `context.trip.estado !== 'finalizado'` y confirmar que `__tests__/screens/ratings.test.tsx` detecta la violación a la regla R9.
+
+---
+
+## Pruebas, rendimiento y auditoría (Etapa 8 — Sara)
+
+En la Etapa 8, Sara hizo con Claude Code tanto su parte como la que le tocaba a Samuel (él no pudo por parciales). Samuel no escribió ni revisó nada de esta sección.
+
+### Mapa de archivos nuevos o cambiados
+
+| Archivo | Qué hace | Quién |
+| --- | --- | --- |
+| features/reservations/selectors.ts (`selectRequestCountsByTrip`) | Cuenta una sola vez las solicitudes pendientes y aceptadas de cada viaje, con `createSelector`. | Sara (E8) |
+| app/(tabs)/creados.tsx y curso.tsx | `renderItem` usa los conteos del selector y callbacks estables, para que `React.memo` de CreatedTripCard no se rompa. | Sara (E8) |
+| lib/imagePicker.ts | Reduce las fotos a 1280 px en el lado mayor y JPEG al 70 % con expo-image-manipulator antes de subirlas. | Sara (E8) |
+| __tests__/screens/auth-flows.test.tsx, __tests__/lib/imagePicker.test.ts, __tests__/features/list-performance.test.ts | Flujos de inicio de sesión con error y registro con validación; reducción de fotos; memo y estabilidad de selectores. | Sara (E8) |
+| supabase/tests/rls.sql | Script ejecutable de 82 comprobaciones de RLS con cuentas ficticias dentro de una transacción que se deshace (TC-23). Parte de la lista comentada de Samuel (E2). | Sara (E8) |
+| docs/PRUEBAS.md, docs/AUDITORIA_ACCESIBILIDAD.md, docs/AUDITORIA_REPOSITORIO.md | Protocolos de TC-01 a TC-23, F1 a F6, variantes y Profiler; auditoría de secretos y del README desde un clon limpio. | Sara (E8) |
+
+### Preguntas probables — Pruebas, rendimiento y seguridad
+
+65. **¿Por qué `React.memo` no servía en Creados antes de la Etapa 8?**
+    `React.memo` compara las props por referencia. `renderItem` creaba en cada render una función nueva para cada tarjeta y filtraba las solicitudes por viaje, así que las props siempre eran "distintas" y todas las tarjetas se volvían a dibujar. Ahora las navegaciones son funciones fuera del componente, los demás callbacks usan `useCallback` y `selectRequestCountsByTrip` devuelve el mismo objeto mientras las solicitudes no cambien. list-performance.test comprueba esa referencia.
+66. **¿Por qué reducen las fotos si el selector de imágenes ya tiene `quality`?**
+    `quality` solo comprime: una foto de cámara sigue midiendo unos 4000 px. expo-image-manipulator (incluido en Expo Go) reduce el lado mayor a 1280 px y guarda JPEG al 70 %, sin agrandar las fotos pequeñas. Se sube menos y la tarjeta carga más rápido.
+67. **¿Cómo prueban RLS sin crear usuarios reales?**
+    supabase/tests/rls.sql abre una transacción, crea cuatro cuentas ficticias en `auth.users` (el trigger `handle_new_user` crea sus perfiles) y actúa como cada una con `set_config('request.jwt.claims', …)` más `SET LOCAL ROLE authenticated`: así `auth.uid()` devuelve esa cuenta, igual que con la app. Cada intento queda en una tabla temporal y al final un `RAISE EXCEPTION` muestra el resumen y deshace todo. Se validó en un PostgreSQL local, sin dejar ninguna fila.
+68. **¿Por qué una prueba que "debe fallar" se deshace aunque la base la permita?**
+    Si la base deja hacer algo indebido (por ejemplo, que alguien se ponga una reserva "aceptada"), esa fila cambiaría el resultado de las pruebas siguientes. `pg_temp.probar` ejecuta el intento dentro de un bloque con `EXCEPTION`, que PostgreSQL convierte en un savepoint, y siempre lo revierte. Solo registra si se permitió.
+69. **¿Qué encontró la prueba de RLS?** (validación local, falta en Supabase)
+    Tres fallas en 82 comprobaciones. RP-05: la política de lectura de `profiles` es `USING (TRUE)`, así que cualquier cuenta lee el teléfono, el correo y el ID universitario de las demás, aunque la app solo use nombre y apellido. RU-03: el trigger de la migración 0007 compara `current_user = 'authenticated'`, pero es `SECURITY DEFINER`, y dentro de una función así `current_user` es su dueño, nunca `authenticated`. RR-11: la política de INSERT de `reservas` solo exige `pasajero_id = auth.uid()`, así que alguien puede insertar una reserva "aceptada" sin la RPC y entrar al chat.
+70. **¿Por qué el resumen de RLS sale como error y no como una consulta?**
+    El SQL Editor muestra solo el resultado de la última sentencia, y la última tiene que deshacer todo. Un error dentro de la transacción la revierte por completo y su mensaje siempre se ve. Es el mismo patrón de chat_rls.sql.
+71. **¿Cómo comprobaron que no hay secretos en el repositorio?**
+    `git log --all -p` con expresiones para JWT (`eyJ…`), claves `sb_secret_`/`sb_publishable_`, URL de supabase.co, `service_role` y contraseñas, en los 99 commits de todas las ramas. Además buscaron los valores reales del `.env` con `git log -S`, sin imprimirlos: 0 coincidencias. `.env` está ignorado y `.env.example` va vacío (docs/AUDITORIA_REPOSITORIO.md).
+72. **¿Por qué TC-20 nunca se hace con la conductora principal?**
+    `viajes.vehiculo_id` tiene `ON DELETE CASCADE`: eliminar el carro borra todos sus viajes y, en cascada, sus reservas, mensajes y calificaciones. Se usa la cuenta nueva de TC-01.
+
+### Ejercicios de ajuste en vivo (Etapa 8)
+
+21. **Agregar una comprobación a rls.sql.** Copiar una línea `pg_temp.contar(...)`, por ejemplo "Q lee las notificaciones de P: 0 fila(s)", pegarla en el bloque de Q y explicar por qué el resumen pasa de 82 a 83 líneas.
+22. **Cambiar el tamaño máximo de las fotos.** En lib/imagePicker.ts, cambiar `MAX_IMAGE_SIDE` de 1280 a 1024 y correr `npm test`: imagePicker.test sigue pasando porque compara contra la constante, no contra un número fijo. Explicar el efecto en Storage (archivos más pequeños) y cómo se mediría en R-06.

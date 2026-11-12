@@ -12,7 +12,13 @@ Proyecto del curso Desarrollo de Aplicaciones Móviles (profesor Santiago Rivade
 
 - Node.js 22.13 o superior (en la línea 22) o 24.3 o superior.
 - Expo Go para SDK 58 en un teléfono Android. Si Google Play todavía ofrece una versión anterior, instálalo desde https://expo.dev/go o deja que Expo CLI lo instale (tecla `a` con el teléfono conectado por USB o con un emulador).
-- Cuenta de Supabase (desde la Etapa 2).
+- Cuenta de Supabase (plan gratuito) con un proyecto creado.
+
+## Preparar Supabase (una sola vez por proyecto)
+
+1. En el SQL Editor del proyecto, ejecuta en orden los archivos de `supabase/migrations` (de `0001` a `0008`, uno por uno) y luego `supabase/seed.sql` (sectores).
+2. Authentication > Email Templates > "Confirm signup": el cuerpo debe incluir `{{ .Token }}`, porque la app verifica el correo con el código de 6 dígitos.
+3. Project Settings > API: copia la **Project URL** y la **anon public key** (o publishable key). Nunca uses la `service_role` key en la app.
 
 ## Instalar y correr
 
@@ -20,11 +26,15 @@ Proyecto del curso Desarrollo de Aplicaciones Móviles (profesor Santiago Rivade
 git clone https://github.com/sarastacruz04/campusgo.git
 cd campusgo
 npm install
-cp .env.example .env   # luego llena los valores (Etapa 2)
+cp .env.example .env   # pega la URL y la anon key del paso 3 de arriba
 npx expo start
 ```
 
+En `.env` van `EXPO_PUBLIC_SUPABASE_URL` y `EXPO_PUBLIC_SUPABASE_ANON_KEY`. El archivo está ignorado por Git.
+
 Escanea el código QR con Expo Go (el teléfono y el computador deben estar en la misma red; si no, usa `npx expo start --tunnel`).
+
+Para comprobar el proyecto: `npm run typecheck`, `npm run lint` y `npm test`.
 
 ## Scripts
 

@@ -42,7 +42,7 @@ Sección 3: Implementación y auditoría de accesibilidad móvil (consolidación
 
 Sección 4: Pruebas y validación
 - [ ] Casos de prueba ejecutados: caminos felices y errores de red o validación (TC-01 a TC-23) con resultado real → §10, E8
-- [ ] Pruebas automáticas ejecutadas (unitarias, componentes, contraste, RLS) → §10, E8
+- [ ] Pruebas automáticas ejecutadas (unitarias, componentes, contraste, RLS) → §10, E8 (evidencia parcial: 241 de 241 pruebas y 66 de 66 pares de contraste en docs/PRUEBAS.md, sección 1; supabase/tests/rls.sql validado solo en un PostgreSQL local con 79 de 82 y tres hallazgos (TC-23). Falta ejecutarlo en Supabase)
 - [ ] Auditoría de accesibilidad en dispositivo (TalkBack y Accessibility Scanner) con resultados reales → §10, E8, docs/AUDITORIA_ACCESIBILIDAD.md
 - [ ] Limitación declarada: iOS, VoiceOver y Accessibility Inspector no se probaron (solo Android) → §7.1, §11
 
@@ -68,7 +68,7 @@ Aplicación
 Repositorio
 - [x] Estructura de carpetas limpia → §4, §9, E0 (evidencia: carpetas de la sección 4 en la raíz, sin src ni código de ejemplo; `npx expo-doctor` 20/20 el 2026-11-06)
 - [ ] Código tipado (TypeScript estricto) y modularizado → §3, §4, §14
-- [ ] Cero credenciales o secretos en el historial → §9, §13, §14, E8
+- [x] Cero credenciales o secretos en el historial → §9, §13, §14, E8 (evidencia: docs/AUDITORIA_REPOSITORIO.md, sección 1: patrones y valores reales del .env buscados en los 99 commits de todas las ramas, 0 coincidencias, el 2026-11-11 por Sara; sin gitleaks, declarado como limitación)
 - [ ] Commits de ambos integrantes, continuos y equitativos a lo largo del corte → §0.2, §9, §13
 - [ ] Pull requests revisados por la otra persona → §9
 - [ ] README.md completo: instalación → §9, E9
@@ -76,7 +76,7 @@ Repositorio
 - [ ] README.md: arquitectura del proyecto → §9, E9
 - [ ] README.md: guía de ejecución → §9, E9
 - [ ] README.md: resumen de las características de accesibilidad → §9, E9
-- [ ] README reproducible desde un clon limpio, comprobado → §13, E8
+- [ ] README reproducible desde un clon limpio, comprobado → §13, E8 (evidencia parcial: docs/AUDITORIA_REPOSITORIO.md, sección 2: clon limpio con install, typecheck, lint, 241 pruebas, contraste y bundle de Android correctos; se agregó "Preparar Supabase" al README. Falta abrir la app en Expo Go desde un clon y repetirlo con el README de la Etapa 9)
 
 ## C. Presentación y demo (10 %)
 
