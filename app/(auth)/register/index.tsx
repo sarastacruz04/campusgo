@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -17,6 +17,7 @@ import { ScreenTitle } from '@/components/ui/ScreenTitle';
 import { StepIndicator } from '@/components/ui/StepIndicator';
 import { TextField } from '@/components/ui/TextField';
 import { selectAuthError, selectAuthStatus } from '@/features/auth/selectors';
+import { authErrorCleared } from '@/features/auth/slice';
 import { signUp } from '@/features/auth/thunks';
 import { useAnnounce } from '@/hooks/useAnnounce';
 import {
@@ -37,6 +38,12 @@ export default function RegisterStep1Screen() {
   const loading = authStatus === 'loading';
   const authError = useAppSelector(selectAuthError);
   const announce = useAnnounce();
+
+  // El error de Auth vive en el store y lo comparten las pantallas de acceso: sin
+  // esto, un inicio de sesión fallido se mostraba aquí al entrar (TC-05).
+  useEffect(() => {
+    dispatch(authErrorCleared());
+  }, [dispatch]);
 
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');

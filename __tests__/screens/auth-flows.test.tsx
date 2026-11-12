@@ -5,6 +5,7 @@ import { AccessibilityInfo } from 'react-native';
 import LoginScreen from '@/app/(auth)/login';
 import RegisterStep1Screen from '@/app/(auth)/register/index';
 import * as authService from '@/services/authService';
+import { makeStore } from '@/store/store';
 import { renderWithProviders } from '@/test-utils/render';
 
 // Flujos de pantalla de la sección 10 (E8): inicio de sesión con error y registro
@@ -152,5 +153,21 @@ describe('Registro, paso 1 con validación (pantalla 3, TC-01, TC-02 y TC-05)', 
     await fireEvent.press(screen.getByRole('button', { name: 'Registrarse' }));
     expect(await screen.findByText('Ya existe una cuenta con este correo.')).toBeTruthy();
     expect(router.push).not.toHaveBeenCalled();
+  });
+
+  it('no muestra el error de un inicio de sesión fallido anterior al entrar (TC-05)', async () => {
+    // Mismo store en las dos pantallas, como en la app.
+    const store = makeStore();
+    auth.signIn.mockRejectedValueOnce({ code: 'invalid_credentials', message: 'x' });
+    await renderWithProviders(<LoginScreen />, {}, store);
+    await fireEvent.changeText(screen.getByLabelText('Correo electrónico'), 'p@unisabana.edu.co');
+    await fireEvent.changeText(screen.getByLabelText('Contraseña'), 'malo00');
+    await fireEvent.press(screen.getByRole('button', { name: 'Iniciar Sesión' }));
+    expect(await screen.findByText('El correo o la contraseña no son correctos.')).toBeTruthy();
+    screen.unmount();
+
+    await renderWithProviders(<RegisterStep1Screen />, {}, store);
+    expect(screen.queryByText('El correo o la contraseña no son correctos.')).toBeNull();
+    expect(store.getState().auth.error).toBeNull();
   });
 });
