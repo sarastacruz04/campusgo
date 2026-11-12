@@ -62,7 +62,7 @@ Se clonó el repositorio en una carpeta temporal fuera del proyecto (`~/clon-lim
 | Lint | `npm run lint` | Sin errores (código de salida 0) |
 | Pruebas | `npm test` | 34 archivos, 241 de 241 pruebas aprobadas en 33 s |
 | Contraste | `npm run a11y:contrast` | Los 66 pares cumplen WCAG AA |
-| Doctor | `npx expo-doctor` | La primera corrida en el clon dijo "1 check failed". Solo se guardaron las dos últimas líneas de esa salida, así que no se sabe cuál chequeo falló. Al repetirlo en el mismo clon, sin cambiar nada: 20 de 20. En el repositorio también: 20 de 20 |
+| Doctor | `npx expo-doctor` | La primera corrida en el clon dijo "1 check failed". Solo se guardaron las dos últimas líneas de esa salida, así que no se sabe cuál chequeo falló. Al repetirlo en el mismo clon, sin cambiar nada: 20 de 20. En el repositorio también: 20 de 20. Pasó otra vez en la rama e8-auditoria: "2 checks failed" justo después de seis corridas seguidas de jest, y luego 20 de 20 en cuatro corridas seguidas, guardando la salida completa. La falla no se pudo reproducir y no se sabe qué chequeo fue; algunos chequeos de expo-doctor consultan servicios de Expo por red |
 | Correr | `npx expo start` (sin interacción, puerto 8099) | El servidor respondió `packager-status:running` y el bundle de Android se generó: HTTP 200, 9.620.704 bytes. No se abrió en un teléfono desde el clon |
 
 ### 2.1 Qué faltaba en el README y se corrigió
