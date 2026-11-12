@@ -115,7 +115,7 @@ En cada flujo, TalkBack activo y tema Claro, salvo que la fila diga otra cosa. A
 | --- | --- | --- | --- | --- | --- |
 | F3-01 | Recorrer el encabezado de Inicio | "Perfil, botón"; el logo pequeño no recibe foco; selector "Modo pasajero, botón de opción, marcado" y "Modo conductor, botón de opción" | S-02, S-03, S-09 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
 | F3-02 | Filtro "Sectores" | Se anuncia con su nombre y el sector elegido | S-01, S-05, V-03 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
-| F3-03 | "Cantidad de puestos disponibles" y lupa | Teclado numérico; la lupa dice "Buscar viajes, botón"; el resultado de la búsqueda se anuncia | S-02, S-07, T-02 | Primera pasada (2026-11-12, ejecutó Sara): al llegar al campo, TalkBack dice "tocar dos veces para activar" y el teclado no se abre. Con TalkBack el teclado se abre con el doble toque; el campo tiene keyboardType="number-pad" (components/trips/TripFilters.tsx:57-58). Falta repetir con doble toque | Pendiente (repetir con doble toque) |
+| F3-03 | "Cantidad de puestos disponibles" y lupa | Teclado numérico; la lupa dice "Buscar viajes, botón"; el resultado de la búsqueda se anuncia | S-02, S-07, T-02 | Primera pasada: TalkBack dice "tocar dos veces para activar" y el teclado no se abre solo (con TalkBack se abre con el doble toque). Repetido el 2026-11-12 por Sara con doble toque: se abre el teclado numérico; pasa | Aprobado |
 | F3-04 | Pasar por una tarjeta de viaje | Un solo foco con todo: sector, conductor, salida, valor, cupos y calificación (por ejemplo "Colina. Conductor …. Sale 7:00 a. m. Valor 5.000 pesos. 2 cupos."). El "+" no es un foco aparte | S-04 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
 | F3-05 | Bajar al final de la lista | Se anuncia "Cargando más viajes…" | S-07, T-05 | No se pudo observar (2026-11-12, Sara): la búsqueda carga de 20 en 20 (TRIPS_PAGE_SIZE) y había menos de 20 viajes abiertos, así que no hay segunda página que cargar. Se comprueba en R-01 con los 200 viajes temporales | No ejecutado (menos de 20 viajes) |
 | F3-06 | Doble toque en la tarjeta | Foco en "Reserva tu viaje, encabezado" | T-03 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
@@ -128,12 +128,12 @@ En cada flujo, TalkBack activo y tema Claro, salvo que la fila diga otra cosa. A
 
 | # | Acción | Qué debe anunciar TalkBack o qué debe pasar | IDs | Resultado real | Estado |
 | --- | --- | --- | --- | --- | --- |
-| F4-01 | Inicio de conductor | "Crea un viaje" y "Crear un nuevo viaje, botón"; "Viajes Pendientes" con "Ver solicitudes pendientes, botón" | S-01, S-02 | — | Pendiente |
-| F4-02 | Abrir "Crea tu viaje" | Foco en "Crea tu viaje, encabezado"; el mapa se anuncia con su nombre | T-03, S-09 | — | Pendiente |
-| F4-03 | "¡Listo!" con campos vacíos | Se anuncia "Revisa los campos con error: …" con los nombres de los campos; cada campo muestra su error en texto | S-05, S-07, V-05 | — | Pendiente |
-| F4-04 | Fecha y hora | Los selectores se abren y se anuncian; la fecha queda escrita en texto | S-05, T-07 | — | Pendiente |
-| F4-05 | Completar y "¡Listo!" | Vibra; diálogo "Viaje realizado con éxito" con foco en el título | S-08, T-04 | — | Pendiente |
-| F4-06 | Pestaña Creados > tarjeta del viaje | Botones con el sector en la etiqueta ("Iniciar viaje a …", "Cancelar viaje a …", "Ver solicitudes del viaje a …") | S-02, S-04 | — | Pendiente |
+| F4-01 | Inicio de conductor | "Crea un viaje" y "Crear un nuevo viaje, botón"; "Viajes Pendientes" con "Ver solicitudes pendientes, botón" | S-01, S-02 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F4-02 | Abrir "Crea tu viaje" | Foco en "Crea tu viaje, encabezado"; el mapa se anuncia con su nombre | T-03, S-09 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F4-03 | "¡Listo!" con campos vacíos | Se anuncia "Revisa los campos con error: …" con los nombres de los campos; cada campo muestra su error en texto | S-05, S-07, V-05 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F4-04 | Fecha y hora | Los selectores se abren y se anuncian; la fecha queda escrita en texto | S-05, T-07 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F4-05 | Completar y "¡Listo!" | Vibra; diálogo "Viaje realizado con éxito" con foco en el título | S-08, T-04 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F4-06 | Pestaña Creados > tarjeta del viaje | Botones con el sector en la etiqueta ("Iniciar viaje a …", "Cancelar viaje a …", "Ver solicitudes del viaje a …") | S-02, S-04 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
 
 #### F5. Cancelar reserva y eliminar carro (P para la reserva; N de TC-01 para el carro)
 
