@@ -36,6 +36,27 @@ describe('toAppError', () => {
     expect(toAppError({ name: 'AuthRetryableFetchError', message: 'Failed to fetch' })).toEqual(
       ERRORS.sinConexion,
     );
+    expect(toAppError({ name: 'AuthRetryableFetchError', message: 'x', status: 0 })).toEqual(
+      ERRORS.sinConexion,
+    );
+  });
+
+  it('no confunde un error 5xx del servidor con la falta de red (TC-01)', () => {
+    // auth-js usa AuthRetryableFetchError también para 500 a 504.
+    expect(
+      toAppError({
+        name: 'AuthRetryableFetchError',
+        message: 'Context deadline exceeded',
+        status: 504,
+      }),
+    ).toEqual(ERRORS.servidorNoDisponible);
+    expect(
+      toAppError({
+        name: 'AuthRetryableFetchError',
+        message: 'Error sending confirmation email',
+        status: 500,
+      }),
+    ).toEqual(ERRORS.correoNoEnviado);
   });
 
   it('reconoce el rechazo de un correo de otro dominio en la base (R1)', () => {

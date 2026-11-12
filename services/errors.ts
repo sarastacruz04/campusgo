@@ -69,6 +69,17 @@ export const ERRORS = {
     code: 'correo_no_institucional',
     message: 'Solo se aceptan correos @unisabana.edu.co.',
   },
+  // El servidor respondió con un error 5xx: hay red, pero Supabase no pudo atender.
+  servidorNoDisponible: {
+    code: 'servidor_no_disponible',
+    message: 'El servidor no está disponible en este momento. Intenta de nuevo en unos minutos.',
+  },
+  // Registro o reenvío del código: Supabase no alcanzó a enviar el correo (SMTP).
+  correoNoEnviado: {
+    code: 'correo_no_enviado',
+    message:
+      'No pudimos enviar el código de verificación a tu correo. Intenta de nuevo en unos minutos.',
+  },
   sinSesion: { code: 'sin_sesion', message: 'Tu sesión terminó. Inicia sesión de nuevo.' },
   // 500 = MAX_MESSAGE_LENGTH de chatService (no se importa para no crear un ciclo).
   mensajeInvalido: {
@@ -118,9 +129,21 @@ export function toAppError(error: unknown): AppError {
   const { code, message, name } = error as ErrorLike;
   const text = typeof message === 'string' ? message : '';
 
-  // Sin red: fetch de React Native lanza "Network request failed"; Supabase Auth lo
-  // envuelve en AuthRetryableFetchError.
-  if (/network request failed|failed to fetch/i.test(text) || name === 'AuthRetryableFetchError') {
+  // Sin red: fetch de React Native lanza "Network request failed".
+  if (/network request failed|failed to fetch/i.test(text)) {
+    return ERRORS.sinConexion;
+  }
+
+  // Supabase Auth usa AuthRetryableFetchError para dos cosas distintas: sin red
+  // (status 0) y respuestas 5xx del servidor (por ejemplo, un 504 cuando el SMTP
+  // tarda demasiado al enviar el código). Antes ambas decían "Sin conexión".
+  if (name === 'AuthRetryableFetchError') {
+    const { status } = error as ErrorLike;
+    if (typeof status === 'number' && status >= 500) {
+      return /confirmation email/i.test(text)
+        ? ERRORS.correoNoEnviado
+        : ERRORS.servidorNoDisponible;
+    }
     return ERRORS.sinConexion;
   }
 
