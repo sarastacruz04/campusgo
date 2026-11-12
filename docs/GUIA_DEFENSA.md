@@ -442,5 +442,21 @@ En la Etapa 8, Sara hizo con Claude Code tanto su parte como la que le tocaba a 
 ### Ejercicios de ajuste en vivo (Etapa 8)
 
 21. **Agregar una comprobación a rls.sql.** Copiar una línea `pg_temp.contar(...)`, por ejemplo "Q lee las notificaciones de P: 0 fila(s)", pegarla en el bloque de Q y explicar por qué el resumen pasa de 92 a 93 líneas.
-23. **Dejar ver una columna más de los perfiles.** En una migración nueva, `GRANT SELECT (created_at) ON public.profiles TO authenticated;` y explicar por qué `telefono` nunca debería ir en esa lista (RP-05 en rls.sql fallaría).
 22. **Cambiar el tamaño máximo de las fotos.** En lib/imagePicker.ts, cambiar `MAX_IMAGE_SIDE` de 1280 a 1024 y correr `npm test`: imagePicker.test sigue pasando porque compara contra la constante, no contra un número fijo. Explicar el efecto en Storage (archivos más pequeños) y cómo se mediría en R-06.
+23. **Dejar ver una columna más de los perfiles.** En una migración nueva, `GRANT SELECT (created_at) ON public.profiles TO authenticated;` y explicar por qué `telefono` nunca debería ir en esa lista (RP-05 en rls.sql fallaría).
+
+### Preguntas probables — Pruebas en el teléfono (Etapa 8, parte 2)
+
+77. **¿Por qué el registro ya no pide el código del correo?** (D-68)
+    Supabase solo deja poner el código en la plantilla con un SMTP propio. Con el SMTP de Gmail, Auth respondió 504 "Context deadline exceeded" y 429, y ningún correo llegó (TC-01). Apagamos "Confirm email": la cuenta queda activa al registrarse y el dominio @unisabana.edu.co se sigue exigiendo en la app y en la base. La pantalla "Verifica tu correo" sigue en el código: si `signUp` vuelve sin sesión, la app la muestra. El riesgo declarado es que no se comprueba que la persona sea dueña del correo; el trabajo futuro es un SMTP con dominio propio o el SSO de la universidad.
+78. **¿Por qué la app decía "Sin conexión" con el wifi activo?**
+    Supabase Auth usa el mismo error, `AuthRetryableFetchError`, para la falta de red (status 0) y para respuestas 5xx del servidor. `toAppError` lo traducía siempre a "Sin conexión". Ahora mira el status: con 5xx dice que el servidor no está disponible y, en el registro, que no se pudo enviar el código (services/errors.ts y authService.ts, con pruebas).
+79. **¿Por qué el Registro mostraba un error que no era suyo?** (TC-05)
+    El error de Auth vive en el store, que comparten las pantallas de acceso. Un inicio de sesión fallido dejaba su mensaje y el Registro lo mostraba al entrar. Ahora el Registro despacha `authErrorCleared` en un `useEffect` al montarse; la prueba usa el mismo store en las dos pantallas.
+80. **¿Cómo validaron la accesibilidad en el teléfono?**
+    Con TalkBack se recorrieron los seis flujos F1 a F6 (45 filas aprobadas) y las variantes de tema oscuro, alto contraste, reducir animaciones, fuente al máximo y vibración apagada; Accessibility Scanner no dio avisos. Todo está en docs/AUDITORIA_ACCESIBILIDAD.md y trazado por ID en docs/MATRIZ_ACCESIBILIDAD.md. iOS (VoiceOver) no se probó porque el equipo no tiene iPhone.
+
+### Ejercicios de ajuste en vivo (Etapa 8, parte 2)
+
+24. **Volver a pedir el código del correo.** Explicar que basta con encender "Confirm email" en Supabase: `authService.signUp` devuelve null, `auth.emailCodeRequired` queda en true, la app va a "Verifica tu correo" y "Paso x de y" pasa a 7 (lib/registerSteps.ts). Mostrarlo en __tests__/screens/auth-flows.test.tsx.
+25. **Aceptar la hora sin los dos puntos.** En lib/validators.ts, `validateTime` usa `/^(\d{1,2}):(\d{2})$/`; proponer otro patrón y ver qué pruebas de validators.test fallan.

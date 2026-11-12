@@ -5,6 +5,7 @@ import { AccessibilityInfo } from 'react-native';
 import LoginScreen from '@/app/(auth)/login';
 import RegisterStep1Screen from '@/app/(auth)/register/index';
 import * as authService from '@/services/authService';
+import { makeStore } from '@/store/store';
 import { renderWithProviders } from '@/test-utils/render';
 
 // Flujos de pantalla de la sección 10 (E8): inicio de sesión con error y registro
@@ -80,7 +81,8 @@ describe('Registro, paso 1 con validación (pantalla 3, TC-01, TC-02 y TC-05)', 
 
   it('sin datos muestra un error en texto bajo cada campo y no registra', async () => {
     await renderWithProviders(<RegisterStep1Screen />);
-    expect(screen.getByText('Paso 1 de 7')).toBeTruthy();
+    // Sin confirmación de correo (D-68) el registro tiene 6 pasos.
+    expect(screen.getByText('Paso 1 de 6')).toBeTruthy();
     await fireEvent.press(screen.getByRole('button', { name: 'Registrarse' }));
     expect(screen.getByText('Por favor completa el campo Nombre.')).toBeTruthy();
     expect(screen.getByText('Por favor completa el campo Apellido.')).toBeTruthy();
@@ -115,8 +117,8 @@ describe('Registro, paso 1 con validación (pantalla 3, TC-01, TC-02 y TC-05)', 
     expect(auth.signUp).not.toHaveBeenCalled();
   });
 
-  it('con datos válidos registra y lleva a "Verifica tu correo" con el correo', async () => {
-    auth.signUp.mockResolvedValueOnce(undefined);
+  it('con la confirmación de correo activa lleva a "Verifica tu correo" con el correo', async () => {
+    auth.signUp.mockResolvedValueOnce(null);
     await renderWithProviders(<RegisterStep1Screen />);
     await fill({
       Nombre: 'Sara',
@@ -138,6 +140,27 @@ describe('Registro, paso 1 con validación (pantalla 3, TC-01, TC-02 y TC-05)', 
     );
   });
 
+  it('sin confirmación de correo (D-68) la cuenta queda activa y sigue a la foto', async () => {
+    auth.signUp.mockResolvedValueOnce({ userId: 'u-1', email: 'sara.prueba@unisabana.edu.co' });
+    const store = makeStore();
+    await renderWithProviders(<RegisterStep1Screen />, {}, store);
+    expect(screen.getByText('Paso 1 de 6')).toBeTruthy();
+    await fill({
+      Nombre: 'Sara',
+      Apellido: 'Santacruz',
+      'ID de la Universidad': '0000123456',
+      'Correo Electrónico': 'sara.prueba@unisabana.edu.co',
+      Teléfono: '3001234567',
+      Contraseña: 'secreta1',
+    });
+    await fireEvent.press(screen.getByRole('button', { name: 'Registrarse' }));
+    await waitFor(() => expect(router.push).toHaveBeenCalledWith('/(auth)/register/photo'));
+    expect(router.push).not.toHaveBeenCalledWith(
+      expect.objectContaining({ pathname: '/(auth)/register/verify' }),
+    );
+    expect(store.getState().auth.userId).toBe('u-1');
+  });
+
   it('si el correo ya existe muestra el mensaje del servidor y no avanza', async () => {
     auth.signUp.mockRejectedValueOnce({ code: 'user_already_exists', message: 'User exists' });
     await renderWithProviders(<RegisterStep1Screen />);
@@ -152,5 +175,21 @@ describe('Registro, paso 1 con validación (pantalla 3, TC-01, TC-02 y TC-05)', 
     await fireEvent.press(screen.getByRole('button', { name: 'Registrarse' }));
     expect(await screen.findByText('Ya existe una cuenta con este correo.')).toBeTruthy();
     expect(router.push).not.toHaveBeenCalled();
+  });
+
+  it('no muestra el error de un inicio de sesión fallido anterior al entrar (TC-05)', async () => {
+    // Mismo store en las dos pantallas, como en la app.
+    const store = makeStore();
+    auth.signIn.mockRejectedValueOnce({ code: 'invalid_credentials', message: 'x' });
+    await renderWithProviders(<LoginScreen />, {}, store);
+    await fireEvent.changeText(screen.getByLabelText('Correo electrónico'), 'p@unisabana.edu.co');
+    await fireEvent.changeText(screen.getByLabelText('Contraseña'), 'malo00');
+    await fireEvent.press(screen.getByRole('button', { name: 'Iniciar Sesión' }));
+    expect(await screen.findByText('El correo o la contraseña no son correctos.')).toBeTruthy();
+    screen.unmount();
+
+    await renderWithProviders(<RegisterStep1Screen />, {}, store);
+    expect(screen.queryByText('El correo o la contraseña no son correctos.')).toBeNull();
+    expect(store.getState().auth.error).toBeNull();
   });
 });

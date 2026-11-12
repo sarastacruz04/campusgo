@@ -12,6 +12,7 @@ import { TextField } from '@/components/ui/TextField';
 import { selectAuthError, selectAuthStatus } from '@/features/auth/selectors';
 import { resendSignUpCode, verifySignUpCode } from '@/features/auth/thunks';
 import { fetchMyProfile } from '@/features/profile/thunks';
+import { useRegisterStep } from '@/hooks/useRegisterStep';
 import { useAnnounce } from '@/hooks/useAnnounce';
 import { validateVerificationCode } from '@/lib/validators';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -20,6 +21,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 
 export default function VerifyCodeScreen() {
   const { colors } = useTheme();
+  const step = useRegisterStep('codigo');
   const dispatch = useAppDispatch();
   const authStatus = useAppSelector(selectAuthStatus);
   const loading = authStatus === 'loading';
@@ -86,7 +88,7 @@ export default function VerifyCodeScreen() {
             <Logo size="large" />
           </View>
 
-          <StepIndicator current={2} total={7} />
+          <StepIndicator current={step.current} total={step.total} />
 
           <ScreenTitle>Verifica tu correo</ScreenTitle>
 

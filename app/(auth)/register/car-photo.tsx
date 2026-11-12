@@ -9,6 +9,7 @@ import { Logo } from '@/components/ui/Logo';
 import { PhotoPicker } from '@/components/ui/PhotoPicker';
 import { ScreenTitle } from '@/components/ui/ScreenTitle';
 import { StepIndicator } from '@/components/ui/StepIndicator';
+import { useRegisterStep } from '@/hooks/useRegisterStep';
 import { useAnnounce } from '@/hooks/useAnnounce';
 import { type PickedImage, pickImageFromLibrary } from '@/lib/imagePicker';
 import { spacing } from '@/theme/layout';
@@ -16,6 +17,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 
 export default function RegisterCarPhotoScreen() {
   const { colors } = useTheme();
+  const step = useRegisterStep('fotoCarro');
   const announce = useAnnounce();
 
   const params = useLocalSearchParams<{
@@ -54,7 +56,7 @@ export default function RegisterCarPhotoScreen() {
           <Logo size="large" />
         </View>
 
-        <StepIndicator current={6} total={7} />
+        <StepIndicator current={step.current} total={step.total} />
 
         <ScreenTitle>¡Agrega una foto de tu carro!</ScreenTitle>
 

@@ -87,7 +87,10 @@ export default function CreateTripScreen() {
     const errDate = validateDate(fecha) ?? undefined;
     const errTime = validateTime(hora) ?? undefined;
     const departure = validateFutureDeparture(fecha, hora);
-    const errDeparture = departure.error ?? undefined;
+    // "La salida debe ser en el futuro" solo tiene sentido con fecha y hora válidas.
+    // Si no, validateFutureDeparture devuelve el error de formato de la hora y saldría
+    // también bajo la fecha (TC-10).
+    const errDeparture = !errDate && !errTime ? (departure.error ?? undefined) : undefined;
     const errCupos = validateTripCupos(cupos, maxVehicleCapacity) ?? undefined;
     const errValor = validatePrice(valorPorCupo) ?? undefined;
 

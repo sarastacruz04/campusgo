@@ -23,6 +23,8 @@ export type AuthState = {
   error: AppError | null;
   /** Correo que espera el código de verificación después de registrarse. */
   pendingVerificationEmail: string | null;
+  /** true si Supabase exige confirmar el correo con el código (D-68). */
+  emailCodeRequired: boolean;
 };
 
 export const initialAuthState: AuthState = {
@@ -32,6 +34,7 @@ export const initialAuthState: AuthState = {
   status: 'idle',
   error: null,
   pendingVerificationEmail: null,
+  emailCodeRequired: false,
 };
 
 function setUser(state: AuthState, user: SessionUser | null) {
@@ -68,7 +71,11 @@ const authSlice = createSlice({
         state.initialized = true;
       })
       .addCase(signUp.fulfilled, (state, action) => {
-        state.pendingVerificationEmail = action.payload;
+        const { email, user } = action.payload;
+        // Sin sesión, Supabase espera el código; con sesión, la cuenta ya está activa.
+        state.emailCodeRequired = user === null;
+        state.pendingVerificationEmail = user === null ? email : null;
+        if (user) setUser(state, user);
       })
       .addCase(verifySignUpCode.fulfilled, (state, action) => {
         setUser(state, action.payload);

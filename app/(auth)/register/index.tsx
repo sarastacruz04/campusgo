@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -17,7 +17,10 @@ import { ScreenTitle } from '@/components/ui/ScreenTitle';
 import { StepIndicator } from '@/components/ui/StepIndicator';
 import { TextField } from '@/components/ui/TextField';
 import { selectAuthError, selectAuthStatus } from '@/features/auth/selectors';
+import { authErrorCleared } from '@/features/auth/slice';
 import { signUp } from '@/features/auth/thunks';
+import { fetchMyProfile } from '@/features/profile/thunks';
+import { useRegisterStep } from '@/hooks/useRegisterStep';
 import { useAnnounce } from '@/hooks/useAnnounce';
 import {
   validateEmail,
@@ -37,6 +40,13 @@ export default function RegisterStep1Screen() {
   const loading = authStatus === 'loading';
   const authError = useAppSelector(selectAuthError);
   const announce = useAnnounce();
+  const step = useRegisterStep('datos');
+
+  // El error de Auth vive en el store y lo comparten las pantallas de acceso: sin
+  // esto, un inicio de sesión fallido se mostraba aquí al entrar (TC-05).
+  useEffect(() => {
+    dispatch(authErrorCleared());
+  }, [dispatch]);
 
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
@@ -86,6 +96,14 @@ export default function RegisterStep1Screen() {
     );
 
     if (signUp.fulfilled.match(result)) {
+      if (result.payload.user) {
+        // Confirmación de correo apagada en Supabase (D-68): la cuenta ya tiene
+        // sesión, así que se carga el perfil y se sigue con la foto.
+        await dispatch(fetchMyProfile());
+        announce('Cuenta creada. Ahora agrega tu foto.');
+        router.push('/(auth)/register/photo');
+        return;
+      }
       announce('Registro iniciado. Ingresa el código enviado a tu correo.');
       router.push({
         pathname: '/(auth)/register/verify',
@@ -111,7 +129,7 @@ export default function RegisterStep1Screen() {
             <Logo size="large" />
           </View>
 
-          <StepIndicator current={1} total={7} />
+          <StepIndicator current={step.current} total={step.total} />
 
           <ScreenTitle>Registro</ScreenTitle>
 

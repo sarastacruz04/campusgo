@@ -52,8 +52,8 @@ describe('auth: thunks y reducers', () => {
     expect(store.getState().auth.userId).toBeNull();
   });
 
-  it('signUp deja pendiente el correo que debe verificarse', async () => {
-    service.signUp.mockResolvedValue(undefined);
+  it('signUp con la confirmación activa (sin sesión) deja pendiente el correo', async () => {
+    service.signUp.mockResolvedValue(null);
     const store = makeStore();
     await store.dispatch(
       signUp({
@@ -66,6 +66,26 @@ describe('auth: thunks y reducers', () => {
       }),
     );
     expect(store.getState().auth.pendingVerificationEmail).toBe('nueva@unisabana.edu.co');
+    expect(store.getState().auth.emailCodeRequired).toBe(true);
+    expect(store.getState().auth.userId).toBeNull();
+  });
+
+  it('signUp sin confirmación de correo (D-68) deja la sesión iniciada', async () => {
+    service.signUp.mockResolvedValue({ userId: 'u-nueva', email: 'nueva@unisabana.edu.co' });
+    const store = makeStore();
+    await store.dispatch(
+      signUp({
+        email: 'nueva@unisabana.edu.co',
+        password: '123456',
+        nombre: 'Ana',
+        apellido: 'Gómez',
+        idUniversidad: '0000000002',
+        telefono: '3000000001',
+      }),
+    );
+    expect(store.getState().auth.userId).toBe('u-nueva');
+    expect(store.getState().auth.pendingVerificationEmail).toBeNull();
+    expect(store.getState().auth.emailCodeRequired).toBe(false);
   });
 
   it('restoreSession marca la app como inicializada con o sin sesión (TC-22)', async () => {
@@ -90,6 +110,7 @@ describe('auth: thunks y reducers', () => {
         status: 'idle',
         error: null,
         pendingVerificationEmail: null,
+        emailCodeRequired: false,
       },
       profile: { ...initialProfileState, data: makeProfile({ id: 'u1' }) },
     });

@@ -12,6 +12,7 @@ import { StepIndicator } from '@/components/ui/StepIndicator';
 import { selectUserId } from '@/features/auth/selectors';
 import { changeMode, updateMyProfile } from '@/features/profile/thunks';
 import { registerVehicle } from '@/features/vehicle/thunks';
+import { useRegisterStep } from '@/hooks/useRegisterStep';
 import { useAnnounce } from '@/hooks/useAnnounce';
 import { type PickedImage, pickImageFromLibrary } from '@/lib/imagePicker';
 import { uploadImage } from '@/services/storageService';
@@ -21,6 +22,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 
 export default function RegisterSoatScreen() {
   const { colors } = useTheme();
+  const step = useRegisterStep('soat');
   const dispatch = useAppDispatch();
   const userId = useAppSelector(selectUserId);
   const announce = useAnnounce();
@@ -125,7 +127,7 @@ export default function RegisterSoatScreen() {
           <Logo size="large" />
         </View>
 
-        <StepIndicator current={7} total={7} />
+        <StepIndicator current={step.current} total={step.total} />
 
         <ScreenTitle>¡Agrega una foto de tu SOAT vigente!</ScreenTitle>
 

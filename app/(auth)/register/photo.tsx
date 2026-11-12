@@ -11,6 +11,7 @@ import { ScreenTitle } from '@/components/ui/ScreenTitle';
 import { StepIndicator } from '@/components/ui/StepIndicator';
 import { selectUserId } from '@/features/auth/selectors';
 import { updateMyProfile } from '@/features/profile/thunks';
+import { useRegisterStep } from '@/hooks/useRegisterStep';
 import { useAnnounce } from '@/hooks/useAnnounce';
 import { type PickedImage, pickImageFromLibrary } from '@/lib/imagePicker';
 import { uploadImage } from '@/services/storageService';
@@ -20,6 +21,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 
 export default function RegisterPhotoScreen() {
   const { colors } = useTheme();
+  const step = useRegisterStep('foto');
   const dispatch = useAppDispatch();
   const userId = useAppSelector(selectUserId);
   const announce = useAnnounce();
@@ -71,7 +73,7 @@ export default function RegisterPhotoScreen() {
           <Logo size="large" />
         </View>
 
-        <StepIndicator current={3} total={7} />
+        <StepIndicator current={step.current} total={step.total} />
 
         <ScreenTitle>Agrega tu foto</ScreenTitle>
 

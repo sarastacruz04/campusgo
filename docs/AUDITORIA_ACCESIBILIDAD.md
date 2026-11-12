@@ -83,91 +83,91 @@ En cada flujo, TalkBack activo y tema Claro, salvo que la fila diga otra cosa. A
 
 | # | Acción | Qué debe anunciar TalkBack o qué debe pasar | IDs | Resultado real | Estado |
 | --- | --- | --- | --- | --- | --- |
-| F1-01 | Abrir la app sin sesión | "Te damos la bienvenida, encabezado". El logo se lee una sola vez: "CampusGo, by Sara y Samuel" | S-01, S-09, T-03 | — | Pendiente |
-| F1-02 | Pasar a "Registrarse" y activarlo | "Registrarse, botón"; al entrar, foco en "Registro, encabezado" y luego "Paso 1 de 7" | S-01, T-08 | — | Pendiente |
-| F1-03 | Recorrer el formulario | Cada campo dice su etiqueta visible ("Nombre", "Apellido", "ID de la Universidad", "Correo Electrónico", "Teléfono", "Contraseña") y su pista de formato ("10 dígitos"); el orden es el visual | S-05, V-02, T-03 | — | Pendiente |
-| F1-04 | Escribir 3 dígitos en el ID y pasar al siguiente campo | Se anuncia "ID de la Universidad: Debe tener exactamente 10 dígitos." sin mover el foco; se ven ícono, texto y borde de 2 px | S-05, S-07, V-05 | — | Pendiente |
-| F1-05 | En el teclado, tecla "Siguiente" | El foco pasa al campo siguiente | T-03 | — | Pendiente |
-| F1-06 | "Mostrar contraseña" | Cambia a "Ocultar contraseña" y el texto se ve; la contraseña se puede pegar | T-08 | — | Pendiente |
-| F1-07 | Registrarse con datos válidos | Botón con indicador y "Enviando"; luego "Verifica tu correo, encabezado", "Paso 2 de 7" | T-05, T-03, T-08 | — | Pendiente |
-| F1-08 | Código de 6 dígitos | El campo "Código de verificación" acepta pegar el código; "Reenviar código en N s" se anuncia como no disponible mientras cuenta | S-05, S-06, T-08 | — | Pendiente |
-| F1-09 | "Agrega tu foto" | "Foto de perfil, botón" con su pista; después de elegirla: "Foto de perfil, foto cargada"; "Paso 3 de 7" | S-09, S-02, V-04 | — | Pendiente |
-| F1-10 | "Anterior" y volver | Lo escrito y la foto se conservan | T-08 | — | Pendiente |
-| F1-11 | "¿Quieres Registrar un Carro?" | Grupo "¿Deseas registrar un carro ahora?" con dos "botón de opción" ("No, quiero ser pasajero" y "Sí, quiero registrar mi carro"); solo la elegida dice "marcado" | S-03, S-06, V-05 | — | Pendiente |
-| F1-12 | "¡Registra tu carro!" con placa "AB12" | Error de la placa anunciado sin mover el foco; "Cupos vehículo" abre teclado numérico | S-05, S-07 | — | Pendiente |
-| F1-13 | Fotos del carro y del SOAT | "Foto del vehículo" y "Foto del SOAT vigente" con estado "foto cargada"; "Paso 6 de 7" y "Paso 7 de 7" | S-09, T-08, V-04 | — | Pendiente |
-| F1-14 | "¡Listo!" | Vibra, se anuncia el resultado y entra a Inicio con el foco en "¡Buen viaje …!, encabezado" | T-04, T-03 | — | Pendiente |
+| F1-01 | Abrir la app sin sesión | "Te damos la bienvenida, encabezado". El logo se lee una sola vez: "CampusGo, by Sara y Samuel" | S-01, S-09, T-03 | Pasa (2026-11-12, ejecutó Sara con TalkBack, registro de una cuenta nueva en 6 pasos, D-68) | Aprobado |
+| F1-02 | Pasar a "Registrarse" y activarlo | "Registrarse, botón"; al entrar, foco en "Registro, encabezado" y luego "Paso 1 de 6" | S-01, T-08 | Pasa (2026-11-12, ejecutó Sara con TalkBack, registro de una cuenta nueva en 6 pasos, D-68) | Aprobado |
+| F1-03 | Recorrer el formulario | Cada campo dice su etiqueta visible ("Nombre", "Apellido", "ID de la Universidad", "Correo Electrónico", "Teléfono", "Contraseña") y su pista de formato ("10 dígitos"); el orden es el visual | S-05, V-02, T-03 | Pasa (2026-11-12, ejecutó Sara con TalkBack, registro de una cuenta nueva en 6 pasos, D-68) | Aprobado |
+| F1-04 | Escribir 3 dígitos en el ID y pasar al siguiente campo | Se anuncia "ID de la Universidad: Debe tener exactamente 10 dígitos." sin mover el foco; se ven ícono, texto y borde de 2 px | S-05, S-07, V-05 | Pasa (2026-11-12, ejecutó Sara con TalkBack, registro de una cuenta nueva en 6 pasos, D-68) | Aprobado |
+| F1-05 | En el teclado, tecla "Siguiente" | El foco pasa al campo siguiente | T-03 | Pasa (2026-11-12, ejecutó Sara con TalkBack, registro de una cuenta nueva en 6 pasos, D-68) | Aprobado |
+| F1-06 | "Mostrar contraseña" | Cambia a "Ocultar contraseña" y el texto se ve; la contraseña se puede pegar | T-08 | Pasa (2026-11-12, ejecutó Sara con TalkBack, registro de una cuenta nueva en 6 pasos, D-68) | Aprobado |
+| F1-07 | Registrarse con datos válidos | Botón con indicador y "Enviando"; luego se anuncia "Cuenta creada. Ahora agrega tu foto." y el foco va a "Agrega tu foto, encabezado", "Paso 2 de 6" (sin código de correo, D-68) | T-05, T-03, T-08 | Pasa (2026-11-12, ejecutó Sara con TalkBack, registro de una cuenta nueva en 6 pasos, D-68) | Aprobado |
+| F1-08 | Código de 6 dígitos | El campo "Código de verificación" acepta pegar el código; "Reenviar código en N s" se anuncia como no disponible mientras cuenta | S-05, S-06, T-08 | No aplica mientras "Confirm email" esté apagado (D-68): la pantalla del código no aparece. Cubierto por pruebas unitarias (auth-flows.test) | No aplica |
+| F1-09 | "Agrega tu foto" | "Foto de perfil, botón" con su pista; después de elegirla: "Foto de perfil, foto cargada"; "Paso 2 de 6" | S-09, S-02, V-04 | Pasa (2026-11-12, ejecutó Sara con TalkBack, registro de una cuenta nueva en 6 pasos, D-68) | Aprobado |
+| F1-10 | "Anterior" y volver | Lo escrito y la foto se conservan | T-08 | Pasa (2026-11-12, ejecutó Sara con TalkBack, registro de una cuenta nueva en 6 pasos, D-68) | Aprobado |
+| F1-11 | "¿Quieres Registrar un Carro?" | Grupo "¿Deseas registrar un carro ahora?" con dos "botón de opción" ("No, quiero ser pasajero" y "Sí, quiero registrar mi carro"); solo la elegida dice "marcado" | S-03, S-06, V-05 | Pasa (2026-11-12, ejecutó Sara con TalkBack, registro de una cuenta nueva en 6 pasos, D-68) | Aprobado |
+| F1-12 | "¡Registra tu carro!" con placa "AB12" | Error de la placa anunciado sin mover el foco; "Cupos vehículo" abre teclado numérico | S-05, S-07 | Pasa (2026-11-12, ejecutó Sara con TalkBack, registro de una cuenta nueva en 6 pasos, D-68) | Aprobado |
+| F1-13 | Fotos del carro y del SOAT | "Foto del vehículo" y "Foto del SOAT vigente" con estado "foto cargada"; "Paso 5 de 6" y "Paso 6 de 6" | S-09, T-08, V-04 | Pasa (2026-11-12, ejecutó Sara con TalkBack, registro de una cuenta nueva en 6 pasos, D-68) | Aprobado |
+| F1-14 | "¡Listo!" | Vibra, se anuncia el resultado y entra a Inicio con el foco en "¡Buen viaje …!, encabezado" | T-04, T-03 | Pasa (2026-11-12, ejecutó Sara con TalkBack, registro de una cuenta nueva en 6 pasos, D-68) | Aprobado |
 
 #### F2. Inicio de sesión con error (cuenta P)
 
 | # | Acción | Qué debe anunciar TalkBack o qué debe pasar | IDs | Resultado real | Estado |
 | --- | --- | --- | --- | --- | --- |
-| F2-01 | Bienvenida > "Iniciar Sesión" | Foco en "Inicio Sesión, encabezado" | S-01, T-03 | — | Pendiente |
-| F2-02 | Correo con autocompletar | El teclado ofrece el correo guardado | T-08, S-05 | — | Pendiente |
-| F2-03 | Contraseña incorrecta | Pantalla de error: se anuncia "ERROR" y el mensaje "El correo o la contraseña no son correctos."; vibración de error | S-07, T-04, V-05 | — | Pendiente |
-| F2-04 | "Volver" | Regresa al formulario con lo escrito | T-03 | — | Pendiente |
-| F2-05 | Modo avión y "Iniciar Sesión" | Se anuncia "Sin conexión a internet. Revisa tu red e intenta de nuevo." | S-07, T-05 | — | Pendiente |
-| F2-06 | Datos correctos | Indicador "Enviando", botón deshabilitado y luego Inicio | T-05, S-06 | — | Pendiente |
+| F2-01 | Bienvenida > "Iniciar Sesión" | Foco en "Inicio Sesión, encabezado" | S-01, T-03 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F2-02 | Correo con autocompletar | El teclado ofrece el correo guardado | T-08, S-05 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F2-03 | Contraseña incorrecta | Pantalla de error: se anuncia "ERROR" y el mensaje "El correo o la contraseña no son correctos."; vibración de error | S-07, T-04, V-05 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F2-04 | "Volver" | Regresa al formulario con lo escrito | T-03 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F2-05 | Modo avión y "Iniciar Sesión" | Se anuncia "Sin conexión a internet. Revisa tu red e intenta de nuevo." | S-07, T-05 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F2-06 | Datos correctos | Indicador "Enviando", botón deshabilitado y luego Inicio | T-05, S-06 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
 
 #### F3. Buscar y reservar (cuenta P sobre un viaje de C)
 
 | # | Acción | Qué debe anunciar TalkBack o qué debe pasar | IDs | Resultado real | Estado |
 | --- | --- | --- | --- | --- | --- |
-| F3-01 | Recorrer el encabezado de Inicio | "Perfil, botón"; el logo pequeño no recibe foco; selector "Modo pasajero, botón de opción, marcado" y "Modo conductor, botón de opción" | S-02, S-03, S-09 | — | Pendiente |
-| F3-02 | Filtro "Sectores" | Se anuncia con su nombre y el sector elegido | S-01, S-05, V-03 | — | Pendiente |
-| F3-03 | "Cantidad de puestos disponibles" y lupa | Teclado numérico; la lupa dice "Buscar viajes, botón"; el resultado de la búsqueda se anuncia | S-02, S-07, T-02 | — | Pendiente |
-| F3-04 | Pasar por una tarjeta de viaje | Un solo foco con todo: sector, conductor, salida, valor, cupos y calificación (por ejemplo "Colina. Conductor …. Sale 7:00 a. m. Valor 5.000 pesos. 2 cupos."). El "+" no es un foco aparte | S-04 | — | Pendiente |
-| F3-05 | Bajar al final de la lista | Se anuncia "Cargando más viajes…" | S-07, T-05 | — | Pendiente |
-| F3-06 | Doble toque en la tarjeta | Foco en "Reserva tu viaje, encabezado" | T-03 | — | Pendiente |
-| F3-07 | Pasar por el mapa | "Mapa para elegir el punto de recogida. También puedes escribir la dirección en el campo de abajo." | S-09, T-07 | — | Pendiente |
-| F3-08 | Escribir solo la dirección, sin tocar el mapa | "Describe la dirección del punto de recogida" acepta el texto y "Reservar" funciona | T-07, S-05 | — | Pendiente |
-| F3-09 | "Reservar" | Vibra; diálogo "Reserva realizada con éxito" con foco en el título y el texto "Tu reserva quedó pendiente de la confirmación del conductor."; "¡Listo!" | S-08, T-04 | — | Pendiente |
-| F3-10 | Pestaña Reservas | "Reservas, pestaña, seleccionado"; pestañas internas "Pendientes", "Aceptados", "Rechazados" con la activa seleccionada | S-06, V-05 | — | Pendiente |
+| F3-01 | Recorrer el encabezado de Inicio | "Perfil, botón"; el logo pequeño no recibe foco; selector "Modo pasajero, botón de opción, marcado" y "Modo conductor, botón de opción" | S-02, S-03, S-09 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F3-02 | Filtro "Sectores" | Se anuncia con su nombre y el sector elegido | S-01, S-05, V-03 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F3-03 | "Cantidad de puestos disponibles" y lupa | Teclado numérico; la lupa dice "Buscar viajes, botón"; el resultado de la búsqueda se anuncia | S-02, S-07, T-02 | Primera pasada: TalkBack dice "tocar dos veces para activar" y el teclado no se abre solo (con TalkBack se abre con el doble toque). Repetido el 2026-11-12 por Sara con doble toque: se abre el teclado numérico; pasa | Aprobado |
+| F3-04 | Pasar por una tarjeta de viaje | Un solo foco con todo: sector, conductor, salida, valor, cupos y calificación (por ejemplo "Colina. Conductor …. Sale 7:00 a. m. Valor 5.000 pesos. 2 cupos."). El "+" no es un foco aparte | S-04 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F3-05 | Bajar al final de la lista | Se anuncia "Cargando más viajes…" | S-07, T-05 | No se pudo observar (2026-11-12, Sara): la búsqueda carga de 20 en 20 (TRIPS_PAGE_SIZE) y había menos de 20 viajes abiertos, así que no hay segunda página que cargar. Se comprueba en R-01 con los 200 viajes temporales. La carga de más páginas sí se verificó a la vista en V5-04 (Etapa 5, 200 viajes); el anuncio de TalkBack "Cargando más viajes…" no se escuchó en dispositivo (lo cubre la prueba unitaria de LoadingState en feedback.test) | No ejecutado (menos de 20 viajes) |
+| F3-06 | Doble toque en la tarjeta | Foco en "Reserva tu viaje, encabezado" | T-03 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F3-07 | Pasar por el mapa | "Mapa para elegir el punto de recogida. También puedes escribir la dirección en el campo de abajo." | S-09, T-07 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F3-08 | Escribir solo la dirección, sin tocar el mapa | "Describe la dirección del punto de recogida" acepta el texto y "Reservar" funciona | T-07, S-05 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F3-09 | "Reservar" | Vibra; diálogo "Reserva realizada con éxito" con foco en el título y el texto "Tu reserva quedó pendiente de la confirmación del conductor."; "¡Listo!" | S-08, T-04 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F3-10 | Pestaña Reservas | "Reservas, pestaña, seleccionado"; pestañas internas "Pendientes", "Aceptados", "Rechazados" con la activa seleccionada | S-06, V-05 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
 
 #### F4. Crear viaje con error y éxito (cuenta C)
 
 | # | Acción | Qué debe anunciar TalkBack o qué debe pasar | IDs | Resultado real | Estado |
 | --- | --- | --- | --- | --- | --- |
-| F4-01 | Inicio de conductor | "Crea un viaje" y "Crear un nuevo viaje, botón"; "Viajes Pendientes" con "Ver solicitudes pendientes, botón" | S-01, S-02 | — | Pendiente |
-| F4-02 | Abrir "Crea tu viaje" | Foco en "Crea tu viaje, encabezado"; el mapa se anuncia con su nombre | T-03, S-09 | — | Pendiente |
-| F4-03 | "¡Listo!" con campos vacíos | Se anuncia "Revisa los campos con error: …" con los nombres de los campos; cada campo muestra su error en texto | S-05, S-07, V-05 | — | Pendiente |
-| F4-04 | Fecha y hora | Los selectores se abren y se anuncian; la fecha queda escrita en texto | S-05, T-07 | — | Pendiente |
-| F4-05 | Completar y "¡Listo!" | Vibra; diálogo "Viaje realizado con éxito" con foco en el título | S-08, T-04 | — | Pendiente |
-| F4-06 | Pestaña Creados > tarjeta del viaje | Botones con el sector en la etiqueta ("Iniciar viaje a …", "Cancelar viaje a …", "Ver solicitudes del viaje a …") | S-02, S-04 | — | Pendiente |
+| F4-01 | Inicio de conductor | "Crea un viaje" y "Crear un nuevo viaje, botón"; "Viajes Pendientes" con "Ver solicitudes pendientes, botón" | S-01, S-02 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F4-02 | Abrir "Crea tu viaje" | Foco en "Crea tu viaje, encabezado"; el mapa se anuncia con su nombre | T-03, S-09 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F4-03 | "¡Listo!" con campos vacíos | Se anuncia "Revisa los campos con error: …" con los nombres de los campos; cada campo muestra su error en texto | S-05, S-07, V-05 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F4-04 | Fecha y hora | Los selectores se abren y se anuncian; la fecha queda escrita en texto | S-05, T-07 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F4-05 | Completar y "¡Listo!" | Vibra; diálogo "Viaje realizado con éxito" con foco en el título | S-08, T-04 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F4-06 | Pestaña Creados > tarjeta del viaje | Botones con el sector en la etiqueta ("Iniciar viaje a …", "Cancelar viaje a …", "Ver solicitudes del viaje a …") | S-02, S-04 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
 
 #### F5. Cancelar reserva y eliminar carro (P para la reserva; N de TC-01 para el carro)
 
 | # | Acción | Qué debe anunciar TalkBack o qué debe pasar | IDs | Resultado real | Estado |
 | --- | --- | --- | --- | --- | --- |
-| F5-01 | Reservas > Pendientes > papelera | "Cancelar reserva de …, botón" (foco aparte de la tarjeta) | S-02, S-04, T-02 | — | Pendiente |
-| F5-02 | Abrir el diálogo | Foco en "¿Está seguro que desea cancelar esta reserva?, encabezado"; el siguiente elemento es "No, volver" | S-08, T-06 | — | Pendiente |
-| F5-03 | Gesto Atrás | Cierra el diálogo y el foco vuelve a la papelera | S-08 | — | Pendiente |
-| F5-04 | "Sí, cancelar reserva" | Vibra y se anuncia el resultado; la tarjeta sale de Pendientes | T-04, S-07 | — | Pendiente |
-| F5-05 | Cuenta N: Perfil > "Carro" > papelera | "Eliminar este carro, botón"; diálogo "¿Está seguro de que desea eliminar este carro?" con "Esta acción no se puede deshacer." y foco inicial en la opción segura | T-06, S-08 | — | Pendiente |
-| F5-06 | "Sí, eliminar carro" | Se anuncia el resultado y aparece "Registrar Carro" | S-07, T-04 | — | Pendiente |
+| F5-01 | Reservas > Pendientes > papelera | "Cancelar reserva de …, botón" (foco aparte de la tarjeta) | S-02, S-04, T-02 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F5-02 | Abrir el diálogo | Foco en "¿Está seguro que desea cancelar esta reserva?, encabezado"; el siguiente elemento es "No, volver" | S-08, T-06 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F5-03 | Gesto Atrás | Cierra el diálogo y el foco vuelve a la papelera | S-08 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F5-04 | "Sí, cancelar reserva" | Vibra y se anuncia el resultado; la tarjeta sale de Pendientes | T-04, S-07 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F5-05 | Cuenta N: Perfil > "Carro" > papelera | "Eliminar este carro, botón"; diálogo "¿Está seguro de que desea eliminar este carro?" con "Esta acción no se puede deshacer." y foco inicial en la opción segura | T-06, S-08 | Pasa (2026-11-12, ejecutó Sara con TalkBack, con la cuenta nueva de TC-01 y un carro registrado para la prueba) | Aprobado |
+| F5-06 | "Sí, eliminar carro" | Se anuncia el resultado y aparece "Registrar Carro" | S-07, T-04 | Pasa (2026-11-12, ejecutó Sara con TalkBack, misma cuenta) | Aprobado |
 
 #### F6. Cambio de modo y cierre de sesión (cuentas P y C)
 
 | # | Acción | Qué debe anunciar TalkBack o qué debe pasar | IDs | Resultado real | Estado |
 | --- | --- | --- | --- | --- | --- |
-| F6-01 | P (sin carro): "Modo conductor" | Diálogo "No tienes un carro registrado" con "Debes registrar un carro para cambiar a modo conductor."; foco en el título | S-03, S-08, T-06 | — | Pendiente |
-| F6-02 | C: "Modo conductor" | Diálogo "¿Está seguro que desea cambiar a modo Conductor?" con "Esta acción afectará la manera en que usa la app."; "Sí, cambiar a Conductor" | T-06, S-08 | — | Pendiente |
-| F6-03 | Después del cambio | El selector anuncia "Modo conductor, …, marcado"; la barra inferior muestra "Creados" en vez de "Reservas" | S-03, S-06 | — | Pendiente |
-| F6-04 | Perfil > "Cerrar Sesión" | Ícono de power con texto; diálogo "¿Deseas cerrar sesión?" con foco en la opción segura | S-02, T-06 | — | Pendiente |
-| F6-05 | "Sí, cerrar sesión" | Vuelve a la bienvenida con el foco en el título | T-03 | — | Pendiente |
+| F6-01 | P (sin carro): "Modo conductor" | Diálogo "No tienes un carro registrado" con "Debes registrar un carro para cambiar a modo conductor."; foco en el título | S-03, S-08, T-06 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F6-02 | C: "Modo conductor" | Diálogo "¿Está seguro que desea cambiar a modo Conductor?" con "Esta acción afectará la manera en que usa la app."; "Sí, cambiar a Conductor" | T-06, S-08 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F6-03 | Después del cambio | El selector anuncia "Modo conductor, …, marcado"; la barra inferior muestra "Creados" en vez de "Reservas" | S-03, S-06 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F6-04 | Perfil > "Cerrar Sesión" | Ícono de power con texto; diálogo "¿Deseas cerrar sesión?" con foco en la opción segura | S-02, T-06 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F6-05 | "Sí, cerrar sesión" | Vuelve a la bienvenida con el foco en el título | T-03 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
 
 ### 3. Variantes: tema oscuro, alto contraste, reducir animaciones y fuente al máximo
 
 | # | Qué hacer | Qué debe pasar | IDs | Resultado real | Estado |
 | --- | --- | --- | --- | --- | --- |
-| VA-01 | Tema Oscuro (P-7) y recorrer Inicio, una tarjeta, Reserva tu viaje y Perfil | Todo legible; los campos y bordes se distinguen; el mapa y las fotos no quedan tapados | V-08, V-01 | — | Pendiente |
-| VA-02 | Tema Alto contraste en las mismas pantallas | Texto negro sobre blanco y bordes de 2 px en botones, campos y tarjetas | V-08, V-01 | — | Pendiente |
-| VA-03 | Tema "Sistema" con el modo oscuro del teléfono activo; cerrar y abrir la app | La app pasa sola a oscuro y la preferencia se conserva | V-08 | — | Pendiente |
-| VA-04 | "Eliminar animaciones" (P-8); abrir un diálogo y cambiar de pantalla | Los diálogos aparecen sin animación o con un fundido corto | V-09 | — | Pendiente |
-| VA-05 | Fuente y pantalla al máximo (P-5) y "Tamaño del texto: Extra grande" en Ajustes de accesibilidad; recorrer F3 | Ningún texto se corta ni se solapa; tildes, Ñ, ¿ y ¡ completas; la tarjeta crece en alto | V-06, V-07 | — | Pendiente |
-| VA-06 | Ajustes de accesibilidad > "Vibración" apagada y repetir F3-09 | No vibra, pero el mensaje se ve y se anuncia | T-04, V-08 | — | Pendiente |
-| VA-07 | Accessibility Scanner (P-4) en Inicio, Reserva tu viaje, Reservas, Crea tu viaje, Creados, Perfil, Notificaciones, Chat y Calificar viaje | Sin avisos de tamaño táctil, contraste ni etiquetas. Anotar cada aviso con su pantalla | T-01, T-02, V-01, V-04, S-02 | — | Pendiente |
-| VA-08 | Con "Mostrar toques" (P-6), tocar la lupa, la papelera y el lápiz por el borde | El toque cuenta aunque caiga un poco fuera del ícono (hitSlop) | T-02 | — | Pendiente |
+| VA-01 | Tema Oscuro (P-7) y recorrer Inicio, una tarjeta, Reserva tu viaje y Perfil | Todo legible; los campos y bordes se distinguen; el mapa y las fotos no quedan tapados | V-08, V-01 | Pasa (2026-11-12, ejecutó Sara) | Aprobado |
+| VA-02 | Tema Alto contraste en las mismas pantallas | Texto negro sobre blanco y bordes de 2 px en botones, campos y tarjetas | V-08, V-01 | Pasa (2026-11-12, ejecutó Sara) | Aprobado |
+| VA-03 | Tema "Sistema" con el modo oscuro del teléfono activo; cerrar y abrir la app | La app pasa sola a oscuro y la preferencia se conserva | V-08 | Pasa (2026-11-12, ejecutó Sara) | Aprobado |
+| VA-04 | "Eliminar animaciones" (P-8); abrir un diálogo y cambiar de pantalla | Los diálogos aparecen sin animación o con un fundido corto | V-09 | Pasa (2026-11-12, ejecutó Sara) | Aprobado |
+| VA-05 | Fuente y pantalla al máximo (P-5) y "Tamaño del texto: Extra grande" en Ajustes de accesibilidad; recorrer F3 | Ningún texto se corta ni se solapa; tildes, Ñ, ¿ y ¡ completas; la tarjeta crece en alto | V-06, V-07 | Pasa (2026-11-12, ejecutó Sara) | Aprobado |
+| VA-06 | Ajustes de accesibilidad > "Vibración" apagada y repetir F3-09 | No vibra, pero el mensaje se ve y se anuncia | T-04, V-08 | Pasa (2026-11-12, ejecutó Sara) | Aprobado |
+| VA-07 | Accessibility Scanner (P-4) en Inicio, Reserva tu viaje, Reservas, Crea tu viaje, Creados, Perfil, Notificaciones, Chat y Calificar viaje | Sin avisos de tamaño táctil, contraste ni etiquetas. Anotar cada aviso con su pantalla | T-01, T-02, V-01, V-04, S-02 | Pasa: Accessibility Scanner sin avisos en las pantallas indicadas (2026-11-12, ejecutó Sara) | Aprobado |
+| VA-08 | Con "Mostrar toques" (P-6), tocar la lupa, la papelera y el lápiz por el borde | El toque cuenta aunque caiga un poco fuera del ícono (hitSlop) | T-02 | Pasa (2026-11-12, ejecutó Sara) | Aprobado |
 
 ### 4. Resultado por compromiso de la matriz
 
@@ -175,41 +175,41 @@ Resume en dispositivo cada uno de los 26 IDs de docs/MATRIZ_ACCESIBILIDAD.md. Se
 
 | ID | Compromiso | Dónde se comprueba | Ejecutó | Fecha | Resultado real | Estado |
 | --- | --- | --- | --- | --- | --- | --- |
-| S-01 | Roles correctos (botón, encabezado, pestaña, opción) | F1-01, F1-02, F2-01, F3-02, F4-01 | — | — | — | Pendiente |
-| S-02 | Etiquetas en íconos sin texto; decorativos ocultos | F1-09, F3-01, F3-03, F4-01, F5-01, F6-04, VA-07 | — | — | — | Pendiente |
-| S-03 | Selector de modo como grupo de opciones con estado | F1-11, F3-01, F6-01, F6-03 | — | — | — | Pendiente |
-| S-04 | TripCard como un solo foco | F3-04, F4-06, F5-01 | — | — | — | Pendiente |
-| S-05 | Formularios con etiqueta, pista y error en texto | F1-03, F1-04, F1-08, F1-12, F3-08, F4-03, F4-04 | — | — | — | Pendiente |
-| S-06 | Estados selected, disabled, busy y checked | F1-08, F1-11, F2-06, F3-10, F6-03 | — | — | — | Pendiente |
-| S-07 | Mensajes dinámicos anunciados sin mover el foco | F1-04, F1-12, F2-03, F2-05, F3-03, F3-05, F4-03, F5-04, F5-06 | — | — | — | Pendiente |
-| S-08 | Diálogos modales: foco al título, Atrás y retorno del foco | F3-09, F4-05, F5-02, F5-03, F5-05, F6-01, F6-02 | — | — | — | Pendiente |
-| S-09 | Alternativas textuales: mapa, fotos y logo | F1-01, F1-09, F1-13, F3-01, F3-07, F4-02 | — | — | — | Pendiente |
-| V-01 | Contraste verificado en los tres temas | VA-01, VA-02, VA-07 | — | — | — | Pendiente |
-| V-02 | Placeholder legible y etiqueta visible persistente | F1-03 | — | — | — | Pendiente |
-| V-03 | Controles sobre azul legibles | F3-02 | — | — | — | Pendiente |
-| V-04 | Íconos de estado y de subida con 3:1 | F1-09, F1-13, VA-07 | — | — | — | Pendiente |
-| V-05 | No depender solo del color | F1-04, F1-11, F2-03, F3-10, F4-03 | — | — | — | Pendiente |
-| V-06 | Escalado de fuente al máximo sin cortes | VA-05 | — | — | — | Pendiente |
-| V-07 | lineHeight suficiente (tildes, Ñ, ¿, ¡) | VA-05 | — | — | — | Pendiente |
-| V-08 | Temas, tamaño de texto y vibración con persistencia | VA-01, VA-02, VA-03, VA-06 | — | — | — | Pendiente |
-| V-09 | Respeto a reducir movimiento | VA-04 | — | — | — | Pendiente |
-| T-01 | Áreas táctiles de 48 dp | VA-07 | — | — | — | Pendiente |
-| T-02 | hitSlop y separación de 8 dp | F3-03, F5-01, VA-07, VA-08 | — | — | — | Pendiente |
-| T-03 | Orden de foco, foco al título y "Siguiente" del teclado | F1-01, F1-02, F1-03, F1-05, F1-07, F1-14, F2-01, F2-04, F3-06, F4-02, F6-05 | — | — | — | Pendiente |
-| T-04 | Háptica + mensaje + anuncio; interruptor de vibración | F1-14, F2-03, F3-09, F4-05, F5-04, F5-06, VA-06 | — | — | — | Pendiente |
-| T-05 | Carga y errores de red con texto, busy y "Reintentar" | F1-07, F2-05, F2-06, F3-05 | — | — | — | Pendiente |
-| T-06 | Confirmaciones destructivas con foco en la opción segura | F5-02, F5-05, F6-01, F6-02, F6-04 | — | — | — | Pendiente |
-| T-07 | Sin gestos complejos; dirección escrita como alternativa al mapa | F3-07, F3-08, F4-04 | — | — | — | Pendiente |
-| T-08 | Registro por pasos, "Anterior" conserva, autocompletar y pegar | F1-02, F1-06, F1-07, F1-08, F1-10, F2-02 | — | — | — | Pendiente |
+| S-01 | Roles correctos (botón, encabezado, pestaña, opción) | F1-01, F1-02, F2-01, F3-02, F4-01 | Sara | 2026-11-12 | Aprobadas F1-01, F1-02, F2-01, F3-02, F4-01 | Aprobado |
+| S-02 | Etiquetas en íconos sin texto; decorativos ocultos | F1-09, F3-01, F3-03, F4-01, F5-01, F6-04, VA-07 | Sara | 2026-11-12 | Aprobadas F1-09, F3-01, F3-03, F4-01, F5-01, F6-04, VA-07 | Aprobado |
+| S-03 | Selector de modo como grupo de opciones con estado | F1-11, F3-01, F6-01, F6-03 | Sara | 2026-11-12 | Aprobadas F1-11, F3-01, F6-01, F6-03 | Aprobado |
+| S-04 | TripCard como un solo foco | F3-04, F4-06, F5-01 | Sara | 2026-11-12 | Aprobadas F3-04, F4-06, F5-01 | Aprobado |
+| S-05 | Formularios con etiqueta, pista y error en texto | F1-03, F1-04, F1-08, F1-12, F3-08, F4-03, F4-04 | Sara | 2026-11-12 | Aprobadas F1-03, F1-04, F1-12, F3-08, F4-03, F4-04; no aplica F1-08 (sin código de correo, D-68) | Aprobado |
+| S-06 | Estados selected, disabled, busy y checked | F1-08, F1-11, F2-06, F3-10, F6-03 | Sara | 2026-11-12 | Aprobadas F1-11, F2-06, F3-10, F6-03; no aplica F1-08 (sin código de correo, D-68) | Aprobado |
+| S-07 | Mensajes dinámicos anunciados sin mover el foco | F1-04, F1-12, F2-03, F2-05, F3-03, F3-05, F4-03, F5-04, F5-06 | Sara | 2026-11-12 | Aprobadas F1-04, F1-12, F2-03, F2-05, F3-03, F4-03, F5-04, F5-06; no ejecutada F3-05 (menos de 20 viajes; ver R-01) | Aprobado en lo ejecutado |
+| S-08 | Diálogos modales: foco al título, Atrás y retorno del foco | F3-09, F4-05, F5-02, F5-03, F5-05, F6-01, F6-02 | Sara | 2026-11-12 | Aprobadas F3-09, F4-05, F5-02, F5-03, F5-05, F6-01, F6-02 | Aprobado |
+| S-09 | Alternativas textuales: mapa, fotos y logo | F1-01, F1-09, F1-13, F3-01, F3-07, F4-02 | Sara | 2026-11-12 | Aprobadas F1-01, F1-09, F1-13, F3-01, F3-07, F4-02 | Aprobado |
+| V-01 | Contraste verificado en los tres temas | VA-01, VA-02, VA-07 | Sara | 2026-11-12 | Aprobadas VA-01, VA-02, VA-07 | Aprobado |
+| V-02 | Placeholder legible y etiqueta visible persistente | F1-03 | Sara | 2026-11-12 | Aprobadas F1-03 | Aprobado |
+| V-03 | Controles sobre azul legibles | F3-02 | Sara | 2026-11-12 | Aprobadas F3-02 | Aprobado |
+| V-04 | Íconos de estado y de subida con 3:1 | F1-09, F1-13, VA-07 | Sara | 2026-11-12 | Aprobadas F1-09, F1-13, VA-07 | Aprobado |
+| V-05 | No depender solo del color | F1-04, F1-11, F2-03, F3-10, F4-03 | Sara | 2026-11-12 | Aprobadas F1-04, F1-11, F2-03, F3-10, F4-03 | Aprobado |
+| V-06 | Escalado de fuente al máximo sin cortes | VA-05 | Sara | 2026-11-12 | Aprobadas VA-05 | Aprobado |
+| V-07 | lineHeight suficiente (tildes, Ñ, ¿, ¡) | VA-05 | Sara | 2026-11-12 | Aprobadas VA-05 | Aprobado |
+| V-08 | Temas, tamaño de texto y vibración con persistencia | VA-01, VA-02, VA-03, VA-06 | Sara | 2026-11-12 | Aprobadas VA-01, VA-02, VA-03, VA-06 | Aprobado |
+| V-09 | Respeto a reducir movimiento | VA-04 | Sara | 2026-11-12 | Aprobadas VA-04 | Aprobado |
+| T-01 | Áreas táctiles de 48 dp | VA-07 | Sara | 2026-11-12 | Aprobadas VA-07 | Aprobado |
+| T-02 | hitSlop y separación de 8 dp | F3-03, F5-01, VA-07, VA-08 | Sara | 2026-11-12 | Aprobadas F3-03, F5-01, VA-07, VA-08 | Aprobado |
+| T-03 | Orden de foco, foco al título y "Siguiente" del teclado | F1-01, F1-02, F1-03, F1-05, F1-07, F1-14, F2-01, F2-04, F3-06, F4-02, F6-05 | Sara | 2026-11-12 | Aprobadas F1-01, F1-02, F1-03, F1-05, F1-07, F1-14, F2-01, F2-04, F3-06, F4-02, F6-05 | Aprobado |
+| T-04 | Háptica + mensaje + anuncio; interruptor de vibración | F1-14, F2-03, F3-09, F4-05, F5-04, F5-06, VA-06 | Sara | 2026-11-12 | Aprobadas F1-14, F2-03, F3-09, F4-05, F5-04, F5-06, VA-06 | Aprobado |
+| T-05 | Carga y errores de red con texto, busy y "Reintentar" | F1-07, F2-05, F2-06, F3-05 | Sara | 2026-11-12 | Aprobadas F1-07, F2-05, F2-06; no ejecutada F3-05 (menos de 20 viajes; ver R-01) | Aprobado en lo ejecutado |
+| T-06 | Confirmaciones destructivas con foco en la opción segura | F5-02, F5-05, F6-01, F6-02, F6-04 | Sara | 2026-11-12 | Aprobadas F5-02, F5-05, F6-01, F6-02, F6-04 | Aprobado |
+| T-07 | Sin gestos complejos; dirección escrita como alternativa al mapa | F3-07, F3-08, F4-04 | Sara | 2026-11-12 | Aprobadas F3-07, F3-08, F4-04 | Aprobado |
+| T-08 | Registro por pasos, "Anterior" conserva, autocompletar y pegar | F1-02, F1-06, F1-07, F1-08, F1-10, F2-02 | Sara | 2026-11-12 | Aprobadas F1-02, F1-06, F1-07, F1-10, F2-02; no aplica F1-08 (sin código de correo, D-68) | Aprobado |
 
 ### 5. Resumen por flujo
 
 | Flujo | Dispositivo y versión de Android | Ejecutó | Fecha | Resultado | Estado |
 | --- | --- | --- | --- | --- | --- |
-| F1 | — | — | — | — | Pendiente |
-| F2 | — | — | — | — | Pendiente |
-| F3 | — | — | — | — | Pendiente |
-| F4 | — | — | — | — | Pendiente |
-| F5 | — | — | — | — | Pendiente |
-| F6 | — | — | — | — | Pendiente |
-| Variantes (VA-01 a VA-08) | — | — | — | — | Pendiente |
+| F1 | Samsung Galaxy A35 5G, Android 16 | Sara | 2026-11-12 | Registro completo con foto, carro y SOAT en 6 pasos: 13 filas aprobadas; F1-08 no aplica (sin código, D-68) | Aprobado |
+| F2 | Samsung Galaxy A35 5G, Android 16 | Sara | 2026-11-12 | 6 de 6 aprobadas | Aprobado |
+| F3 | Samsung Galaxy A35 5G, Android 16 | Sara | 2026-11-12 | 9 aprobadas; F3-05 no ejecutada (menos de 20 viajes). F3-03 pasó al repetirla con doble toque | Aprobado en lo ejecutado |
+| F4 | Samsung Galaxy A35 5G, Android 16 | Sara | 2026-11-12 | 6 de 6 aprobadas | Aprobado |
+| F5 | Samsung Galaxy A35 5G, Android 16 | Sara | 2026-11-12 | 6 de 6 aprobadas (eliminar carro con la cuenta nueva de TC-01) | Aprobado |
+| F6 | Samsung Galaxy A35 5G, Android 16 | Sara | 2026-11-12 | 5 de 5 aprobadas | Aprobado |
+| Variantes (VA-01 a VA-08) | Samsung Galaxy A35 5G, Android 16 | Sara | 2026-11-12 | 8 de 8 aprobadas; Accessibility Scanner sin avisos | Aprobado |

@@ -150,7 +150,17 @@ describe('lib/validators', () => {
 
       expect(validateTime('08:30')).toBeNull();
       expect(validateTime('25:00')).toMatch(/no es válida/i);
-      expect(validateTime('8:30')).toMatch(/HH:MM/i);
+      expect(validateTime('8:3')).toMatch(/HH:MM/i);
+      expect(validateTime('830')).toMatch(/HH:MM/i);
+    });
+
+    it('acepta hora, día y mes de un dígito (TC-10: "6:00" se rechazaba)', () => {
+      expect(validateTime('6:00')).toBeNull();
+      expect(validateDate('1/12/2026')).toBeNull();
+      expect(validateDate('12/1/2026')).toBeNull();
+      const departure = validateFutureDeparture('31/12/2099', '6:00');
+      expect(departure.error).toBeNull();
+      expect(departure.iso).toContain('2099');
     });
 
     it('valida que la salida sea en el futuro', () => {

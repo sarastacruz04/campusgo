@@ -32,13 +32,17 @@ export const signIn = createAppAsyncThunk(
   },
 );
 
-/** Registra y devuelve el correo que debe verificarse con el código. */
+/**
+ * Registra. Devuelve el correo y la sesión: `user` es null si Supabase exige
+ * confirmar el correo con el código, y trae la cuenta si la confirmación está
+ * apagada (D-68).
+ */
 export const signUp = createAppAsyncThunk(
   'auth/signUp',
   async (input: authService.SignUpInput, { rejectWithValue }) => {
     try {
-      await authService.signUp(input);
-      return input.email.trim().toLowerCase();
+      const user = await authService.signUp(input);
+      return { email: input.email.trim().toLowerCase(), user };
     } catch (error) {
       return rejectWithValue(toAppError(error));
     }

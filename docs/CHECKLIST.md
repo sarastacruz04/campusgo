@@ -41,10 +41,10 @@ Sección 3: Implementación y auditoría de accesibilidad móvil (consolidación
 - [ ] Matriz trazable: cada mejora del Corte 2, archivo o componente exacto y prueba realizada → §7, §11, docs/MATRIZ_ACCESIBILIDAD.md
 
 Sección 4: Pruebas y validación
-- [ ] Casos de prueba ejecutados: caminos felices y errores de red o validación (TC-01 a TC-23) con resultado real → §10, E8
-- [ ] Pruebas automáticas ejecutadas (unitarias, componentes, contraste, RLS) → §10, E8 (evidencia parcial: 241 de 241 pruebas y 66 de 66 pares de contraste en docs/PRUEBAS.md, sección 1; supabase/tests/rls.sql validado solo en un PostgreSQL local: 79 de 82 con tres hallazgos, corregidos en la migración 0009, y luego 92 de 92 (TC-23). Falta aplicar 0009 y ejecutarlo en Supabase)
-- [ ] Auditoría de accesibilidad en dispositivo (TalkBack y Accessibility Scanner) con resultados reales → §10, E8, docs/AUDITORIA_ACCESIBILIDAD.md
-- [ ] Limitación declarada: iOS, VoiceOver y Accessibility Inspector no se probaron (solo Android) → §7.1, §11
+- [x] Casos de prueba ejecutados: caminos felices y errores de red o validación (TC-01 a TC-23) con resultado real → §10, E8 (evidencia: docs/PRUEBAS.md, sección 2.2: TC-01 a TC-23 aprobados en el teléfono de Sara entre el 2026-11-11 y el 12, con las corridas fallidas y sus correcciones registradas (TC-03, TC-05, TC-10 y TC-01 por el SMTP))
+- [x] Pruebas automáticas ejecutadas (unitarias, componentes, contraste, RLS) → §10, E8 (evidencia: 246 de 246 pruebas y 66 de 66 pares de contraste en docs/PRUEBAS.md, sección 1; supabase/tests/rls.sql ejecutado por Sara en Supabase el 2026-11-11 con las migraciones 0001 a 0009: 92 de 92 (TC-23, paso 1). Antes, en local, había dado 79 de 82 con tres hallazgos corregidos en la 0009)
+- [x] Auditoría de accesibilidad en dispositivo (TalkBack y Accessibility Scanner) con resultados reales → §10, E8, docs/AUDITORIA_ACCESIBILIDAD.md (evidencia: docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12: F1 a F6 con TalkBack (45 filas aprobadas, F1-08 no aplica, F3-05 no ejecutada) y VA-01 a VA-08 aprobadas, Accessibility Scanner sin avisos)
+- [x] Limitación declarada: iOS, VoiceOver y Accessibility Inspector no se probaron (solo Android) → §7.1, §11 (evidencia: docs/AUDITORIA_ACCESIBILIDAD.md, "Alcance y limitaciones")
 
 Sección 5: Conclusiones, limitaciones y trabajo futuro
 - [ ] Lecciones aprendidas y retos de ingeniería superados → §11
@@ -55,22 +55,22 @@ Sección 5: Conclusiones, limitaciones y trabajo futuro
 ## B. Funcionalidad y repositorio (30 %)
 
 Aplicación
-- [ ] Flujos principales de la Fase 1 funcionando de extremo a extremo → §5, §6, E2 a E7
-- [ ] Operan en tiempo real (cupos, solicitudes, notificaciones, chat) → §5, E3, E5 a E7
-- [ ] Cero datos simulados injustificados (solo los sectores sembrados) → §14, §13
-- [ ] Cero crashes en los flujos de la demo → §13, E8
+- [x] Flujos principales de la Fase 1 funcionando de extremo a extremo → §5, §6, E2 a E7 (evidencia: TC-01 a TC-23 aprobados con datos reales de Supabase)
+- [x] Operan en tiempo real (cupos, solicitudes, notificaciones, chat) → §5, E3, E5 a E7 (evidencia: TC-12, TC-13 y TC-16 aprobados; V5-01 a V5-03 en la sección 3 de docs/PRUEBAS.md)
+- [x] Cero datos simulados injustificados (solo los sectores sembrados) → §14, §13 (evidencia: la app lee todo de Supabase; los únicos datos sembrados son los sectores (supabase/seed.sql) y los viajes de prueba de supabase/dev_seed_viajes.sql, que solo se cargan para pruebas (D-67); los simulados están solo dentro de __tests__)
+- [x] Cero crashes en los flujos de la demo → §13, E8 (evidencia: ningún cierre de la app en TC-01 a TC-23 ni en F1 a F6 (reportes de Sara, 2026-11-11 y 12))
 - [ ] Fidelidad visual con el Figma (20 pantallas) → §6, E1, E4 a E7
-- [ ] Fluidez en animaciones y navegación, con respeto a "reducir animaciones" → §6, §7, E1, E8
-- [ ] Atributos de accesibilidad aplicados de verdad en las pantallas → §7, E1, E4 a E7
-- [ ] Estados de carga, vacío, error y sin conexión → §6, §7, E3, E5
-- [ ] Los flujos de accesibilidad de la Fase 2 operan en la app → §7, E1
+- [x] Fluidez en animaciones y navegación, con respeto a "reducir animaciones" → §6, §7, E1, E8 (evidencia: VA-04 aprobada (reducir animaciones) y R-01 (V5-04))
+- [x] Atributos de accesibilidad aplicados de verdad en las pantallas → §7, E1, E4 a E7 (evidencia: docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12, F1 a F6)
+- [x] Estados de carga, vacío, error y sin conexión → §6, §7, E3, E5 (evidencia: TC-17 y TC-18 aprobados; pruebas de pantalla en __tests__/screens)
+- [x] Los flujos de accesibilidad de la Fase 2 operan en la app → §7, E1 (evidencia: docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12 y docs/MATRIZ_ACCESIBILIDAD.md)
 
 Repositorio
 - [x] Estructura de carpetas limpia → §4, §9, E0 (evidencia: carpetas de la sección 4 en la raíz, sin src ni código de ejemplo; `npx expo-doctor` 20/20 el 2026-11-06)
-- [ ] Código tipado (TypeScript estricto) y modularizado → §3, §4, §14
+- [x] Código tipado (TypeScript estricto) y modularizado → §3, §4, §14 (evidencia: tsconfig con strict; `npm run typecheck` y `npm run lint` pasan en cada commit)
 - [x] Cero credenciales o secretos en el historial → §9, §13, §14, E8 (evidencia: docs/AUDITORIA_REPOSITORIO.md, sección 1: patrones y valores reales del .env buscados en los 99 commits de todas las ramas, 0 coincidencias, el 2026-11-11 por Sara; sin gitleaks, declarado como limitación)
-- [ ] Commits de ambos integrantes, continuos y equitativos a lo largo del corte → §0.2, §9, §13
-- [ ] Pull requests revisados por la otra persona → §9
+- [ ] Commits de ambos integrantes, continuos y equitativos a lo largo del corte → §0.2, §9, §13 (nota: Samuel no tiene commits en la Etapa 8 (no pudo por parciales); la Etapa 8 completa la hizo Sara. No se atribuye trabajo a quien no lo hizo)
+- [ ] Pull requests revisados por la otra persona → §9 (nota: los PR de las etapas 0 a 7 se revisaron entre los dos; los de la Etapa 8 (PR #10 a #12 y el de resultados) los revisó y unió Sara, porque Samuel no estaba disponible)
 - [ ] README.md completo: instalación → §9, E9
 - [ ] README.md: variables de entorno requeridas → §9, E9
 - [ ] README.md: arquitectura del proyecto → §9, E9
@@ -114,46 +114,46 @@ Repositorio
 
 Cada ID queda con archivo exacto, prueba y resultado en docs/MATRIZ_ACCESIBILIDAD.md → §7, E1 y E4 a E8.
 
-- [ ] S-01
-- [ ] S-02
-- [ ] S-03
-- [ ] S-04
-- [ ] S-05
-- [ ] S-06
-- [ ] S-07
-- [ ] S-08
-- [ ] S-09
-- [ ] V-01
-- [ ] V-02
-- [ ] V-03
-- [ ] V-04
-- [ ] V-05
-- [ ] V-06
-- [ ] V-07
-- [ ] V-08
-- [ ] V-09
-- [ ] T-01
-- [ ] T-02
-- [ ] T-03
-- [ ] T-04
-- [ ] T-05
-- [ ] T-06
-- [ ] T-07
-- [ ] T-08
-- [x] Pantalla de ajustes de accesibilidad (tema, alto contraste, escala de texto, reducir animaciones) → §6, §7, E1 (evidencia: app/settings/accessibility.tsx y __tests__/theme/ThemeProvider.test.tsx; la revisión con TalkBack está en docs/AUDITORIA_ACCESIBILIDAD.md, C-10, Pendiente)
-- [ ] Plan de validación del Corte 2 ejecutado: pruebas con lector de pantalla, escalado, contraste y táctil (VoiceOver e Inspector declarados como no ejecutados) → §7.1, §10, E8
+- [x] S-01 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] S-02 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] S-03 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] S-04 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] S-05 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] S-06 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] S-07 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md; aprobado en lo ejecutado, F3-05 sin ejecutar con TalkBack)
+- [x] S-08 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] S-09 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] V-01 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] V-02 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] V-03 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] V-04 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] V-05 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] V-06 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] V-07 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] V-08 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] V-09 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] T-01 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] T-02 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] T-03 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] T-04 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] T-05 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md; aprobado en lo ejecutado, F3-05 sin ejecutar con TalkBack)
+- [x] T-06 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] T-07 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] T-08 (evidencia: docs/MATRIZ_ACCESIBILIDAD.md y docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12)
+- [x] Pantalla de ajustes de accesibilidad (tema, alto contraste, escala de texto, reducir animaciones) → §6, §7, E1 (evidencia: app/settings/accessibility.tsx y __tests__/theme/ThemeProvider.test.tsx; revisión en el teléfono: C-10 y VA-01 a VA-03 aprobadas en docs/AUDITORIA_ACCESIBILIDAD.md)
+- [x] Plan de validación del Corte 2 ejecutado: pruebas con lector de pantalla, escalado, contraste y táctil (VoiceOver e Inspector declarados como no ejecutados) → §7.1, §10, E8 (evidencia: docs/AUDITORIA_ACCESIBILIDAD.md, ejecutada por Sara el 2026-11-12; VoiceOver e Inspector de iOS declarados como no ejecutados)
 
 ## G. Pila tecnológica y requisitos de las fases previas
 
 - [x] React Native con Expo SDK 58, que abre en Expo Go → §3, E0 (evidencia: proyecto en SDK 58, bundle de Android compilado con `expo export` y Sara confirmó el 2026-11-06 que la app abre en Expo Go en su teléfono)
 - [x] Navegación con Expo Router → §3, §4 (evidencia: app/_layout.tsx con guardia de sesión, app/index.tsx, app/(auth)/login.tsx, app/(auth)/register/*, app/(tabs)/* y app/profile.tsx)
 - [x] Estado global con Redux Toolkit → §3, E3 (evidencia: store/store.ts con 9 slices en features/ y pruebas en __tests__/features/, 2026-11-07)
-- [ ] Backend y persistencia en Supabase (Auth, Postgres, Realtime, Storage, RLS) → §3, §5, E2, E6, E7 (evidencia parcial: migraciones 0001 a 0008 listas con tests en supabase/tests/rls.sql; Samuel debe aplicar 0008 en su proyecto y confirmar)
+- [x] Backend y persistencia en Supabase (Auth, Postgres, Realtime, Storage, RLS) → §3, §5, E2, E6, E7 (evidencia: migraciones 0001 a 0009 aplicadas; RLS 92 de 92 (TC-23); TC-01 a TC-22 aprobados con Auth, Postgres, Realtime y Storage reales)
 - [x] Caché sin conexión con SQLite → §3, E3 (evidencia: db/cache.ts, __tests__/db/cache.test.ts y TC-17 aprobado en el teléfono)
 - [x] Sesión guardada en almacenamiento seguro → §3, E3 (evidencia: services/secureSessionStorage.ts y TC-22 aprobado en el teléfono)
 - [x] Mapas y ubicación sin claves de Google ni servicios de pago → §3, §6 (evidencia: components/maps/MapPicker.tsx, lib/location.ts y TC-07 aprobado en el teléfono)
-- [ ] Regla de negocio: cierre automático de reservas cuando los cupos llegan a cero → §5, E2, E6 (evidencia parcial: RPC `aceptar_reserva` implementada en 0001 y protegida contra bypass en 0007; verificación funcional pendiente de aplicar en Supabase)
-- [x] Verificación por código con correo institucional @unisabana.edu.co → §5 (R16), E4 (evidencia: app/(auth)/register/verify.tsx, lib/validators.ts y __tests__/lib/validators.test.ts)
-- [ ] Todo funciona en Expo Go, sin módulos nativos ajenos → §3, §14
+- [x] Regla de negocio: cierre automático de reservas cuando los cupos llegan a cero → §5, E2, E6 (evidencia: TC-12 aprobado en el teléfono (el viaje pasa a "Lleno" y sale de la búsqueda))
+- [ ] Verificación por código con correo institucional @unisabana.edu.co → §5 (R16), E4 (nota: implementada (app/(auth)/register/verify.tsx, verifyOtp), pero apagada desde D-68 porque el SMTP no entregaba los correos; el dominio @unisabana.edu.co se sigue validando en la app y en la base (TC-05))
+- [x] Todo funciona en Expo Go, sin módulos nativos ajenos → §3, §14 (evidencia: todas las pruebas de la Etapa 8 se hicieron en Expo Go SDK 58; npx expo-doctor 20 de 20)
 - [x] Créditos "By Sara y Samuel" en las pantallas del Figma → §6 (evidencia: components/ui/Logo.tsx en app/index.tsx, login.tsx y register/index.tsx, probado en __tests__/components/identity.test.tsx)
 - [ ] Competidores y brechas de la Fase 1 reflejados en el producto → §1

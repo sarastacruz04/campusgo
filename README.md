@@ -17,7 +17,7 @@ Proyecto del curso Desarrollo de Aplicaciones Móviles (profesor Santiago Rivade
 ## Preparar Supabase (una sola vez por proyecto)
 
 1. En el SQL Editor del proyecto, ejecuta en orden los archivos de `supabase/migrations` (de `0001` a `0009`, uno por uno) y luego `supabase/seed.sql` (sectores). Para comprobar la seguridad, `supabase/tests/rls.sql` debe terminar con "RESULTADO RLS: 92 de 92 correctas".
-2. Authentication > Email Templates > "Confirm signup": el cuerpo debe incluir `{{ .Token }}`, porque la app verifica el correo con el código de 6 dígitos.
+2. Authentication > Sign In / Providers > Email: apagar **"Confirm email"**. La app solo acepta correos @unisabana.edu.co (en la app y en la base) y la cuenta queda activa al registrarse (D-68). Para pedir el código de 6 dígitos hace falta un SMTP propio: encender "Confirm email" y poner `{{ .Token }}` en la plantilla "Confirm signup"; la app muestra sola la pantalla "Verifica tu correo".
 3. Project Settings > API: copia la **Project URL** y la **anon public key** (o publishable key). Nunca uses la `service_role` key en la app.
 
 ## Instalar y correr
