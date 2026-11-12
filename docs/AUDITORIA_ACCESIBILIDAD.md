@@ -102,12 +102,12 @@ En cada flujo, TalkBack activo y tema Claro, salvo que la fila diga otra cosa. A
 
 | # | Acción | Qué debe anunciar TalkBack o qué debe pasar | IDs | Resultado real | Estado |
 | --- | --- | --- | --- | --- | --- |
-| F2-01 | Bienvenida > "Iniciar Sesión" | Foco en "Inicio Sesión, encabezado" | S-01, T-03 | — | Pendiente |
-| F2-02 | Correo con autocompletar | El teclado ofrece el correo guardado | T-08, S-05 | — | Pendiente |
-| F2-03 | Contraseña incorrecta | Pantalla de error: se anuncia "ERROR" y el mensaje "El correo o la contraseña no son correctos."; vibración de error | S-07, T-04, V-05 | — | Pendiente |
-| F2-04 | "Volver" | Regresa al formulario con lo escrito | T-03 | — | Pendiente |
-| F2-05 | Modo avión y "Iniciar Sesión" | Se anuncia "Sin conexión a internet. Revisa tu red e intenta de nuevo." | S-07, T-05 | — | Pendiente |
-| F2-06 | Datos correctos | Indicador "Enviando", botón deshabilitado y luego Inicio | T-05, S-06 | — | Pendiente |
+| F2-01 | Bienvenida > "Iniciar Sesión" | Foco en "Inicio Sesión, encabezado" | S-01, T-03 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F2-02 | Correo con autocompletar | El teclado ofrece el correo guardado | T-08, S-05 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F2-03 | Contraseña incorrecta | Pantalla de error: se anuncia "ERROR" y el mensaje "El correo o la contraseña no son correctos."; vibración de error | S-07, T-04, V-05 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F2-04 | "Volver" | Regresa al formulario con lo escrito | T-03 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F2-05 | Modo avión y "Iniciar Sesión" | Se anuncia "Sin conexión a internet. Revisa tu red e intenta de nuevo." | S-07, T-05 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F2-06 | Datos correctos | Indicador "Enviando", botón deshabilitado y luego Inicio | T-05, S-06 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
 
 #### F3. Buscar y reservar (cuenta P sobre un viaje de C)
 
@@ -150,11 +150,11 @@ En cada flujo, TalkBack activo y tema Claro, salvo que la fila diga otra cosa. A
 
 | # | Acción | Qué debe anunciar TalkBack o qué debe pasar | IDs | Resultado real | Estado |
 | --- | --- | --- | --- | --- | --- |
-| F6-01 | P (sin carro): "Modo conductor" | Diálogo "No tienes un carro registrado" con "Debes registrar un carro para cambiar a modo conductor."; foco en el título | S-03, S-08, T-06 | — | Pendiente |
-| F6-02 | C: "Modo conductor" | Diálogo "¿Está seguro que desea cambiar a modo Conductor?" con "Esta acción afectará la manera en que usa la app."; "Sí, cambiar a Conductor" | T-06, S-08 | — | Pendiente |
-| F6-03 | Después del cambio | El selector anuncia "Modo conductor, …, marcado"; la barra inferior muestra "Creados" en vez de "Reservas" | S-03, S-06 | — | Pendiente |
-| F6-04 | Perfil > "Cerrar Sesión" | Ícono de power con texto; diálogo "¿Deseas cerrar sesión?" con foco en la opción segura | S-02, T-06 | — | Pendiente |
-| F6-05 | "Sí, cerrar sesión" | Vuelve a la bienvenida con el foco en el título | T-03 | — | Pendiente |
+| F6-01 | P (sin carro): "Modo conductor" | Diálogo "No tienes un carro registrado" con "Debes registrar un carro para cambiar a modo conductor."; foco en el título | S-03, S-08, T-06 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F6-02 | C: "Modo conductor" | Diálogo "¿Está seguro que desea cambiar a modo Conductor?" con "Esta acción afectará la manera en que usa la app."; "Sí, cambiar a Conductor" | T-06, S-08 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F6-03 | Después del cambio | El selector anuncia "Modo conductor, …, marcado"; la barra inferior muestra "Creados" en vez de "Reservas" | S-03, S-06 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F6-04 | Perfil > "Cerrar Sesión" | Ícono de power con texto; diálogo "¿Deseas cerrar sesión?" con foco en la opción segura | S-02, T-06 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F6-05 | "Sí, cerrar sesión" | Vuelve a la bienvenida con el foco en el título | T-03 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
 
 ### 3. Variantes: tema oscuro, alto contraste, reducir animaciones y fuente al máximo
 
