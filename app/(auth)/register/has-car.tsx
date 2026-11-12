@@ -10,6 +10,7 @@ import { RadioGroup } from '@/components/ui/RadioGroup';
 import { ScreenTitle } from '@/components/ui/ScreenTitle';
 import { StepIndicator } from '@/components/ui/StepIndicator';
 import { changeMode, updateMyProfile } from '@/features/profile/thunks';
+import { useRegisterStep } from '@/hooks/useRegisterStep';
 import { useAnnounce } from '@/hooks/useAnnounce';
 import { useAppDispatch } from '@/store/hooks';
 import { spacing } from '@/theme/layout';
@@ -17,6 +18,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 
 export default function RegisterHasCarScreen() {
   const { colors } = useTheme();
+  const step = useRegisterStep('tieneCarro');
   const dispatch = useAppDispatch();
   const announce = useAnnounce();
 
@@ -55,7 +57,7 @@ export default function RegisterHasCarScreen() {
           <Logo size="large" />
         </View>
 
-        <StepIndicator current={4} total={7} />
+        <StepIndicator current={step.current} total={step.total} />
 
         <ScreenTitle>¿Quieres Registrar un Carro?</ScreenTitle>
 

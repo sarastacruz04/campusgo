@@ -48,10 +48,15 @@ function asCodeNotSent(error: unknown): unknown {
     : error;
 }
 
-export async function signUp(input: SignUpInput): Promise<void> {
+/**
+ * Crea la cuenta. Si "Confirm email" está apagado en Supabase (D-68), la respuesta
+ * ya trae la sesión y se devuelve la cuenta; si está encendido, devuelve null y la
+ * app pide el código de 6 dígitos.
+ */
+export async function signUp(input: SignUpInput): Promise<SessionUser | null> {
   assertInstitutionalEmail(input.email);
   try {
-    unwrap(
+    const data = unwrap(
       await supabase.auth.signUp({
         email: input.email.trim().toLowerCase(),
         password: input.password,
@@ -66,6 +71,7 @@ export async function signUp(input: SignUpInput): Promise<void> {
         },
       }),
     );
+    return data.session ? toSessionUser(data.user) : null;
   } catch (error) {
     throw asCodeNotSent(error);
   }

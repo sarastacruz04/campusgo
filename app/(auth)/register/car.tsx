@@ -8,6 +8,7 @@ import { Logo } from '@/components/ui/Logo';
 import { ScreenTitle } from '@/components/ui/ScreenTitle';
 import { StepIndicator } from '@/components/ui/StepIndicator';
 import { TextField } from '@/components/ui/TextField';
+import { useRegisterStep } from '@/hooks/useRegisterStep';
 import { useAnnounce } from '@/hooks/useAnnounce';
 import { validateCapacidad, validatePlaca, validateRequired } from '@/lib/validators';
 import { spacing } from '@/theme/layout';
@@ -15,6 +16,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 
 export default function RegisterCarScreen() {
   const { colors } = useTheme();
+  const step = useRegisterStep('carro');
   const announce = useAnnounce();
 
   const [placa, setPlaca] = useState('');
@@ -70,7 +72,7 @@ export default function RegisterCarScreen() {
             <Logo size="large" />
           </View>
 
-          <StepIndicator current={5} total={7} />
+          <StepIndicator current={step.current} total={step.total} />
 
           <ScreenTitle>¡Registra tu carro!</ScreenTitle>
 

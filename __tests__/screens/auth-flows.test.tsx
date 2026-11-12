@@ -81,7 +81,8 @@ describe('Registro, paso 1 con validación (pantalla 3, TC-01, TC-02 y TC-05)', 
 
   it('sin datos muestra un error en texto bajo cada campo y no registra', async () => {
     await renderWithProviders(<RegisterStep1Screen />);
-    expect(screen.getByText('Paso 1 de 7')).toBeTruthy();
+    // Sin confirmación de correo (D-68) el registro tiene 6 pasos.
+    expect(screen.getByText('Paso 1 de 6')).toBeTruthy();
     await fireEvent.press(screen.getByRole('button', { name: 'Registrarse' }));
     expect(screen.getByText('Por favor completa el campo Nombre.')).toBeTruthy();
     expect(screen.getByText('Por favor completa el campo Apellido.')).toBeTruthy();
@@ -116,8 +117,8 @@ describe('Registro, paso 1 con validación (pantalla 3, TC-01, TC-02 y TC-05)', 
     expect(auth.signUp).not.toHaveBeenCalled();
   });
 
-  it('con datos válidos registra y lleva a "Verifica tu correo" con el correo', async () => {
-    auth.signUp.mockResolvedValueOnce(undefined);
+  it('con la confirmación de correo activa lleva a "Verifica tu correo" con el correo', async () => {
+    auth.signUp.mockResolvedValueOnce(null);
     await renderWithProviders(<RegisterStep1Screen />);
     await fill({
       Nombre: 'Sara',
@@ -137,6 +138,27 @@ describe('Registro, paso 1 con validación (pantalla 3, TC-01, TC-02 y TC-05)', 
     expect(auth.signUp).toHaveBeenCalledWith(
       expect.objectContaining({ idUniversidad: '0000123456', telefono: '3001234567' }),
     );
+  });
+
+  it('sin confirmación de correo (D-68) la cuenta queda activa y sigue a la foto', async () => {
+    auth.signUp.mockResolvedValueOnce({ userId: 'u-1', email: 'sara.prueba@unisabana.edu.co' });
+    const store = makeStore();
+    await renderWithProviders(<RegisterStep1Screen />, {}, store);
+    expect(screen.getByText('Paso 1 de 6')).toBeTruthy();
+    await fill({
+      Nombre: 'Sara',
+      Apellido: 'Santacruz',
+      'ID de la Universidad': '0000123456',
+      'Correo Electrónico': 'sara.prueba@unisabana.edu.co',
+      Teléfono: '3001234567',
+      Contraseña: 'secreta1',
+    });
+    await fireEvent.press(screen.getByRole('button', { name: 'Registrarse' }));
+    await waitFor(() => expect(router.push).toHaveBeenCalledWith('/(auth)/register/photo'));
+    expect(router.push).not.toHaveBeenCalledWith(
+      expect.objectContaining({ pathname: '/(auth)/register/verify' }),
+    );
+    expect(store.getState().auth.userId).toBe('u-1');
   });
 
   it('si el correo ya existe muestra el mensaje del servidor y no avanza', async () => {
