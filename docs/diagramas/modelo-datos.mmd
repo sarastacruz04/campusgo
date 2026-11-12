@@ -1,0 +1,69 @@
+erDiagram
+  PROFILES ||--o| VEHICULOS : "tiene (0 o 1)"
+  PROFILES ||--o{ VIAJES : "conduce"
+  VEHICULOS ||--o{ VIAJES : "se usa en"
+  SECTORES ||--o{ VIAJES : "agrupa"
+  VIAJES ||--o{ RESERVAS : "recibe"
+  PROFILES ||--o{ RESERVAS : "reserva"
+  VIAJES ||--o{ MENSAJES : "chat"
+  PROFILES ||--o{ MENSAJES : "escribe"
+  VIAJES ||--o{ CALIFICACIONES : "se califica"
+  PROFILES ||--o{ CALIFICACIONES : "autor y destinatario"
+  PROFILES ||--o{ NOTIFICACIONES : "recibe"
+
+  PROFILES {
+    uuid id PK "FK auth.users"
+    text nombre
+    text apellido
+    text id_universidad "10 dígitos, único"
+    text email "termina en @unisabana.edu.co"
+    text telefono "10 dígitos"
+    text modo_actual "pasajero o conductor"
+    bool registro_completo
+  }
+  VEHICULOS {
+    uuid id PK
+    uuid propietario_id FK "único"
+    text placa "ABC123, única"
+    int capacidad "1 a 8"
+  }
+  SECTORES {
+    bigint id PK
+    text nombre "único"
+  }
+  VIAJES {
+    uuid id PK
+    uuid conductor_id FK
+    uuid vehiculo_id FK
+    bigint sector_id FK
+    timestamptz salida_at "futura (trigger R4)"
+    int valor_por_cupo ">= 0"
+    int cupos_totales "<= capacidad"
+    int cupos_disponibles
+    text estado "abierto, lleno, en_curso, finalizado, cancelado"
+  }
+  RESERVAS {
+    uuid id PK
+    uuid viaje_id FK
+    uuid pasajero_id FK
+    text estado "pendiente, aceptada, rechazada, cancelada"
+  }
+  CALIFICACIONES {
+    uuid id PK
+    uuid viaje_id FK
+    uuid autor_id FK
+    uuid destinatario_id FK
+    int estrellas "1 a 5"
+  }
+  MENSAJES {
+    uuid id PK
+    uuid viaje_id FK
+    uuid autor_id FK
+    text contenido "1 a 500"
+  }
+  NOTIFICACIONES {
+    uuid id PK
+    uuid usuario_id FK
+    text tipo
+    bool leida
+  }

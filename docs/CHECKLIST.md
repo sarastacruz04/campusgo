@@ -5,40 +5,40 @@ Reglas: marca [x] solo con evidencia real (archivo, prueba o captura). Lo que no
 ## A. Documento final (20 %)
 
 Formato y entrega
-- [ ] PDF (o Markdown con diagramas renderizados) ubicado en /docs o en la raíz del repositorio → §11, E9
-- [ ] Extensión de 5 a 8 páginas, sin contar portada ni referencias → §11
-- [ ] Exactamente cinco secciones, en el orden de la Fase 3 → §11
-- [ ] Referencias en APA o IEEE, verificadas y sin inventar ninguna → §11
-- [ ] Diagramas y tablas dentro del documento → §11
-- [ ] Documento subido también a la plataforma del curso → §11, sección E de este checklist
+- [x] PDF (o Markdown con diagramas renderizados) ubicado en /docs o en la raíz del repositorio → §11, E9 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, con los diagramas en docs/img)
+- [x] Extensión de 5 a 8 páginas, sin contar portada ni referencias → §11 (evidencia: el PDF tiene 10 páginas: portada, 8 de contenido y 1 de referencias)
+- [x] Exactamente cinco secciones, en el orden de la Fase 3 → §11 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, secciones 1 a 5)
+- [x] Referencias en APA o IEEE, verificadas y sin inventar ninguna → §11 (evidencia: referencias en APA verificadas el 2026-11-12; se quitaron las que no se pudieron verificar (URJC, Green Earth, Conexión Sabana 360) y el dato del 60 % de Javid et al.)
+- [x] Diagramas y tablas dentro del documento → §11 (evidencia: docs/img/arquitectura.png, modelo-datos.png y flujo-reserva.png (fuentes en docs/diagramas) y 7 tablas)
+- [ ] Documento subido también a la plataforma del curso → §11, sección E de este checklist (nota: lo sube Sara a la plataforma antes de las 5 p. m. del 12/11)
 
 Sección 1: Visión del producto, problema y estado del arte (evolución Fase 1)
-- [ ] Resumen ejecutivo y UVP: nombre definitivo, tagline, propósito central → §1, §11
-- [ ] User personas, incluidas las de necesidades de accesibilidad → §1, §11
-- [ ] Síntesis del problema validado → §1, §11
-- [ ] Tabla comparativa con los competidores de la Fase 1 que demuestre las brechas superadas → §1, §11
-- [ ] Innovación lograda: justificación técnica de cada diferenciador implementado → §1, §11
+- [x] Resumen ejecutivo y UVP: nombre definitivo, tagline, propósito central → §1, §11 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 1)
+- [x] User personas, incluidas las de necesidades de accesibilidad → §1, §11 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 1)
+- [x] Síntesis del problema validado → §1, §11 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 1)
+- [x] Tabla comparativa con los competidores de la Fase 1 que demuestre las brechas superadas → §1, §11 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 1)
+- [x] Innovación lograda: justificación técnica de cada diferenciador implementado → §1, §11 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 1)
 
 Sección 2: Arquitectura e implementación técnica
-- [ ] Diagrama de arquitectura end-to-end (Expo y React Native, Redux Toolkit, servicios, Supabase, SQLite, mapas) → §4, §11
-- [ ] Organización modular y estructura de componentes → §4, §11
-- [ ] Flujo de navegación con Expo Router → §3, §4, §11
-- [ ] Manejo de estado asíncrono (thunks, estados de carga y error) → §3, §4, §11, E3
-- [ ] Almacenamiento seguro de la sesión → §3, §5 (R16), §11, E3
-- [ ] Optimización de rendimiento en listas y vistas complejas → §6, §11, E5, E8
-- [ ] Modelo de datos (diagrama entidad-relación) → §5, §11
-- [ ] Contratos de servicio y flujos de datos principales (registro, reserva con cierre automático, creación de viaje) → §5, §11, docs/API_CONTRATOS.md
+- [x] Diagrama de arquitectura end-to-end (Expo y React Native, Redux Toolkit, servicios, Supabase, SQLite, mapas) → §4, §11 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 2)
+- [x] Organización modular y estructura de componentes → §4, §11 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 2)
+- [x] Flujo de navegación con Expo Router → §3, §4, §11 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 2)
+- [x] Manejo de estado asíncrono (thunks, estados de carga y error) → §3, §4, §11, E3 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 2)
+- [x] Almacenamiento seguro de la sesión → §3, §5 (R16), §11, E3 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 2)
+- [x] Optimización de rendimiento en listas y vistas complejas → §6, §11, E5, E8 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 2)
+- [x] Modelo de datos (diagrama entidad-relación) → §5, §11 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 2)
+- [x] Contratos de servicio y flujos de datos principales (registro, reserva con cierre automático, creación de viaje) → §5, §11, docs/API_CONTRATOS.md (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 2)
 
 Sección 3: Implementación y auditoría de accesibilidad móvil (consolidación Fase 2)
-- [ ] Semántica para lectores de pantalla (accessible, accessibilityLabel, accessibilityHint, accessibilityRole, accessibilityState) con evidencia en el código → §7, §11, E1
-- [ ] Agrupamiento correcto de contenedores táctiles, sin focos fragmentados → §7, §11
-- [ ] Contraste verificado de 4,5:1 o más en texto normal, con el script y su resultado → §7, §11, E1
-- [ ] lineHeight correcto, sin recorte de caracteres, y escalado dinámico de fuentes → §7, §11, E1
-- [ ] Alternativas que no dependan solo del color → §7, §11
-- [ ] Áreas táctiles de 44×44 pt y 48×48 dp, y hitSlop donde corresponda → §7, §11, E1
-- [ ] Orden lógico de foco → §7, §11
-- [ ] Retroalimentación háptica, auditiva y visual ante errores y cargas → §7, §11
-- [ ] Matriz trazable: cada mejora del Corte 2, archivo o componente exacto y prueba realizada → §7, §11, docs/MATRIZ_ACCESIBILIDAD.md
+- [x] Semántica para lectores de pantalla (accessible, accessibilityLabel, accessibilityHint, accessibilityRole, accessibilityState) con evidencia en el código → §7, §11, E1 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 3, y docs/MATRIZ_ACCESIBILIDAD.md)
+- [x] Agrupamiento correcto de contenedores táctiles, sin focos fragmentados → §7, §11 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 3, y docs/MATRIZ_ACCESIBILIDAD.md)
+- [x] Contraste verificado de 4,5:1 o más en texto normal, con el script y su resultado → §7, §11, E1 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 3, y docs/MATRIZ_ACCESIBILIDAD.md)
+- [x] lineHeight correcto, sin recorte de caracteres, y escalado dinámico de fuentes → §7, §11, E1 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 3, y docs/MATRIZ_ACCESIBILIDAD.md)
+- [x] Alternativas que no dependan solo del color → §7, §11 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 3, y docs/MATRIZ_ACCESIBILIDAD.md)
+- [x] Áreas táctiles de 44×44 pt y 48×48 dp, y hitSlop donde corresponda → §7, §11, E1 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 3, y docs/MATRIZ_ACCESIBILIDAD.md)
+- [x] Orden lógico de foco → §7, §11 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 3, y docs/MATRIZ_ACCESIBILIDAD.md)
+- [x] Retroalimentación háptica, auditiva y visual ante errores y cargas → §7, §11 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 3, y docs/MATRIZ_ACCESIBILIDAD.md)
+- [x] Matriz trazable: cada mejora del Corte 2, archivo o componente exacto y prueba realizada → §7, §11, docs/MATRIZ_ACCESIBILIDAD.md (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 3, y docs/MATRIZ_ACCESIBILIDAD.md)
 
 Sección 4: Pruebas y validación
 - [x] Casos de prueba ejecutados: caminos felices y errores de red o validación (TC-01 a TC-23) con resultado real → §10, E8 (evidencia: docs/PRUEBAS.md, sección 2.2: TC-01 a TC-23 aprobados en el teléfono de Sara entre el 2026-11-11 y el 12, con las corridas fallidas y sus correcciones registradas (TC-03, TC-05, TC-10 y TC-01 por el SMTP))
@@ -47,10 +47,10 @@ Sección 4: Pruebas y validación
 - [x] Limitación declarada: iOS, VoiceOver y Accessibility Inspector no se probaron (solo Android) → §7.1, §11 (evidencia: docs/AUDITORIA_ACCESIBILIDAD.md, "Alcance y limitaciones")
 
 Sección 5: Conclusiones, limitaciones y trabajo futuro
-- [ ] Lecciones aprendidas y retos de ingeniería superados → §11
-- [ ] Alcance logrado frente al planeado → §11
-- [ ] Limitaciones reales → §11
-- [ ] Hoja de ruta para futuras versiones → §11
+- [x] Lecciones aprendidas y retos de ingeniería superados → §11 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 5)
+- [x] Alcance logrado frente al planeado → §11 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 5)
+- [x] Limitaciones reales → §11 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 5)
+- [x] Hoja de ruta para futuras versiones → §11 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 5)
 
 ## B. Funcionalidad y repositorio (30 %)
 
@@ -71,17 +71,17 @@ Repositorio
 - [x] Cero credenciales o secretos en el historial → §9, §13, §14, E8 (evidencia: docs/AUDITORIA_REPOSITORIO.md, sección 1: patrones y valores reales del .env buscados en los 99 commits de todas las ramas, 0 coincidencias, el 2026-11-11 por Sara; sin gitleaks, declarado como limitación)
 - [ ] Commits de ambos integrantes, continuos y equitativos a lo largo del corte → §0.2, §9, §13 (nota: Samuel no tiene commits en la Etapa 8 (no pudo por parciales); la Etapa 8 completa la hizo Sara. No se atribuye trabajo a quien no lo hizo)
 - [ ] Pull requests revisados por la otra persona → §9 (nota: los PR de las etapas 0 a 7 se revisaron entre los dos; los de la Etapa 8 (PR #10 a #12 y el de resultados) los revisó y unió Sara, porque Samuel no estaba disponible)
-- [ ] README.md completo: instalación → §9, E9
-- [ ] README.md: variables de entorno requeridas → §9, E9
-- [ ] README.md: arquitectura del proyecto → §9, E9
-- [ ] README.md: guía de ejecución → §9, E9
-- [ ] README.md: resumen de las características de accesibilidad → §9, E9
+- [x] README.md completo: instalación → §9, E9 (evidencia: README.md (Etapa 9))
+- [x] README.md: variables de entorno requeridas → §9, E9 (evidencia: README.md (Etapa 9))
+- [x] README.md: arquitectura del proyecto → §9, E9 (evidencia: README.md (Etapa 9))
+- [x] README.md: guía de ejecución → §9, E9 (evidencia: README.md (Etapa 9))
+- [x] README.md: resumen de las características de accesibilidad → §9, E9 (evidencia: README.md (Etapa 9))
 - [ ] README reproducible desde un clon limpio, comprobado → §13, E8 (evidencia parcial: docs/AUDITORIA_REPOSITORIO.md, sección 2: clon limpio con install, typecheck, lint, 241 pruebas, contraste y bundle de Android correctos; se agregó "Preparar Supabase" al README. Falta abrir la app en Expo Go desde un clon y repetirlo con el README de la Etapa 9)
 
 ## C. Presentación y demo (10 %)
 
-- [ ] Pitch: problema, solución construida, arquitectura y diferenciadores de accesibilidad → §12, E9
-- [ ] Claridad y estructura del pitch, con material de apoyo de buena calidad visual → §12, E9
+- [ ] Pitch: problema, solución construida, arquitectura y diferenciadores de accesibilidad → §12, E9 (nota: guion con tiempos y reparto en docs/PRESENTACION.md; falta presentarlo)
+- [ ] Claridad y estructura del pitch, con material de apoyo de buena calidad visual → §12, E9 (nota: la lista de diapositivas está en docs/PRESENTACION.md; las diapositivas las hace el equipo)
 - [ ] Manejo del tiempo dentro del bloque estricto del profesor (hora y duración por confirmar) → §12
 - [ ] Demo en vivo sobre dispositivo: flujo de negocio completo → §12
 - [ ] Demo en vivo: navegación asistida con TalkBack y etiquetas semánticas → §12
@@ -99,8 +99,8 @@ Repositorio
 - [ ] Preparado: ciclo de vida de hooks y manejo de asincronía → §12
 - [ ] Preparado: accessibilityRole, accessibilityLabel, manejo de foco, lineHeight y Pressable → §7.3, §12
 - [ ] Preparado: decisiones documentadas de las Fases 1, 2 y 3 → docs/DECISIONES.md, §12
-- [ ] 40 preguntas probables con respuesta modelo y 10 ejercicios de ajuste en vivo → §12
-- [ ] Lista de "mis archivos" y "archivos del otro que debo dominar" por persona → §12
+- [x] 40 preguntas probables con respuesta modelo y 10 ejercicios de ajuste en vivo → §12 (evidencia: docs/GUIA_DEFENSA.md: 80 preguntas con respuesta modelo y 25 ejercicios de ajuste en vivo)
+- [x] Lista de "mis archivos" y "archivos del otro que debo dominar" por persona → §12 (evidencia: docs/GUIA_DEFENSA.md, sección 5 y tablas por etapa)
 
 ## E. Envío
 
@@ -156,4 +156,4 @@ Cada ID queda con archivo exacto, prueba y resultado en docs/MATRIZ_ACCESIBILIDA
 - [ ] Verificación por código con correo institucional @unisabana.edu.co → §5 (R16), E4 (nota: implementada (app/(auth)/register/verify.tsx, verifyOtp), pero apagada desde D-68 porque el SMTP no entregaba los correos; el dominio @unisabana.edu.co se sigue validando en la app y en la base (TC-05))
 - [x] Todo funciona en Expo Go, sin módulos nativos ajenos → §3, §14 (evidencia: todas las pruebas de la Etapa 8 se hicieron en Expo Go SDK 58; npx expo-doctor 20 de 20)
 - [x] Créditos "By Sara y Samuel" en las pantallas del Figma → §6 (evidencia: components/ui/Logo.tsx en app/index.tsx, login.tsx y register/index.tsx, probado en __tests__/components/identity.test.tsx)
-- [ ] Competidores y brechas de la Fase 1 reflejados en el producto → §1
+- [x] Competidores y brechas de la Fase 1 reflejados en el producto → §1 (evidencia: docs/DOCUMENTO_FINAL.md y docs/DOCUMENTO_FINAL.pdf, sección 1.2)

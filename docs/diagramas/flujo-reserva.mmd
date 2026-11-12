@@ -1,0 +1,19 @@
+sequenceDiagram
+  autonumber
+  actor P as Pasajera
+  participant App as App (pantalla → thunk → servicio)
+  participant API as Supabase (RPC + RLS)
+  participant DB as PostgreSQL
+  participant RT as Realtime
+  actor C as Conductora
+  P->>App: Toca Reservar (punto en el mapa o dirección escrita)
+  App->>API: rpc crear_reserva(viaje, punto)
+  API->>DB: valida R5 con bloqueo de fila (abierto, cupos, salida futura, sin duplicado)
+  DB-->>RT: INSERT reserva y notificación nueva_reserva
+  API-->>App: id de la reserva (pendiente)
+  RT-->>C: solicitud nueva en vivo
+  C->>API: rpc aceptar_reserva(id)
+  API->>DB: descuenta un cupo y, si llega a 0, el viaje pasa a lleno (R6)
+  DB-->>RT: UPDATE reserva y viaje
+  RT-->>App: reservationChanged / tripChanged
+  App-->>P: la reserva pasa a Aceptados y el viaje lleno sale de la búsqueda
