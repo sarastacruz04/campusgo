@@ -113,16 +113,16 @@ En cada flujo, TalkBack activo y tema Claro, salvo que la fila diga otra cosa. A
 
 | # | Acción | Qué debe anunciar TalkBack o qué debe pasar | IDs | Resultado real | Estado |
 | --- | --- | --- | --- | --- | --- |
-| F3-01 | Recorrer el encabezado de Inicio | "Perfil, botón"; el logo pequeño no recibe foco; selector "Modo pasajero, botón de opción, marcado" y "Modo conductor, botón de opción" | S-02, S-03, S-09 | — | Pendiente |
-| F3-02 | Filtro "Sectores" | Se anuncia con su nombre y el sector elegido | S-01, S-05, V-03 | — | Pendiente |
-| F3-03 | "Cantidad de puestos disponibles" y lupa | Teclado numérico; la lupa dice "Buscar viajes, botón"; el resultado de la búsqueda se anuncia | S-02, S-07, T-02 | — | Pendiente |
-| F3-04 | Pasar por una tarjeta de viaje | Un solo foco con todo: sector, conductor, salida, valor, cupos y calificación (por ejemplo "Colina. Conductor …. Sale 7:00 a. m. Valor 5.000 pesos. 2 cupos."). El "+" no es un foco aparte | S-04 | — | Pendiente |
-| F3-05 | Bajar al final de la lista | Se anuncia "Cargando más viajes…" | S-07, T-05 | — | Pendiente |
-| F3-06 | Doble toque en la tarjeta | Foco en "Reserva tu viaje, encabezado" | T-03 | — | Pendiente |
-| F3-07 | Pasar por el mapa | "Mapa para elegir el punto de recogida. También puedes escribir la dirección en el campo de abajo." | S-09, T-07 | — | Pendiente |
-| F3-08 | Escribir solo la dirección, sin tocar el mapa | "Describe la dirección del punto de recogida" acepta el texto y "Reservar" funciona | T-07, S-05 | — | Pendiente |
-| F3-09 | "Reservar" | Vibra; diálogo "Reserva realizada con éxito" con foco en el título y el texto "Tu reserva quedó pendiente de la confirmación del conductor."; "¡Listo!" | S-08, T-04 | — | Pendiente |
-| F3-10 | Pestaña Reservas | "Reservas, pestaña, seleccionado"; pestañas internas "Pendientes", "Aceptados", "Rechazados" con la activa seleccionada | S-06, V-05 | — | Pendiente |
+| F3-01 | Recorrer el encabezado de Inicio | "Perfil, botón"; el logo pequeño no recibe foco; selector "Modo pasajero, botón de opción, marcado" y "Modo conductor, botón de opción" | S-02, S-03, S-09 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F3-02 | Filtro "Sectores" | Se anuncia con su nombre y el sector elegido | S-01, S-05, V-03 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F3-03 | "Cantidad de puestos disponibles" y lupa | Teclado numérico; la lupa dice "Buscar viajes, botón"; el resultado de la búsqueda se anuncia | S-02, S-07, T-02 | Primera pasada (2026-11-12, ejecutó Sara): al llegar al campo, TalkBack dice "tocar dos veces para activar" y el teclado no se abre. Con TalkBack el teclado se abre con el doble toque; el campo tiene keyboardType="number-pad" (components/trips/TripFilters.tsx:57-58). Falta repetir con doble toque | Pendiente (repetir con doble toque) |
+| F3-04 | Pasar por una tarjeta de viaje | Un solo foco con todo: sector, conductor, salida, valor, cupos y calificación (por ejemplo "Colina. Conductor …. Sale 7:00 a. m. Valor 5.000 pesos. 2 cupos."). El "+" no es un foco aparte | S-04 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F3-05 | Bajar al final de la lista | Se anuncia "Cargando más viajes…" | S-07, T-05 | No se pudo observar (2026-11-12, Sara): la búsqueda carga de 20 en 20 (TRIPS_PAGE_SIZE) y había menos de 20 viajes abiertos, así que no hay segunda página que cargar. Se comprueba en R-01 con los 200 viajes temporales | No ejecutado (menos de 20 viajes) |
+| F3-06 | Doble toque en la tarjeta | Foco en "Reserva tu viaje, encabezado" | T-03 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F3-07 | Pasar por el mapa | "Mapa para elegir el punto de recogida. También puedes escribir la dirección en el campo de abajo." | S-09, T-07 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F3-08 | Escribir solo la dirección, sin tocar el mapa | "Describe la dirección del punto de recogida" acepta el texto y "Reservar" funciona | T-07, S-05 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F3-09 | "Reservar" | Vibra; diálogo "Reserva realizada con éxito" con foco en el título y el texto "Tu reserva quedó pendiente de la confirmación del conductor."; "¡Listo!" | S-08, T-04 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
+| F3-10 | Pestaña Reservas | "Reservas, pestaña, seleccionado"; pestañas internas "Pendientes", "Aceptados", "Rechazados" con la activa seleccionada | S-06, V-05 | Pasa (2026-11-12, ejecutó Sara con TalkBack) | Aprobado |
 
 #### F4. Crear viaje con error y éxito (cuenta C)
 
