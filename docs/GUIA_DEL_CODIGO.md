@@ -586,6 +586,23 @@ Recorrido completo: "Abrir chat" → comprobar acceso → cargar mensajes → es
 
 ---
 
+## 17b. Pruebas y auditoría (Etapa 8, Sara)
+
+En la Etapa 8, Sara hizo con Claude Code su parte y la que le tocaba a Samuel.
+
+- **Listas:** `selectRequestCountsByTrip` (features/reservations/selectors.ts) cuenta una vez las solicitudes de cada viaje; Creados y Curso pasan callbacks estables para que `React.memo` de CreatedTripCard funcione.
+- **Fotos:** lib/imagePicker.ts reduce cada foto a 1280 px en el lado mayor y JPEG al 70 % antes de subirla (expo-image-manipulator, incluido en Expo Go).
+- **RLS (supabase/tests/rls.sql):** se pega completo en el SQL Editor y no pide datos. Crea cuatro cuentas ficticias (C conductora, P aceptada, Q pendiente, X ajena) dentro de una transacción, actúa como cada una y como anónimo, y termina con un error a propósito: "RESULTADO RLS: N de 82 correctas", con una línea OK o FALLA por prueba. El error deshace todo. Ayudantes: `pg_temp.probar` intenta una acción y siempre la deshace; `pg_temp.paso` hace una acción que sí debe quedar; `pg_temp.contar` cuenta lo que el actor puede ver.
+- **Hallazgos de RLS** (validación local, falta Supabase): RP-05 (perfiles ajenos con teléfono, correo e ID), RU-03 (el trigger de modo_actual no se dispara porque es SECURITY DEFINER) y RR-11 (reserva "aceptada" insertada sin la RPC). Ver TC-23 en docs/PRUEBAS.md.
+- **Auditorías:** docs/AUDITORIA_REPOSITORIO.md (secretos en todo el historial y README desde un clon limpio) y docs/AUDITORIA_ACCESIBILIDAD.md (protocolo F1 a F6, variantes y tabla por ID).
+
+### Si me piden… (Etapa 8)
+
+- **Agregar una prueba de RLS:** copiar una línea `SELECT pg_temp.contar(...)` o `pg_temp.probar(...)` en el bloque del actor y agregarla a la lista "SALIDA ESPERADA" del encabezado.
+- **Correr la prueba de RLS:** SQL Editor > New query > pegar supabase/tests/rls.sql > Run. Copiar el texto del error rojo.
+
+---
+
 ## 18. Registro de actualizaciones de esta guía
 
 | Fecha | Etapa | Quién la hizo | Qué se agregó a la guía |
@@ -594,3 +611,4 @@ Recorrido completo: "Abrir chat" → comprobar acceso → cargar mensajes → es
 | 2026-11-07 | E2 y E3 | Samuel (E2) y Sara (E3) | Resumen de la base de datos (sección 12), la capa de cliente (sección 13), la pantalla de sesión de prueba, las pruebas nuevas, 6 recetas más y términos de Supabase y Redux en el glosario |
 | 2026-11-09 | E4 y E5 | Samuel (E4) y Sara (E5) | Secciones 14 y 15, 6 recetas más y términos nuevos en el glosario |
 | 2026-11-10 | E6 y E7 (chat) | Samuel (E6) y Sara (E7, chat) | Secciones 16 (flujo de conductor) y 17 (chat del viaje), con sus recetas "Si me piden…" |
+| 2026-11-11 | E8 | Sara | Sección 17b: rendimiento de listas, fotos reducidas, prueba ejecutable de RLS con sus hallazgos y auditorías |
